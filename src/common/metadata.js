@@ -138,6 +138,24 @@ export const tools = {
     ],
     useCase: 'Perfect for reducing image size for websites, social media, or email attachments.'
   },
+  'image/compressor': {
+    id: 'compressor',
+    category: 'image',
+    name: 'Image Compressor',
+    description: 'Free online image compressor. Reduce file size of JPEG, PNG, and WebP images while maintaining visual quality, all processed locally in your browser.',
+    icon: '🗜️',
+    keywords: ['image compressor', 'compress image', 'reduce image size', 'optimize images', 'image optimization'],
+    howToUse: [
+      'Upload your image by dropping it or selecting from your device',
+      'Adjust compression quality using the slider (lower = smaller file)',
+      'Choose output format (auto, JPEG, PNG, or WebP)',
+      'Optionally preserve EXIF metadata',
+      'Click "Compress Image" to process',
+      'Compare before and after results',
+      'Download the compressed image'
+    ],
+    useCase: 'Perfect for reducing image file sizes for web use, email attachments, or storage optimization while maintaining good visual quality.'
+  },
   'text/editor': {
     id: 'editor',
     category: 'text',
