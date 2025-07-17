@@ -246,6 +246,22 @@ export const tools = {
       'No data leaves your browser.'
     ],
     useCase: 'Quickly detect faces in images for privacy, fun, or research.'
+  },
+  'ml/image2text': {
+    id: 'image2text',
+    category: 'ml',
+    name: 'Image to Text (OCR)',
+    description: 'Convert images to text with 100% privacy. This offline OCR tool runs entirely in your browser using Tesseract.js. No uploads, no servers — just fast and secure image-to-text conversion.',
+    icon: '📷',
+    keywords: ['ocr', 'image to text', 'text recognition', 'optical character recognition', 'tesseract', 'ml', 'ai', 'local ml'],
+    howToUse: [
+      'Upload an image containing text',
+      'Select the language of the text in the image',
+      'Click "Extract Text" to start OCR processing',
+      'View the extracted text with confidence score',
+      'Copy or download the text as needed'
+    ],
+    useCase: 'Extract text from screenshots, scanned documents, photos of signs, receipts, or any image containing text. Perfect for digitizing printed content while maintaining complete privacy.'
   }
 };
 
