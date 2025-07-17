@@ -91,6 +91,22 @@ export const tools = {
     ],
     useCase: 'Perfect for removing unwanted parts from videos or creating short clips for sharing.'
   },
+  'video/reverse': {
+    id: 'reverse',
+    category: 'video',
+    name: 'Video Reverse',
+    description: 'Free online video reverser. Reverse videos to play backwards with custom start and end points. Option to remove audio for better results, all processed in your browser.',
+    icon: '⏪',
+    keywords: ['video reverse', 'reverse video', 'backwards video', 'video editor', 'reverse playback', 'remove audio'],
+    howToUse: [
+      'Upload your video by dropping it or selecting from your device',
+      'Use the slider to set start and end points for the section to reverse',
+      'Choose whether to remove audio (recommended for reversed videos)',
+      'Click "Reverse Video" to process',
+      'Download the reversed video when complete'
+    ],
+    useCase: 'Perfect for creating creative effects, reversing action sequences, or making videos play backwards for entertainment. Audio removal option ensures better results.'
+  },
   'video/reencode': {
     id: 'reencode',
     category: 'video',
