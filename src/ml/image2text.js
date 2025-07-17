@@ -260,16 +260,10 @@ class ImageToTextTool extends Tool {
 
   async initTesseract() {
     try {
-      this.log('Loading Tesseract.js...', 'info');
-      
-      // Load Tesseract.js from CDN
-      if (typeof Tesseract === 'undefined') {
-        await this.loadTesseractScript();
-      }
-      
-      this.log('Tesseract.js loaded successfully', 'success');
+      // Only load Tesseract.js when actually needed (when user clicks process)
+      this.log('Tesseract.js will be loaded when processing starts', 'info');
     } catch (error) {
-      this.log(`Error loading Tesseract.js: ${error.message}`, 'error');
+      this.log(`Error initializing Tesseract.js: ${error.message}`, 'error');
       throw error;
     }
   }
@@ -316,6 +310,13 @@ class ImageToTextTool extends Tool {
 
       if (!this.currentImage) {
         throw new Error('No image selected');
+      }
+
+      // Load Tesseract.js when actually needed
+      if (typeof Tesseract === 'undefined') {
+        this.log('Loading Tesseract.js...', 'info');
+        await this.loadTesseractScript();
+        this.log('Tesseract.js loaded successfully', 'success');
       }
 
       const language = this.elements.languageSelect.value;
