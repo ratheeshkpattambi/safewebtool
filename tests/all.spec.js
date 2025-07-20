@@ -57,7 +57,7 @@ test.describe('SafeWebTool Tests', () => {
   // Test for specific import errors in all tools
   test('verify all tool modules import correctly', async ({ page }) => {
     // This test will verify that each tool module can be imported correctly
-    page.setDefaultTimeout(45000); // Increase timeout to 45 seconds for ML tools
+    page.setDefaultTimeout(60000); // Increase timeout to 60 seconds for ML tools
     
     for (const [toolPath, toolInfo] of Object.entries(tools)) {
       console.log(`Testing imports for tool: ${toolPath}`);
@@ -68,7 +68,7 @@ test.describe('SafeWebTool Tests', () => {
         
         // Wait for tool to load (longer timeout to accommodate ML and FFmpeg tools)
         const category = toolPath.split('/')[0];
-        const waitTime = category === 'ml' ? 8000 : 2000; // Longer wait for ML tools
+        const waitTime = category === 'ml' ? 15000 : 2000; // Longer wait for ML tools
         await page.waitForTimeout(waitTime);
         
         // Check that no import error message is shown

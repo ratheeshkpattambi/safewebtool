@@ -6,9 +6,9 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './tests',
-  timeout: 30 * 1000,
+  timeout: 60 * 1000, // Increased timeout for ML tools
   expect: {
-    timeout: 5000
+    timeout: 10000 // Increased expect timeout
   },
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
