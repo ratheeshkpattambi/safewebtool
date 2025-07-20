@@ -262,6 +262,22 @@ export const tools = {
       'Copy or download the text as needed'
     ],
     useCase: 'Extract text from screenshots, scanned documents, photos of signs, receipts, or any image containing text. Perfect for digitizing printed content while maintaining complete privacy.'
+  },
+  'ml/transcribe': {
+    id: 'transcribe',
+    category: 'ml',
+    name: 'Audio/Video Transcription',
+    description: 'Convert speech to text with 100% privacy using Whisper. This offline transcription tool runs entirely in your browser. Supports audio and video files with automatic audio extraction.',
+    icon: '🎤',
+    keywords: ['transcription', 'speech to text', 'whisper', 'audio transcription', 'video transcription', 'asr', 'ml', 'ai', 'local ml'],
+    howToUse: [
+      'Upload an audio or video file',
+      'Select the Whisper model (Tiny English)',
+      'Click "Transcribe Audio" to start processing',
+      'View the transcript with timestamps',
+      'Copy or download in TXT, SRT, or VTT format'
+    ],
+    useCase: 'Transcribe podcasts, meetings, interviews, lectures, or any audio/video content. Perfect for creating captions, notes, or text records while maintaining complete privacy.'
   }
 };
 
