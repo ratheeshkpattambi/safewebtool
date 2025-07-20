@@ -32,6 +32,13 @@ export const template = `
             </label>
           </div>
         </div>
+        <div>
+          <label for="transcribe-timestamps" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Options</label>
+          <label class="inline-flex items-center">
+            <input type="checkbox" id="transcribe-timestamps" class="form-checkbox h-4 w-4 text-blue-600 rounded">
+            <span class="ml-2 text-gray-700 dark:text-gray-300">Return timestamps</span>
+          </label>
+        </div>
       </div>
       <div id="transcribe-language-container" class="mb-6 hidden">
           <label for="transcribe-language-select" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Language</label>
@@ -149,6 +156,7 @@ class TranscribeTool extends Tool {
             taskTranslate: 'transcribe-task-translate',
             languageContainer: 'transcribe-language-container',
             languageInput: 'transcribe-language-input',
+            timestamps: 'transcribe-timestamps',
             // Existing elements
             dropZone: 'transcribe-drop-zone',
             fileInput: 'transcribe-file-input',
@@ -181,7 +189,7 @@ class TranscribeTool extends Tool {
     _initializeUI() {
         const { 
             dropZone, fileInput, urlBtn, urlInput, processBtn, 
-            copyBtn, downloadBtn, logs, modelSelect, languageContainer
+            copyBtn, downloadBtn, logs, modelSelect, languageContainer, timestamps
         } = this.elements;
 
         // File upload
@@ -229,6 +237,12 @@ class TranscribeTool extends Tool {
             this.elements.taskContainer.classList.toggle('hidden', !isMultilingual);
         });
         modelSelect.dispatchEvent(new Event('change'));
+
+        // Timestamps checkbox
+        timestamps.addEventListener('change', () => {
+            this.elements.processBtn.disabled = false; // Re-enable process button if model is selected
+        });
+        timestamps.dispatchEvent(new Event('change')); // Initial state
     }
 
     _handleNewInput(input) {
@@ -312,12 +326,13 @@ class TranscribeTool extends Tool {
             const audioBuffer = await this.decodeAudioData(arrayBuffer);
             const audioData = await this.resampleAndPrepareAudio(audioBuffer);
             
-            const { modelSelect, taskTranscribe, languageInput } = this.elements;
+            const { modelSelect, taskTranscribe, languageInput, timestamps } = this.elements;
             const model = modelSelect.value;
             const task = taskTranscribe.checked ? 'transcribe' : 'translate';
             const language = languageInput.value || null;
+            const returnTimestamps = timestamps.checked;
 
-            this._startWorker({ audioData, model, task, language });
+            this._startWorker({ audioData, model, task, language, returnTimestamps });
 
         } catch (error) {
             this.addLog(`Error processing audio: ${error.message}`, 'error');
@@ -336,7 +351,7 @@ class TranscribeTool extends Tool {
             
             self.onmessage = async (event) => {
                 try {
-                    const { audioData, model, task, language } = event.data;
+                    const { audioData, model, task, language, returnTimestamps } = event.data;
                     self.postMessage({ status: 'log', message: 'Worker received task.' });
                     
                     const transcriber = await pipeline('automatic-speech-recognition', model, {
@@ -345,7 +360,11 @@ class TranscribeTool extends Tool {
 
                     self.postMessage({ status: 'log', message: 'Transcription pipeline ready.' });
                     
-                    const output = await transcriber(audioData, { language, task });
+                    const output = await transcriber(audioData, { 
+                        language, 
+                        task,
+                        return_timestamps: returnTimestamps 
+                    });
 
                     self.postMessage({ status: 'log', message: 'Transcription finished.' });
                     console.log('Transcription output:', output.text);
@@ -437,7 +456,17 @@ class TranscribeTool extends Tool {
     displayResult(result) {
         const { result: resultDiv, resultText } = this.elements;
         
-        resultText.textContent = result.text;
+        if (result.chunks && result.chunks.length) {
+            const formattedText = result.chunks.map(chunk => {
+                const start = chunk.timestamp[0].toFixed(2);
+                const end = chunk.timestamp[1].toFixed(2);
+                return `[${start}s -> ${end}s] ${chunk.text}`;
+            }).join('\n');
+            resultText.textContent = formattedText;
+        } else {
+            resultText.textContent = result.text;
+        }
+ 
         resultDiv.style.display = 'block';
         
         this.addLog('Result displayed successfully', 'success');
