@@ -182,7 +182,6 @@ class TranscribeTool extends Tool {
 
     async setup() {
         this.addLog('Audio/Video Transcription Tool v7.1.0 - Starting...', 'info');
-        this.addLog('Code refactored for clarity and maintainability.', 'info');
         this._initializeUI();
     }
     
