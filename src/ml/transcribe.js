@@ -5,8 +5,51 @@ import { Tool } from '../common/base.js';
 
 export const template = `
     <div class="tool-container">
-      <h1>Audio/Video Transcription</h1>
+      <h1 class="text-2xl font-bold mb-6">Audio/Video Transcription</h1>
       
+      <!-- Settings Section -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div>
+          <label for="transcribe-model-select" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Model</label>
+          <select id="transcribe-model-select" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="Xenova/whisper-tiny.en" selected>Whisper Tiny (English)</option>
+            <option value="Xenova/whisper-base.en">Whisper Base (English)</option>
+            <option value="Xenova/whisper-small.en">Whisper Small (English)</option>
+            <option value="Xenova/whisper-tiny">Whisper Tiny (Multilingual)</option>
+            <option value="Xenova/whisper-base">Whisper Base (Multilingual)</option>
+          </select>
+        </div>
+        <div id="transcribe-task-container">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Task</label>
+          <div class="flex items-center space-x-4">
+            <label class="inline-flex items-center">
+              <input type="radio" id="transcribe-task-transcribe" name="transcribe-task" value="transcribe" class="form-radio h-4 w-4 text-blue-600" checked>
+              <span class="ml-2 text-gray-700 dark:text-gray-300">Transcribe</span>
+            </label>
+            <label class="inline-flex items-center">
+              <input type="radio" id="transcribe-task-translate" name="transcribe-task" value="translate" class="form-radio h-4 w-4 text-blue-600">
+              <span class="ml-2 text-gray-700 dark:text-gray-300">Translate to English</span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div id="transcribe-language-container" class="mb-6 hidden">
+          <label for="transcribe-language-select" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Language</label>
+          <input id="transcribe-language-input" list="transcribe-language-list" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Spanish">
+          <datalist id="transcribe-language-list">
+            <option value="English">
+            <option value="Spanish">
+            <option value="French">
+            <option value="German">
+            <option value="Italian">
+            <option value="Portuguese">
+            <option value="Russian">
+            <option value="Chinese">
+            <option value="Japanese">
+            <option value="Korean">
+          </datalist>
+      </div>
+
       <!-- File Upload Section -->
       <div class="mb-6">
         <div id="transcribe-drop-zone" class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-blue-500 dark:hover:border-blue-400 transition-colors cursor-pointer">
@@ -34,7 +77,11 @@ export const template = `
       <!-- Preview Section -->
       <div id="transcribe-preview" class="mb-6" style="display: none;">
         <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Preview:</h3>
-        <div id="transcribe-preview-content" class="bg-gray-100 dark:bg-gray-700 rounded-lg p-4"></div>
+        <div id="transcribe-preview-content" class="bg-gray-100 dark:bg-gray-700 rounded-lg p-4">
+            <audio id="transcribe-audio-preview" controls class="w-full hidden"></audio>
+            <video id="transcribe-video-preview" controls class="w-full max-h-64 hidden"></video>
+            <p id="transcribe-filename" class="text-sm text-gray-600 dark:text-gray-400 mt-2"></p>
+        </div>
       </div>
 
       <!-- Process Button -->
@@ -95,6 +142,14 @@ class TranscribeTool extends Tool {
 
     getElementsMap() {
         return {
+            // Model and task selection
+            modelSelect: 'transcribe-model-select',
+            taskContainer: 'transcribe-task-container',
+            taskTranscribe: 'transcribe-task-transcribe',
+            taskTranslate: 'transcribe-task-translate',
+            languageContainer: 'transcribe-language-container',
+            languageInput: 'transcribe-language-input',
+            // Existing elements
             dropZone: 'transcribe-drop-zone',
             fileInput: 'transcribe-file-input',
             urlInput: 'transcribe-url-input',
@@ -102,6 +157,9 @@ class TranscribeTool extends Tool {
             processBtn: 'transcribe-process-btn',
             preview: 'transcribe-preview',
             previewContent: 'transcribe-preview-content',
+            audioPreview: 'transcribe-audio-preview',
+            videoPreview: 'transcribe-video-preview',
+            fileName: 'transcribe-filename',
             progress: 'transcribe-progress',
             progressBar: 'transcribe-progress-bar',
             progressText: 'transcribe-progress-text',
@@ -115,141 +173,104 @@ class TranscribeTool extends Tool {
     }
 
     async setup() {
-        this.addLog('Audio/Video Transcription Tool v6.2.0 - Starting...', 'info');
-        this.addLog('Supports file upload and URL input', 'info');
-        
-        this.initFileUpload();
-        this.initUrlInput();
-        this.initButtons();
-        this.initLogsToggle();
+        this.addLog('Audio/Video Transcription Tool v7.1.0 - Starting...', 'info');
+        this.addLog('Code refactored for clarity and maintainability.', 'info');
+        this._initializeUI();
     }
+    
+    _initializeUI() {
+        const { 
+            dropZone, fileInput, urlBtn, urlInput, processBtn, 
+            copyBtn, downloadBtn, logs, modelSelect, languageContainer
+        } = this.elements;
 
-    initFileUpload() {
-        const { dropZone, fileInput } = this.elements;
-        
+        // File upload
         dropZone.addEventListener('click', () => fileInput.click());
-        dropZone.addEventListener('dragover', (e) => {
+        dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('border-blue-500'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('border-blue-500'));
+        dropZone.addEventListener('drop', e => {
             e.preventDefault();
-            dropZone.classList.add('border-blue-500', 'dark:border-blue-400');
+            dropZone.classList.remove('border-blue-500');
+            if (e.dataTransfer.files.length) this._handleNewInput(e.dataTransfer.files[0]);
         });
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('border-blue-500', 'dark:border-blue-400');
+        fileInput.addEventListener('change', e => {
+            if (e.target.files.length) this._handleNewInput(e.target.files[0]);
         });
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('border-blue-500', 'dark:border-blue-400');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                this.handleFileSelect(files[0]);
-            }
-        });
-        
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                this.handleFileSelect(e.target.files[0]);
-            }
-        });
-    }
 
-    initUrlInput() {
-        const { urlBtn, urlInput } = this.elements;
-        
-        // Auto-load default JFK audio URL
+        // URL input
         const defaultUrl = 'https://huggingface.co/datasets/Xenova/transformers.js-docs/resolve/main/jfk.wav';
         urlInput.value = defaultUrl;
-        this.handleUrlInput(defaultUrl);
+        this._handleNewInput(defaultUrl);
         
         urlBtn.addEventListener('click', () => {
             const url = urlInput.value.trim();
-            if (url) {
-                this.handleUrlInput(url);
-            } else {
-                this.addLog('Please enter a valid URL', 'error');
-            }
+            if (url) this._handleNewInput(url);
+            else this.addLog('Please enter a valid URL', 'error');
         });
-        
-        urlInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                urlBtn.click();
-            }
-        });
-    }
+        urlInput.addEventListener('keypress', e => { if (e.key === 'Enter') urlBtn.click(); });
 
-    initButtons() {
-        const { processBtn, copyBtn, downloadBtn } = this.elements;
-        
+        // Action buttons
         processBtn.addEventListener('click', () => this.processAudio());
         copyBtn.addEventListener('click', () => this.copyResult());
         downloadBtn.addEventListener('click', () => this.downloadResult());
-    }
 
-    initLogsToggle() {
-        const { logs, logText } = this.elements;
-        
+        // Logs toggle
         logs.addEventListener('click', () => {
+            const logText = this.elements.logText;
             const isVisible = logText.style.display !== 'none';
             logText.style.display = isVisible ? 'none' : 'block';
-            const chevron = logs.querySelector('span:last-child');
-            chevron.style.transform = isVisible ? 'rotate(0deg)' : 'rotate(180deg)';
+            logs.querySelector('span:last-child').style.transform = isVisible ? 'rotate(0deg)' : 'rotate(180deg)';
         });
-    }
-
-    handleFileSelect(file) {
-        this.currentFile = file;
-        this.currentUrl = null;
-        this.addLog(`File selected: ${file.name} (${this.formatFileSize(file.size)})`, 'info');
-        this.displayPreview(file);
-        this.elements.processBtn.disabled = false;
-    }
-
-    handleUrlInput(url) {
-        // Use JFK audio as default if no URL provided
-        const defaultUrl = 'https://huggingface.co/datasets/Xenova/transformers.js-docs/resolve/main/jfk.wav';
-        const finalUrl = url || defaultUrl;
         
-        this.currentUrl = finalUrl;
-        this.currentFile = null;
-        this.addLog(`URL entered: ${finalUrl}`, 'info');
-        this.displayUrlPreview(finalUrl);
-        this.elements.processBtn.disabled = false;
+        // Settings
+        modelSelect.addEventListener('change', () => {
+            const isMultilingual = !modelSelect.value.endsWith('.en');
+            languageContainer.classList.toggle('hidden', !isMultilingual);
+            this.elements.taskContainer.classList.toggle('hidden', !isMultilingual);
+        });
+        modelSelect.dispatchEvent(new Event('change'));
     }
 
-    displayPreview(file) {
-        const { preview, previewContent } = this.elements;
-        
-        if (file.type.startsWith('audio/')) {
-            previewContent.innerHTML = `
-                <audio controls class="w-full">
-                    <source src="${URL.createObjectURL(file)}" type="${file.type}">
-                    Your browser does not support audio playback.
-                </audio>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">${file.name}</p>
-            `;
-        } else if (file.type.startsWith('video/')) {
-            previewContent.innerHTML = `
-                <video controls class="w-full max-h-64">
-                    <source src="${URL.createObjectURL(file)}" type="${file.type}">
-                    Your browser does not support video playback.
-                </video>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">${file.name}</p>
-            `;
+    _handleNewInput(input) {
+        if (typeof input === 'string') {
+            this.currentUrl = input;
+            this.currentFile = null;
+            this.addLog(`URL selected: ${input}`, 'info');
+        } else {
+            this.currentFile = input;
+            this.currentUrl = null;
+            this.addLog(`File selected: ${input.name} (${this.formatFileSize(input.size)})`, 'info');
         }
-        
-        preview.style.display = 'block';
+        this._displayMediaPreview(input);
+        this.elements.processBtn.disabled = false;
     }
 
-    displayUrlPreview(url) {
-        const { preview, previewContent } = this.elements;
+    _displayMediaPreview(source) {
+        const { preview, audioPreview, videoPreview, fileName } = this.elements;
+        const isFile = source instanceof File;
         
-        previewContent.innerHTML = `
-            <div class="flex items-center gap-2">
-                <svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clip-rule="evenodd" />
-                </svg>
-                <span class="text-sm text-gray-700 dark:text-gray-300">${url}</span>
-            </div>
-        `;
+        audioPreview.style.display = 'none';
+        videoPreview.style.display = 'none';
+
+        const src = isFile ? URL.createObjectURL(source) : source;
+        const name = isFile ? source.name : source.split('/').pop();
         
+        let mediaType = 'audio'; // Default to audio
+        if (isFile && source.type.startsWith('video/')) {
+            mediaType = 'video';
+        } else if (!isFile) {
+            const extension = source.split('.').pop().toLowerCase();
+            const videoExtensions = ['mp4', 'mov', 'avi', 'webm', 'mkv'];
+            if (videoExtensions.includes(extension)) mediaType = 'video';
+        }
+
+        const player = mediaType === 'video' ? videoPreview : audioPreview;
+        
+        player.src = src;
+        player.style.display = 'block';
+        player.load();
+
+        fileName.textContent = name;
         preview.style.display = 'block';
     }
 
@@ -270,190 +291,149 @@ class TranscribeTool extends Tool {
     }
 
     async processAudio() {
-        if (this.currentFile) {
-            this.processFile(this.currentFile);
-        } else if (this.currentUrl) {
-            this.processUrl(this.currentUrl);
-        } else {
-            this.addLog('No file or URL to process', 'error');
+        this.clearLogs();
+        this.elements.result.style.display = 'none';
+        this.elements.progress.style.display = 'block';
+
+        try {
+            let arrayBuffer;
+            if (this.currentFile) {
+                this.addLog(`Processing file: ${this.currentFile.name}`, 'info');
+                arrayBuffer = await this.currentFile.arrayBuffer();
+            } else if (this.currentUrl) {
+                this.addLog(`Fetching and processing URL: ${this.currentUrl}`, 'info');
+                const response = await fetch(this.currentUrl);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                arrayBuffer = await response.arrayBuffer();
+            } else {
+                throw new Error('No file or URL to process');
+            }
+
+            const audioBuffer = await this.decodeAudioData(arrayBuffer);
+            const audioData = await this.resampleAndPrepareAudio(audioBuffer);
+            
+            const { modelSelect, taskTranscribe, languageInput } = this.elements;
+            const model = modelSelect.value;
+            const task = taskTranscribe.checked ? 'transcribe' : 'translate';
+            const language = languageInput.value || null;
+
+            this._startWorker({ audioData, model, task, language });
+
+        } catch (error) {
+            this.addLog(`Error processing audio: ${error.message}`, 'error');
+            this.elements.progress.style.display = 'none';
         }
     }
 
-    async loadTransformers() {
-        // Use exact same approach as working test HTML
-        const { pipeline } = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.16.0/dist/transformers.min.js');
-        this.addLog('Transformers.js loaded successfully', 'info');
-        return { pipeline };
-    }
+    _startWorker(data) {
+        this.addLog('Starting transcription worker...', 'info');
+        this.updateProgress(10, 'Worker started...');
 
-    // Centralized transcription logic in a separate worker
-    runTranscription(audioData) {
-        this.startProcessing();
-        this.updateProgress(10, 'Initializing Worker...');
-        this.addLog('Creating isolated worker for transcription...', 'info');
+        const workerCode = `
+            import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.1';
+            
+            env.allowLocalModels = false;
+            
+            self.onmessage = async (event) => {
+                try {
+                    const { audioData, model, task, language } = event.data;
+                    self.postMessage({ status: 'log', message: 'Worker received task.' });
+                    
+                    const transcriber = await pipeline('automatic-speech-recognition', model, {
+                        progress_callback: (progress) => self.postMessage({ status: 'progress', data: progress })
+                    });
 
-        // Use new URL() to correctly resolve the worker path in Vite
-        const worker = new Worker(new URL('./transcribe-worker.js', import.meta.url), { type: 'module' });
+                    self.postMessage({ status: 'log', message: 'Transcription pipeline ready.' });
+                    
+                    const output = await transcriber(audioData, { language, task });
 
-        worker.onmessage = ({ data }) => {
-            switch (data.status) {
+                    self.postMessage({ status: 'log', message: 'Transcription finished.' });
+                    console.log('Transcription output:', output.text);
+                    self.postMessage({ status: 'complete', output });
+
+                } catch (error) {
+                    self.postMessage({ status: 'error', error: error.message });
+                }
+            };
+        `;
+        
+        const blob = new Blob([workerCode], { type: 'application/javascript' });
+        const worker = new Worker(URL.createObjectURL(blob), { type: 'module' });
+
+        worker.postMessage(data);
+
+        worker.onmessage = (event) => {
+            const { status, output, error, data: progressData, message } = event.data;
+
+            switch (status) {
                 case 'log':
-                    this.addLog(`Worker: ${data.message}`, 'info');
+                    this.addLog(`Worker: ${message}`, 'info');
                     break;
                 case 'progress':
-                    if (data.data.status === 'progress') {
-                        const progress = (data.data.progress || 0).toFixed(2);
-                        this.updateProgress(20 + (progress * 0.7), `Downloading model... ${progress}%`);
-                    } else if (data.data.status === 'done') {
-                        this.addLog(`Downloaded: ${data.data.file}`, 'info');
+                    if (progressData.status === 'progress') {
+                        const progress = (progressData.progress || 0).toFixed(2);
+                        this.updateProgress(10 + (progress * 0.8), `Downloading model... ${progress}%`);
+                    } else if (progressData.status === 'done') {
+                        this.addLog(`Downloaded: ${progressData.file}`, 'info');
                     }
                     break;
                 case 'complete':
-                    this.addLog('Transcription complete!', 'success');
-                    this.updateProgress(100, 'Done');
-                    this.displayResult(data.output);
-                    this.endProcessing();
+                    this.addLog(`Transcription result: "${output.text}"`, 'success');
+                    this.displayResult(output);
+                    this.updateProgress(100, 'Transcription complete.');
                     worker.terminate();
                     break;
                 case 'error':
-                    this.addLog(`Worker error: ${data.error}`, 'error');
-                    this.endProcessing(false);
+                    this.addLog(`Transcription error: ${error}`, 'error');
+                    this.elements.progress.classList.add('hidden');
                     worker.terminate();
                     break;
             }
         };
-        
-        this.addLog('Sending audio data to worker...', 'info');
-        worker.postMessage({ audioData });
+
+        worker.onerror = (error) => {
+            this.addLog(`Worker error: ${error.message}`, 'error');
+            this.elements.progress.classList.add('hidden');
+            worker.terminate();
+        };
     }
 
-    async processFile(file) {
-        try {
-            this.updateProgress(10, 'Reading and decoding file...');
-            this.addLog('Reading file into memory...', 'info');
+    async resampleAndPrepareAudio(audioBuffer) {
+        const originalSampleRate = audioBuffer.sampleRate;
+        const targetSampleRate = 16000;
 
-            const arrayBuffer = await file.arrayBuffer();
-
-            this.addLog('Decoding audio data using browser AudioContext...', 'info');
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-            const audioData = audioBuffer.getChannelData(0);
-
-            this.addLog('Audio decoded. Initializing worker...', 'info');
-            this.updateProgress(20, 'Initializing ES Module Worker...');
-
-            const workerCode = `
-                import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.16.0/dist/transformers.min.js';
-                
-                // Set up environment to use remote models only
-                env.allowLocalModels = false;
-                
-                self.onmessage = async (event) => {
-                    try {
-                        const transcriber = await pipeline('automatic-speech-recognition', 'Xenova/whisper-tiny.en');
-                        const output = await transcriber(event.data.audioData, { sampling_rate: 16000 });
-                        self.postMessage({ status: 'complete', output });
-
-                    } catch (error) {
-                        self.postMessage({ status: 'error', error: error.message });
-                    }
-                };
-            `;
-
-            const blob = new Blob([workerCode], { type: 'application/javascript' });
-            const worker = new Worker(URL.createObjectURL(blob), { type: 'module' });
-
-            worker.onmessage = (event) => {
-                const { status, output, error } = event.data;
-
-                if (status === 'complete') {
-                    this.addLog('Transcription complete!', 'success');
-                    this.updateProgress(100, 'Done');
-                    this.displayResult(output);
-                    worker.terminate();
-                } else if (status === 'error') {
-                    this.addLog(`Worker error: ${error}`, 'error');
-                    this.updateProgress(100, 'Error');
-                    worker.terminate();
-                }
-            };
-
-            this.addLog('Sending decoded audio data to worker...', 'info');
-            this.updateProgress(25, 'Sending data to worker...');
-            worker.postMessage({ audioData });
-
-        } catch (error) {
-            this.addLog(`An error occurred: ${error.message}`, 'error');
-            console.error('File processing failed:', error);
-            this.updateProgress(100, 'Error');
+        if (originalSampleRate === targetSampleRate && audioBuffer.numberOfChannels === 1) {
+            this.addLog('Audio is already in the correct format (16kHz, Mono).', 'info');
+            return audioBuffer.getChannelData(0);
         }
+
+        this.addLog(`Preparing audio: Resampling from ${originalSampleRate}Hz to ${targetSampleRate}Hz and ensuring mono...`, 'info');
+
+        const duration = audioBuffer.duration;
+        // The OfflineAudioContext is the most reliable way to resample in the browser.
+        const offlineContext = new OfflineAudioContext(
+            1, // Target mono
+            duration * targetSampleRate,
+            targetSampleRate
+        );
+
+        const bufferSource = offlineContext.createBufferSource();
+        bufferSource.buffer = audioBuffer;
+        bufferSource.connect(offlineContext.destination);
+        bufferSource.start();
+
+        const resampledBuffer = await offlineContext.startRendering();
+        return resampledBuffer.getChannelData(0);
     }
 
-    async processUrl(url) {
-        try {
-            this.updateProgress(10, 'Fetching and decoding audio...');
-            this.addLog('Fetching audio data from URL...', 'info');
-
-            const response = await fetch(url);
-            const arrayBuffer = await response.arrayBuffer();
-
-            this.addLog('Decoding audio data using browser AudioContext...', 'info');
-
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-            
-            const audioData = audioBuffer.getChannelData(0);
-
-            this.addLog('Audio decoded. Initializing worker...', 'info');
-            this.updateProgress(20, 'Initializing ES Module Worker...');
-
-            const workerCode = `
-                import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.16.0/dist/transformers.min.js';
-
-                // Set up environment to use remote models only
-                env.allowLocalModels = false;
-
-                self.onmessage = async (event) => {
-                    try {
-                        const transcriber = await pipeline('automatic-speech-recognition', 'Xenova/whisper-tiny.en');
-                        const output = await transcriber(event.data.audioData, { sampling_rate: 16000 });
-                        self.postMessage({ status: 'complete', output });
-
-                    } catch (error) {
-                        self.postMessage({ status: 'error', error: error.message });
-                    }
-                };
-            `;
-
-            const blob = new Blob([workerCode], { type: 'application/javascript' });
-            const worker = new Worker(URL.createObjectURL(blob), { type: 'module' });
-
-            worker.onmessage = (event) => {
-                const { status, output, error } = event.data;
-
-                if (status === 'complete') {
-                    this.addLog('Transcription complete!', 'success');
-                    this.updateProgress(100, 'Done');
-                    this.displayResult(output);
-                    worker.terminate();
-                } else if (status === 'error') {
-                    this.addLog(`Worker error: ${error}`, 'error');
-                    this.updateProgress(100, 'Error');
-                    worker.terminate();
-                }
-            };
-
-            this.addLog('Sending decoded audio data to worker...', 'info');
-            this.updateProgress(25, 'Sending data to worker...');
-            worker.postMessage({ audioData });
-
-        } catch (error) {
-            this.addLog(`An error occurred: ${error.message}`, 'error');
-            console.error('Transcription failed:', error);
-            this.updateProgress(100, 'Error');
-        }
+    async decodeAudioData(arrayBuffer) {
+        this.addLog('Decoding audio data using browser AudioContext...', 'info');
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        return await audioContext.decodeAudioData(arrayBuffer);
     }
-
+    
+    // REMOVED processFile and processUrl as they are refactored
+    
     displayResult(result) {
         const { result: resultDiv, resultText } = this.elements;
         
@@ -510,6 +490,13 @@ class TranscribeTool extends Tool {
         }
         
         console.log(`[${type.toUpperCase()}] ${message}`);
+    }
+
+    clearLogs() {
+        this.logText = '';
+        if (this.elements.logText) {
+            this.elements.logText.value = '';
+        }
     }
 }
 
