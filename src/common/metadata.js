@@ -139,6 +139,21 @@ export const tools = {
     ],
     useCase: 'Perfect for creating shareable animations for social media, forums, or messaging apps from your videos.'
   },
+  'video/mp4': {
+    id: 'mp4',
+    category: 'video',
+    name: 'Convert to MP4',
+    description: 'Convert nearly any video to MP4 (H.264 + AAC) with optional resolution and quality controls. All processing happens in your browser with FFmpeg WASM.',
+    icon: '🎥',
+    keywords: ['mp4 converter', 'convert to mp4', 'video to mp4', 'h264', 'aac', 'video converter'],
+    howToUse: [
+      'Upload your video (AVI, MKV, MOV, WebM, MP4, and more).',
+      'Choose target resolution (keep source, 4K, 1080p, 720p, etc.).',
+      'Pick a quality level and target bitrate.',
+      'Click "Convert to MP4" and download the result.'
+    ],
+    useCase: 'Create universally compatible MP4 files for web and mobile. Inspired by CloudConvert\'s MP4 converter, implemented fully client-side for privacy.'
+  },
   'image/resize': {
     id: 'resize',
     category: 'image',
