@@ -249,12 +249,95 @@ export async function readOutputFile(ffmpeg, fileName) {
 export async function executeFFmpeg(ffmpeg, args) {
   try {
     addLog(`Executing FFmpeg command: ffmpeg ${args.join(' ')}`, 'info');
-    await ffmpeg.exec(args);
+    const exitCode = await ffmpeg.exec(args);
+    if (exitCode !== 0) {
+      throw new Error(`FFmpeg exited with code ${exitCode}`);
+    }
     addLog('FFmpeg command completed successfully', 'success');
   } catch (error) {
-    addLog(`FFmpeg command failed: ${error.message}`, 'error');
-    throw error;
+    const normalizedError = normalizeFFmpegError(error);
+    addLog(`FFmpeg command failed: ${normalizedError.message}`, 'error');
+    throw normalizedError;
   }
+}
+
+function normalizeFFmpegError(error) {
+  if (error instanceof Error && error.message) return error;
+
+  if (typeof error === 'string' && error.trim()) {
+    return new Error(error);
+  }
+
+  if (error && typeof error === 'object') {
+    const message = error.message || error.reason || error.name;
+    if (message) return new Error(String(message));
+  }
+
+  return new Error('FFmpeg aborted while processing the video. Try MP4 output or lower settings.');
+}
+
+export function getX264EncodeArgs({ quality = 'medium', bitrateKbps = 2000, audio = true, faststart = true } = {}) {
+  const preset =
+    quality === 'high' ? 'medium' :
+    quality === 'low' ? 'veryfast' :
+    'fast';
+
+  const crf =
+    quality === 'high' ? '20' :
+    quality === 'low' ? '29' :
+    '24';
+
+  const args = [
+    '-c:v', 'libx264',
+    '-preset', preset,
+    '-crf', crf,
+    '-pix_fmt', 'yuv420p',
+    '-b:v', `${bitrateKbps}k`,
+    '-maxrate', `${bitrateKbps}k`,
+    '-bufsize', `${Math.max(1000, bitrateKbps * 2)}k`
+  ];
+
+  if (faststart) {
+    args.push('-movflags', '+faststart');
+  }
+
+  if (audio) {
+    args.push('-c:a', 'aac', '-b:a', '96k');
+  } else {
+    args.push('-an');
+  }
+
+  return args;
+}
+
+export function getFastWebMEncodeArgs({ quality = 'medium', bitrateKbps = 1200, audio = true } = {}) {
+  // VP8 is significantly faster than VP9 in ffmpeg.wasm and is broadly compatible.
+  const deadline =
+    quality === 'high' ? 'good' :
+    quality === 'low' ? 'realtime' :
+    'realtime';
+
+  const cpuUsed =
+    quality === 'high' ? '4' :
+    quality === 'low' ? '8' :
+    '6';
+
+  const args = [
+    '-c:v', 'libvpx',
+    '-b:v', `${bitrateKbps}k`,
+    '-deadline', deadline,
+    '-cpu-used', cpuUsed,
+    '-auto-alt-ref', '0',
+    '-pix_fmt', 'yuv420p'
+  ];
+
+  if (audio) {
+    args.push('-c:a', 'libopus', '-b:a', '96k');
+  } else {
+    args.push('-an');
+  }
+
+  return args;
 }
 
 /**

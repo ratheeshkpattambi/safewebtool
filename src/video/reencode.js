@@ -3,7 +3,15 @@
  */
 import { Tool } from '../common/base.js';
 import { formatFileSize } from '../common/utils.js';
-import { loadFFmpeg, writeInputFile, readOutputFile, executeFFmpeg, getExtension } from './ffmpeg-utils.js';
+import {
+  loadFFmpeg,
+  writeInputFile,
+  readOutputFile,
+  executeFFmpeg,
+  getExtension,
+  getX264EncodeArgs,
+  getFastWebMEncodeArgs
+} from './ffmpeg-utils.js';
 
 // Video reencode tool template
 export const template = `
@@ -169,28 +177,11 @@ class VideoReencodeTool extends Tool {
       const ffmpegArgs = ['-i', inputFileName];
 
       if (format === 'mp4') {
-        ffmpegArgs.push(
-          '-c:v', 'libx264',
-          '-preset', quality === 'high' ? 'slow' : quality === 'medium' ? 'medium' : 'fast',
-          '-crf', quality === 'high' ? '18' : quality === 'medium' ? '23' : '28',
-          '-c:a', 'aac',
-          '-b:a', '128k'
-        );
+        ffmpegArgs.push(...getX264EncodeArgs({ quality, bitrateKbps: bitrate, audio: true, faststart: true }));
       } else if (format === 'webm') {
-        ffmpegArgs.push(
-          '-c:v', 'libvpx-vp9',
-          '-b:v', `${bitrate}k`,
-          '-deadline', quality === 'high' ? 'best' : quality === 'medium' ? 'good' : 'realtime',
-          '-c:a', 'libopus'
-        );
+        ffmpegArgs.push(...getFastWebMEncodeArgs({ quality, bitrateKbps: bitrate, audio: true }));
       } else if (format === 'mov') {
-        ffmpegArgs.push(
-          '-c:v', 'libx264',
-          '-preset', quality === 'high' ? 'slow' : quality === 'medium' ? 'medium' : 'fast',
-          '-crf', quality === 'high' ? '18' : quality === 'medium' ? '23' : '28',
-          '-c:a', 'aac',
-          '-b:a', '128k'
-        );
+        ffmpegArgs.push(...getX264EncodeArgs({ quality, bitrateKbps: bitrate, audio: true, faststart: false }));
       }
 
       ffmpegArgs.push(outputFileName);

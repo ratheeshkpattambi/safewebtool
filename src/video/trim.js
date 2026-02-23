@@ -3,7 +3,14 @@
  */
 import { Tool } from '../common/base.js';
 import { formatFileSize, formatTime } from '../common/utils.js';
-import { loadFFmpeg, writeInputFile, readOutputFile, executeFFmpeg, getExtension } from './ffmpeg-utils.js';
+import {
+  loadFFmpeg,
+  writeInputFile,
+  readOutputFile,
+  executeFFmpeg,
+  getExtension,
+  getX264EncodeArgs
+} from './ffmpeg-utils.js';
 
 // Video trim tool template
 export const template = `
@@ -151,12 +158,9 @@ class VideoTrimTool extends Tool {
     this.initFileUpload({
       acceptTypes: 'video/*',
       onFileSelected: (file) => {
-        this.displayPreview(file, 'inputVideo');
-        this.log(`Loaded video: ${file.name} (${formatFileSize(file.size)})`, 'info');
-        
         // Get video duration when metadata is loaded
         if (this.elements.inputVideo) {
-          this.elements.inputVideo.onloadedmetadata = () => {
+          const applyMetadata = () => {
             this.videoDuration = this.elements.inputVideo.duration;
             
             // Enable inputs
@@ -173,6 +177,26 @@ class VideoTrimTool extends Tool {
             // Initialize the slider
             this.initSlider();
           };
+
+          this.elements.inputVideo.onloadedmetadata = applyMetadata;
+          if (this.elements.inputVideo.readyState >= 1 && Number.isFinite(this.elements.inputVideo.duration)) {
+            applyMetadata();
+          }
+        }
+
+        this.displayPreview(file, 'inputVideo');
+        this.log(`Loaded video: ${file.name} (${formatFileSize(file.size)})`, 'info');
+
+        // Avoid UI deadlock if metadata loading is delayed.
+        this.elements.startTime.disabled = false;
+        this.elements.endTime.disabled = false;
+        this.elements.processBtn.disabled = false;
+        if (!this.videoDuration || !Number.isFinite(this.videoDuration)) {
+          this.videoDuration = 1;
+          this.startTime = 0;
+          this.endTime = 1;
+          this.elements.startTime.value = '0:00';
+          this.elements.endTime.value = '0:01';
         }
       }
     });
@@ -382,20 +406,38 @@ class VideoTrimTool extends Tool {
       this.updateProgress(20);
 
       const inputFileName = 'input' + getExtension(file.name);
-      const outputFileName = 'output' + getExtension(file.name);
+      const sourceExt = getExtension(file.name);
+      let outputFileName = 'output' + sourceExt;
+      let outputMime = file.type || 'video/mp4';
+      let outputDownloadName = `trimmed_video${sourceExt}`;
 
       this.log('Writing input file...', 'info');
       await writeInputFile(this.ffmpeg, inputFileName, file);
       this.updateProgress(30);
 
       this.log('Processing...', 'info');
-      await executeFFmpeg(this.ffmpeg, [
-        '-ss', this.startTime.toString(),
-        '-i', inputFileName,
-        '-t', duration.toString(),
-        '-c', 'copy',
-        '-y', outputFileName
-      ]);
+      try {
+        await executeFFmpeg(this.ffmpeg, [
+          '-ss', this.startTime.toString(),
+          '-i', inputFileName,
+          '-t', duration.toString(),
+          '-c', 'copy',
+          '-y', outputFileName
+        ]);
+      } catch (copyError) {
+        this.log('Fast trim failed, retrying with MP4 re-encode for compatibility...', 'info');
+        outputFileName = 'output.mp4';
+        outputMime = 'video/mp4';
+        outputDownloadName = 'trimmed_video.mp4';
+
+        await executeFFmpeg(this.ffmpeg, [
+          '-ss', this.startTime.toString(),
+          '-i', inputFileName,
+          '-t', duration.toString(),
+          ...getX264EncodeArgs({ quality: 'medium', bitrateKbps: 1600, audio: true, faststart: true }),
+          '-y', outputFileName
+        ]);
+      }
       this.updateProgress(80);
 
       this.log('Reading output file...', 'info');
@@ -405,8 +447,8 @@ class VideoTrimTool extends Tool {
         throw new Error('Generated video is empty. Check video format or try different settings.');
       }
       
-      const blob = new Blob([data], { type: file.type });
-      this.displayOutputMedia(blob, 'outputVideo', `trimmed_video${getExtension(file.name)}`, 'downloadContainer');
+      const blob = new Blob([data], { type: outputMime });
+      this.displayOutputMedia(blob, 'outputVideo', outputDownloadName, 'downloadContainer');
       
       this.updateProgress(100);
       this.log('Trimming complete!', 'success');

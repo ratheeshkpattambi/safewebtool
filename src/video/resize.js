@@ -3,7 +3,16 @@
  */
 import { Tool } from '../common/base.js';
 import { formatFileSize } from '../common/utils.js';
-import { loadFFmpeg, getFFmpeg, writeInputFile, readOutputFile, executeFFmpeg, getExtension, cleanupFFmpeg } from './ffmpeg-utils.js';
+import {
+  loadFFmpeg,
+  getFFmpeg,
+  writeInputFile,
+  readOutputFile,
+  executeFFmpeg,
+  getExtension,
+  cleanupFFmpeg,
+  getX264EncodeArgs
+} from './ffmpeg-utils.js';
 
 // Video resize tool template
 export const template = `
@@ -102,9 +111,14 @@ class VideoResizeTool extends Tool {
     this.initFileUpload({
       acceptTypes: 'video/*',
       onFileSelected: (file) => {
+        this.handleVideoMetadata();
         this.displayPreview(file, 'inputVideo');
         this.log(`Loaded video: ${file.name} (${formatFileSize(file.size)})`, 'info');
-        this.handleVideoMetadata();
+
+        // Avoid deadlock if metadata is slow/missed: allow manual dimensions immediately.
+        this.enableInputs();
+        if (!this.elements.width.value) this.elements.width.value = 320;
+        if (!this.elements.height.value) this.elements.height.value = 180;
       }
     });
 
@@ -120,7 +134,7 @@ class VideoResizeTool extends Tool {
 
   handleVideoMetadata() {
     if (this.elements.inputVideo) {
-      this.elements.inputVideo.onloadedmetadata = () => {
+      const applyMetadata = () => {
         this.originalWidth = this.elements.inputVideo.videoWidth;
         this.originalHeight = this.elements.inputVideo.videoHeight;
         this.videoAspectRatio = this.originalWidth / this.originalHeight;
@@ -128,6 +142,12 @@ class VideoResizeTool extends Tool {
         this.enableInputs();
         this.setInitialValues();
       };
+
+      this.elements.inputVideo.onloadedmetadata = applyMetadata;
+
+      if (this.elements.inputVideo.readyState >= 1 && this.elements.inputVideo.videoWidth > 0) {
+        applyMetadata();
+      }
     }
   }
 
@@ -339,7 +359,7 @@ class VideoResizeTool extends Tool {
 
       const dimensions = this.calculateDimensions();
       const { width, height } = dimensions;
-      const quality = this.elements.quality ? this.elements.quality.value : 'medium';
+      const quality = this.elements.quality ? this.elements.quality.value : 'low';
 
       if (width <= 0 || height <= 0) {
         this.log('Please enter valid dimensions', 'error');
@@ -372,25 +392,41 @@ class VideoResizeTool extends Tool {
       }
 
       const inputFileName = 'input' + getExtension(file.name);
-      const outputFileName = 'output' + getExtension(file.name);
+      const outputFileName = 'output.mp4';
 
       this.log('Writing input file...', 'info');
       await writeInputFile(ffmpegInstance, inputFileName, file);
       this.updateProgress(30, 'Input file processed');
 
-      const scaleFilter = `scale=${width}:${height}:flags=lanczos`;
-      const qualityArgs = quality === 'high' ? ['-crf', '18'] :
-                         quality === 'medium' ? ['-crf', '23'] :
-                         ['-crf', '28'];
-
+      const scaleFilter = `scale=${width}:${height}:flags=fast_bilinear`;
       this.updateProgress(40, 'Starting resize...');
-      await executeFFmpeg(ffmpegInstance, [
-        '-i', inputFileName,
-        '-vf', scaleFilter,
-        ...qualityArgs,
-        '-preset', 'medium',
-        '-y', outputFileName
-      ]);
+      try {
+        await executeFFmpeg(ffmpegInstance, [
+          '-i', inputFileName,
+          '-vf', scaleFilter,
+          '-c:v', 'libx264',
+          '-preset', 'ultrafast',
+          '-crf', quality === 'high' ? '22' : quality === 'medium' ? '26' : '30',
+          '-pix_fmt', 'yuv420p',
+          '-c:a', 'copy',
+          '-movflags', '+faststart',
+          '-y', outputFileName
+        ]);
+      } catch (audioCopyError) {
+        this.log('Audio copy failed, retrying with AAC audio for compatibility...', 'info');
+        const encodeArgs = getX264EncodeArgs({
+          quality,
+          bitrateKbps: width >= 1280 ? 1600 : 800,
+          audio: true,
+          faststart: true
+        });
+        await executeFFmpeg(ffmpegInstance, [
+          '-i', inputFileName,
+          '-vf', scaleFilter,
+          ...encodeArgs,
+          '-y', outputFileName
+        ]);
+      }
       this.updateProgress(80, 'Resize complete');
 
       this.log('Reading output file...', 'info');
@@ -400,14 +436,14 @@ class VideoResizeTool extends Tool {
         throw new Error('Generated video is empty. Check video format or try different settings.');
       }
       
-      const blob = new Blob([data], { type: file.type });
+      const blob = new Blob([data], { type: 'video/mp4' });
       this.updateProgress(90, 'Preparing download...');
       
       if (this.elements.outputContainer) {
         this.elements.outputContainer.style.display = 'block';
       }
       
-      this.displayOutputMedia(blob, 'outputVideo', `video_${width}x${height}${getExtension(file.name)}`, 'downloadContainer');
+      this.displayOutputMedia(blob, 'outputVideo', `video_${width}x${height}.mp4`, 'downloadContainer');
       
       // Clean up the instance after processing
       try {

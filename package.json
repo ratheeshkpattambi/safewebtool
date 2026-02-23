@@ -1,6 +1,6 @@
 {
   "name": "safewebtool",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "description": "SafeWebTool - A collection of browser-based tools for video, image, and text processing",
   "type": "module",
   "scripts": {

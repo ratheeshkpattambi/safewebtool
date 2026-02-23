@@ -3,7 +3,14 @@
  */
 import { Tool } from '../common/base.js';
 import { formatFileSize, formatTime } from '../common/utils.js';
-import { loadFFmpeg, writeInputFile, readOutputFile, executeFFmpeg, getExtension } from './ffmpeg-utils.js';
+import {
+  loadFFmpeg,
+  writeInputFile,
+  readOutputFile,
+  executeFFmpeg,
+  getExtension,
+  getX264EncodeArgs
+} from './ffmpeg-utils.js';
 
 // Video reverse tool template
 export const template = `
@@ -82,7 +89,7 @@ export const template = `
           </div>
         </div>
         <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-gray-700 rounded-lg">
-          <input type="checkbox" id="removeAudio" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+          <input type="checkbox" id="removeAudio" checked class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
           <label for="removeAudio" class="text-sm font-medium text-slate-700 dark:text-slate-300">
             Remove audio (recommended for reversed videos)
           </label>
@@ -159,12 +166,9 @@ class VideoReverseTool extends Tool {
     this.initFileUpload({
       acceptTypes: 'video/*',
       onFileSelected: (file) => {
-        this.displayPreview(file, 'inputVideo');
-        this.log(`Loaded video: ${file.name} (${formatFileSize(file.size)})`, 'info');
-        
         // Get video duration when metadata is loaded
         if (this.elements.inputVideo) {
-          this.elements.inputVideo.onloadedmetadata = () => {
+          const applyMetadata = () => {
             this.videoDuration = this.elements.inputVideo.duration;
             
             // Enable inputs
@@ -182,6 +186,27 @@ class VideoReverseTool extends Tool {
             // Initialize the slider
             this.initSlider();
           };
+
+          this.elements.inputVideo.onloadedmetadata = applyMetadata;
+          if (this.elements.inputVideo.readyState >= 1 && Number.isFinite(this.elements.inputVideo.duration)) {
+            applyMetadata();
+          }
+        }
+
+        this.displayPreview(file, 'inputVideo');
+        this.log(`Loaded video: ${file.name} (${formatFileSize(file.size)})`, 'info');
+
+        // Avoid UI deadlock if metadata loading is delayed.
+        this.elements.startTime.disabled = false;
+        this.elements.endTime.disabled = false;
+        this.elements.processBtn.disabled = false;
+        this.elements.removeAudio.disabled = false;
+        if (!this.videoDuration || !Number.isFinite(this.videoDuration)) {
+          this.videoDuration = 1;
+          this.startTime = 0;
+          this.endTime = 1;
+          this.elements.startTime.value = '0:00';
+          this.elements.endTime.value = '0:01';
         }
       }
     });
@@ -391,7 +416,7 @@ class VideoReverseTool extends Tool {
       this.updateProgress(20);
 
       const inputFileName = 'input' + getExtension(file.name);
-      const outputFileName = 'output' + getExtension(file.name);
+      const outputFileName = 'output.mp4';
 
       this.log('Writing input file...', 'info');
       await writeInputFile(this.ffmpeg, inputFileName, file);
@@ -409,11 +434,12 @@ class VideoReverseTool extends Tool {
       ];
       
       if (shouldRemoveAudio) {
-        ffmpegArgs.push('-an'); // Remove audio
+        ffmpegArgs.push(...getX264EncodeArgs({ quality: 'medium', bitrateKbps: 1400, audio: false, faststart: true }));
         this.log('Removing audio from reversed video...', 'info');
       } else {
-        ffmpegArgs.push('-c:a', 'aac'); // Keep audio with AAC codec
-        this.log('Keeping audio in reversed video (may sound unusual)...', 'info');
+        ffmpegArgs.push('-af', 'areverse');
+        ffmpegArgs.push(...getX264EncodeArgs({ quality: 'medium', bitrateKbps: 1400, audio: true, faststart: true }));
+        this.log('Keeping and reversing audio (slower)...', 'info');
       }
       
       ffmpegArgs.push('-y', outputFileName);
@@ -427,8 +453,8 @@ class VideoReverseTool extends Tool {
         throw new Error('Generated video is empty. Check video format or try different settings.');
       }
       
-      const blob = new Blob([data], { type: file.type });
-      this.displayOutputMedia(blob, 'outputVideo', `reversed_video${getExtension(file.name)}`, 'downloadContainer');
+      const blob = new Blob([data], { type: 'video/mp4' });
+      this.displayOutputMedia(blob, 'outputVideo', 'reversed_video.mp4', 'downloadContainer');
       
       this.updateProgress(100);
       this.log('Video reversal complete!', 'success');

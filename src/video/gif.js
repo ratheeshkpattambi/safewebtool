@@ -115,7 +115,9 @@ class VideoGifTool extends Tool {
       startTime: 'startTime',
       duration: 'duration',
       progress: 'progress',
-      downloadContainer: 'downloadContainer'
+      downloadContainer: 'downloadContainer',
+      logHeader: 'logHeader',
+      logContent: 'logContent'
     };
   }
 
@@ -127,7 +129,7 @@ class VideoGifTool extends Tool {
         this.log(`Loaded video: ${file.name} (${formatFileSize(file.size)})`, 'info');
         
         // Get video dimensions when metadata is loaded
-        this.elements.inputVideo.onloadedmetadata = () => {
+        const applyMetadata = () => {
           this.videoAspectRatio = this.elements.inputVideo.videoWidth / this.elements.inputVideo.videoHeight;
           
           // Set default width maintaining aspect ratio
@@ -136,14 +138,22 @@ class VideoGifTool extends Tool {
             this.updateHeight();
           }
         };
+        this.elements.inputVideo.onloadedmetadata = applyMetadata;
+        if (this.elements.inputVideo.readyState >= 1 && this.elements.inputVideo.videoWidth > 0) {
+          applyMetadata();
+        }
         
         // Update duration field based on video length
-        this.elements.inputVideo.onloadeddata = () => {
+        const applyLoadedData = () => {
           if (this.elements.duration.value == 5.0) {
             const videoLength = this.elements.inputVideo.duration;
             this.elements.duration.value = videoLength < 5 ? videoLength.toFixed(1) : 5.0;
           }
         };
+        this.elements.inputVideo.onloadeddata = applyLoadedData;
+        if (this.elements.inputVideo.readyState >= 2 && Number.isFinite(this.elements.inputVideo.duration)) {
+          applyLoadedData();
+        }
       }
     });
 
