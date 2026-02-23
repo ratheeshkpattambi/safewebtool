@@ -3,7 +3,14 @@
  */
 import { Tool } from '../common/base.js';
 import { formatFileSize } from '../common/utils.js';
-import { loadFFmpeg, writeInputFile, readOutputFile, executeFFmpeg, getExtension } from './ffmpeg-utils.js';
+import {
+  loadFFmpeg,
+  writeInputFile,
+  readOutputFile,
+  executeFFmpeg,
+  getExtension,
+  getX264EncodeArgs
+} from './ffmpeg-utils.js';
 
 // Video MP4 convert tool template
 export const template = `
@@ -95,6 +102,7 @@ class VideoMp4Tool extends Tool {
       quality: 'quality',
       bitrate: 'bitrate',
       progress: 'progress',
+      outputContainer: 'outputContainer',
       downloadContainer: 'downloadContainer',
       logHeader: 'logHeader',
       logContent: 'logContent'
@@ -155,17 +163,8 @@ class VideoMp4Tool extends Tool {
         ffmpegArgs.push('-vf', `scale=${scaleMap[resolution]}`);
       }
 
-      // x264 quality/preset similar to CloudConvert selectable quality
-      ffmpegArgs.push(
-        '-c:v', 'libx264',
-        '-preset', quality === 'high' ? 'slow' : quality === 'medium' ? 'medium' : 'fast',
-        '-b:v', `${targetKbps}k`,
-        '-maxrate', `${targetKbps}k`,
-        '-bufsize', `${targetKbps * 2}k`,
-        '-movflags', '+faststart',
-        '-c:a', 'aac',
-        '-b:a', '128k'
-      );
+      // Favor browser-wasm speed while keeping broad compatibility.
+      ffmpegArgs.push(...getX264EncodeArgs({ quality, bitrateKbps: targetKbps, audio: true, faststart: true }));
 
       ffmpegArgs.push('-y', outputFileName);
 
@@ -176,6 +175,10 @@ class VideoMp4Tool extends Tool {
       this.log('Reading output file...', 'info');
       const data = await readOutputFile(this.ffmpeg, outputFileName);
       const blob = new Blob([data], { type: 'video/mp4' });
+
+      if (this.elements.outputContainer) {
+        this.elements.outputContainer.style.display = 'block';
+      }
 
       this.displayOutputMedia(blob, 'outputVideo', 'converted_video.mp4', 'downloadContainer');
       this.updateProgress(100);
@@ -196,5 +199,3 @@ export function initTool() {
   });
   return tool.init();
 }
-
-

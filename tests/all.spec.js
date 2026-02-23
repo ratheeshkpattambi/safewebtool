@@ -56,20 +56,29 @@ test.describe('SafeWebTool Tests', () => {
   
   // Test for specific import errors in all tools
   test('verify all tool modules import correctly', async ({ page }) => {
+    test.setTimeout(180000);
     // This test will verify that each tool module can be imported correctly
-    page.setDefaultTimeout(60000); // Increase timeout to 60 seconds for ML tools
+    page.setDefaultTimeout(60000); // Keep per-action timeout generous for ML tools
     
     for (const [toolPath, toolInfo] of Object.entries(tools)) {
       console.log(`Testing imports for tool: ${toolPath}`);
       
       try {
-        // Navigate with a longer timeout
         await page.goto(`/${toolPath}`, { timeout: 10000 });
-        
-        // Wait for tool to load (longer timeout to accommodate ML and FFmpeg tools)
+
         const category = toolPath.split('/')[0];
-        const waitTime = category === 'ml' ? 15000 : 2000; // Longer wait for ML tools
-        await page.waitForTimeout(waitTime);
+        await expect(page.locator('.tool-page')).toBeVisible();
+        await expect(page.locator('.tool-content-area')).toBeVisible();
+
+        // Prefer readiness signals over fixed sleeps so the test scales as tools are added.
+        const readySelectors = ['#logHeader', '.file-select-btn', 'textarea', 'canvas', '.controls'];
+        const readyLocator = page.locator(readySelectors.join(', ')).first();
+        await readyLocator.waitFor({
+          state: 'attached',
+          timeout: category === 'ml' ? 10000 : 4000
+        }).catch(() => {
+          // Some tools may render progressively; we still continue to import-error checks below.
+        });
         
         // Check that no import error message is shown
         const errorLocator = page.locator('text=Failed to load tool module');

@@ -21,7 +21,6 @@ export function initFileUpload(options) {
   // Get elements
   const dropZone = document.getElementById(dropZoneId);
   const fileInput = document.getElementById(fileInputId);
-  const fileSelectBtn = dropZone ? dropZone.querySelector('.file-select-btn') : null;
   
   if (!dropZone || !fileInput) {
     console.error(`Could not find elements: dropZone=${!!dropZone}, fileInput=${!!fileInput}`);
@@ -73,12 +72,20 @@ export function initFileUpload(options) {
   
   // Click handler for select button
   function handleSelectClick(e) {
+    const selectBtn = e.target.closest('.file-select-btn');
+    if (!selectBtn || !dropZone.contains(selectBtn)) return;
     e.stopPropagation();
-    fileInput.click();
+
+    const currentFileInput = document.getElementById(fileInputId);
+    if (currentFileInput) {
+      currentFileInput.click();
+    }
   }
   
   // Change handler for file input
   function handleFileInputChange(e) {
+    const target = e.target;
+    if (!target || target.id !== fileInputId) return;
     const file = e.target.files[0];
     if (file) handleFile(file);
   }
@@ -88,12 +95,9 @@ export function initFileUpload(options) {
   dropZone.addEventListener('dragleave', handleDragLeave);
   dropZone.addEventListener('drop', handleDrop);
   
-  // Add click handler only to the button
-  if (fileSelectBtn) {
-    fileSelectBtn.addEventListener('click', handleSelectClick);
-  }
-  
-  fileInput.addEventListener('change', handleFileInputChange);
+  // Delegated handlers survive tools that replace dropZone innerHTML after setup.
+  dropZone.addEventListener('click', handleSelectClick);
+  dropZone.addEventListener('change', handleFileInputChange);
   
   // Return cleanup function
   return function cleanup() {
@@ -101,10 +105,7 @@ export function initFileUpload(options) {
     dropZone.removeEventListener('dragleave', handleDragLeave);
     dropZone.removeEventListener('drop', handleDrop);
     
-    if (fileSelectBtn) {
-      fileSelectBtn.removeEventListener('click', handleSelectClick);
-    }
-    
-    fileInput.removeEventListener('change', handleFileInputChange);
+    dropZone.removeEventListener('click', handleSelectClick);
+    dropZone.removeEventListener('change', handleFileInputChange);
   };
-} 
+}

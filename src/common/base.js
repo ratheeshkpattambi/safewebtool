@@ -3,6 +3,7 @@
  */
 import { addLog, updateProgress, showLogs, formatFileSize } from './utils.js';
 import { footerManager } from './footer-manager.js';
+import { initFileUpload as initSharedFileUpload } from './fileUpload.js';
 
 export class Tool {
   /**
@@ -68,6 +69,9 @@ export class Tool {
     
     // Tool-specific initialization
     await this.setup();
+
+    // Mark the rendered tool UI as interactive for tests and diagnostics.
+    document.querySelector('.tool-container')?.setAttribute('data-tool-ready', 'true');
     
     // Mark as initialized
     this.initialized = true;
@@ -186,25 +190,23 @@ export class Tool {
       return;
     }
     
-    import('./fileUpload.js').then(module => {
-      module.initFileUpload({
-        dropZoneId: dropZone.id,
-        fileInputId: fileInput.id,
-        acceptTypes: options.acceptTypes || '*/*',
-        onFileSelected: (file) => {
-          this.inputFile = file;
-          
-          // Enable process button if exists
-          if (this.elements.processBtn) {
-            this.elements.processBtn.disabled = false;
-          }
-          
-          // Call user's onFileSelected handler if provided
-          if (options.onFileSelected) {
-            options.onFileSelected(file);
-          }
+    initSharedFileUpload({
+      dropZoneId: dropZone.id,
+      fileInputId: fileInput.id,
+      acceptTypes: options.acceptTypes || '*/*',
+      onFileSelected: (file) => {
+        this.inputFile = file;
+        
+        // Enable process button if exists
+        if (this.elements.processBtn) {
+          this.elements.processBtn.disabled = false;
         }
-      });
+        
+        // Call user's onFileSelected handler if provided
+        if (options.onFileSelected) {
+          options.onFileSelected(file);
+        }
+      }
     });
   }
   
