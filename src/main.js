@@ -2,6 +2,12 @@ import { handleRoute } from './router.js';
 import './styles/main.css';
 import './index.css';
 
+const GA_MEASUREMENT_ID = 'G-SK7DDP7ND6';
+
+function isLocalHost(hostname) {
+  return ['localhost', '127.0.0.1', '::1'].includes(hostname);
+}
+
 // Router functionality
 function initRouter() {
   // Handle initial page load
@@ -159,6 +165,36 @@ function setTheme(theme) {
   }
 }
 
+function loadAnalytics() {
+  if (isLocalHost(window.location.hostname) || document.getElementById('ga-script')) return;
+
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = window.gtag || function gtag() {
+    window.dataLayer.push(arguments);
+  };
+
+  const script = document.createElement('script');
+  script.id = 'ga-script';
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+  document.head.appendChild(script);
+
+  window.gtag('js', new Date());
+  window.gtag('config', GA_MEASUREMENT_ID, { send_page_view: false });
+  window.gtag('event', 'page_view', {
+    page_title: document.title,
+    page_location: window.location.href
+  });
+}
+
+function scheduleAnalytics() {
+  const scheduleIdle = window.requestIdleCallback || ((callback) => setTimeout(callback, 2500));
+
+  window.addEventListener('load', () => {
+    scheduleIdle(loadAnalytics, { timeout: 5000 });
+  }, { once: true });
+}
+
 // Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
   // Add js-loaded class to body to make content visible
@@ -167,16 +203,5 @@ document.addEventListener('DOMContentLoaded', () => {
   initRouter();
   initFlyoutMenus();
   initThemeToggle();
-  
-  // Send page view to Google Analytics after LCP
-  window.addEventListener('load', () => {
-    setTimeout(() => {
-      if (typeof gtag !== 'undefined') {
-        gtag('event', 'page_view', {
-          page_title: document.title,
-          page_location: window.location.href
-        });
-      }
-    }, 1000);
-  });
+  scheduleAnalytics();
 }); 

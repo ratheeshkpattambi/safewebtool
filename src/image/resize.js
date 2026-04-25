@@ -3,6 +3,7 @@
  */
 import { Tool } from '../common/base.js';
 import { formatFileSize } from '../common/utils.js';
+import { createSampleImageFile } from './sample-image.js';
 
 // Image resize tool template
 export const template = `
@@ -14,6 +15,8 @@ export const template = `
         <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Supports JPEG, PNG, WebP, BMP, TIFF</p>
         <input type="file" id="fileInput" class="hidden" accept="image/*">
         <button class="file-select-btn px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm font-medium">Select File</button>
+        <button id="sampleImageBtn" type="button" class="mt-2 text-sm text-blue-700 dark:text-blue-300 hover:underline">Use built-in sample image</button>
+        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Sample loads automatically. You can replace it anytime.</p>
       </div>
 
       <div class="image-wrapper mt-4">
@@ -87,7 +90,8 @@ class ImageResizeTool extends Tool {
       outputContainer: 'outputContainer',
       downloadContainer: 'downloadContainer',
       logHeader: 'logHeader',
-      logContent: 'logContent'
+      logContent: 'logContent',
+      sampleImageBtn: 'sampleImageBtn'
     };
   }
 
@@ -120,6 +124,25 @@ class ImageResizeTool extends Tool {
           this.updateWidth();
         }
       });
+    }
+
+    this.elements.sampleImageBtn?.addEventListener('click', () => {
+      this.loadBuiltInSample();
+    });
+
+    await this.loadBuiltInSample(true);
+  }
+
+  async loadBuiltInSample(silent = false) {
+    try {
+      const sampleFile = await createSampleImageFile();
+      this.inputFile = sampleFile;
+      this.loadImage(sampleFile);
+      if (!silent) {
+        this.log('Loaded built-in sample image. Select your own image anytime.', 'info');
+      }
+    } catch (error) {
+      this.log(`Failed to load built-in sample image: ${error.message}`, 'error');
     }
   }
 
@@ -258,6 +281,9 @@ class ImageResizeTool extends Tool {
       }
       
       // Create download link
+      if (this.elements.outputContainer) {
+        this.elements.outputContainer.style.display = 'block';
+      }
       this.displayOutputMedia(blob, 'outputImage', `resized_${width}x${height}.${file.type.split('/')[1]}`, 'downloadContainer');
       
       this.updateProgress(100);

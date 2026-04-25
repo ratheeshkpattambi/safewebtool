@@ -12,6 +12,8 @@ export const siteInfo = {
   keywords: ['online tools', 'privacy tools', 'browser tools', 'no upload tools', 'local processing', 'ad-free tools', 'no login']
 };
 
+const baseUrl = 'https://safewebtool.com';
+
 // Tool categories metadata
 export const categories = {
   video: {
@@ -187,6 +189,21 @@ export const tools = {
     ],
     useCase: 'Perfect for reducing image file sizes for web use, email attachments, or storage optimization while maintaining good visual quality.'
   },
+  'image/crop': {
+    id: 'crop',
+    category: 'image',
+    name: 'Image Crop',
+    description: 'Free online image crop tool. Crop images by exact pixel dimensions and position, all processed locally in your browser.',
+    icon: '✂️',
+    keywords: ['image crop', 'crop image', 'trim image', 'image editor', 'crop by pixels'],
+    howToUse: [
+      'Open the page and start with the built-in sample image or upload your own image',
+      'Set X/Y position and crop width/height in pixels',
+      'Use quick actions to center or reset the crop area',
+      'Click "Crop Image" to process and download the result'
+    ],
+    useCase: 'Perfect for removing unwanted edges, extracting a subject, or preparing exact image dimensions for websites and social media.'
+  },
   'text/editor': {
     id: 'editor',
     category: 'text',
@@ -321,9 +338,10 @@ export function getCategoryMetadata(categoryId) {
  */
 export function generateMetaTags(path) {
   const parts = path.split('/').filter(p => p);
+  const canonicalPath = path === '/' || path === '/home' ? '' : path;
   
   // Default metadata for home page
-  let title = `${siteInfo.name} - Online Privacy-First Tools`;
+  let title = siteInfo.name;
   let description = siteInfo.description;
   let keywords = siteInfo.keywords;
   
@@ -356,10 +374,11 @@ export function generateMetaTags(path) {
     <title>${title}</title>
     <meta name="description" content="${description}">
     <meta name="keywords" content="${keywords.join(', ')}">
+    <link rel="canonical" href="${baseUrl}${canonicalPath}">
     <meta property="og:title" content="${title}">
     <meta property="og:description" content="${description}">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://safewebtool.com${path === '/' ? '' : path}">
+    <meta property="og:url" content="${baseUrl}${canonicalPath}">
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="${title}">
     <meta name="twitter:description" content="${description}">
@@ -377,8 +396,6 @@ export function generateStructuredData(path) {
   
   const category = getCategoryMetadata(tool.category);
   if (!category) return '';
-  
-  const baseUrl = 'https://safewebtool.com';
   
   const structuredData = {
     "@context": "https://schema.org",

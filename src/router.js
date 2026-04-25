@@ -7,6 +7,7 @@ import {
 } from './common/metadata.js';
 import { footerManager } from './common/footer-manager.js';
 import { createFFmpegLoadingElement, renderCategoryPage, renderToolPageShell } from './common/page-renderers.js';
+import { serveSitemap } from './common/sitemap.js';
 import { loadToolModule, resolveAppRoute } from './common/tool-registry.js';
 
 let navigationToken = 0;
@@ -55,16 +56,14 @@ function initializeCollapsibleSections() {
 }
 
 function renderSitemap() {
-  import('./common/sitemap.js').then(({ serveSitemap }) => {
-    document.documentElement.innerHTML = `
-      <pre style="word-wrap: break-word; white-space: pre-wrap;">
-        ${serveSitemap()}
-      </pre>
-    `;
-    if (document.contentType) {
-      document.contentType = 'application/xml';
-    }
-  });
+  document.documentElement.innerHTML = `
+    <pre style="word-wrap: break-word; white-space: pre-wrap;">
+      ${serveSitemap()}
+    </pre>
+  `;
+  if (document.contentType) {
+    document.contentType = 'application/xml';
+  }
 }
 
 function renderRouteShell(route) {
@@ -165,6 +164,11 @@ function updateMetadata(path) {
   const metaContainer = document.createElement('div');
   metaContainer.innerHTML = generateMetaTags(path);
   Array.from(metaContainer.children).forEach(node => {
+    if (node.tagName === 'TITLE') {
+      document.title = node.textContent;
+      return;
+    }
+
     node.setAttribute('data-dynamic', 'true');
     head.appendChild(node);
   });
@@ -218,4 +222,3 @@ export async function handleRoute(path) {
 
   await initializeToolRoute(route, main, token);
 }
-

@@ -1,6 +1,6 @@
 {
   "name": "safewebtool",
-  "version": "1.0.8",
+  "version": "2026.4.25",
   "description": "SafeWebTool - A collection of browser-based tools for video, image, and text processing",
   "type": "module",
   "scripts": {
@@ -11,7 +11,13 @@
     "preview": "vite preview",
     "test": "playwright test",
     "test:ui": "playwright test --ui",
+    "test:contract": "node scripts/validate-tool-contract.mjs",
+    "test:tool": "node scripts/test-tool.mjs",
     "test:chrome": "playwright test --project=chromium-desktop --project=chromium-mobile",
+    "verify:fast": "npm run test:contract && npx playwright test tests/all.spec.js --project=chromium-desktop --reporter=line",
+    "verify:full": "npm run test:contract && npm run test:chrome -- --reporter=line",
+    "verify:netlify": "npm run build:netlify && npm run test:contract",
+    "scaffold:tool": "node scripts/scaffold-tool.mjs",
     "copy-src": "mkdir -p dist/src && cp -r src/* dist/src/",
     "copy-ffmpeg-files": "mkdir -p dist/ffmpeg && curl -L -o dist/ffmpeg/ffmpeg-core.js https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js && curl -L -o dist/ffmpeg/ffmpeg-core.wasm https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm && curl -L -o dist/ffmpeg/ffmpeg-core.worker.js https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.worker.js"
   },

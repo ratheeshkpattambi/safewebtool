@@ -6,6 +6,7 @@ import { formatFileSize } from '../common/utils.js';
 import { initFileUpload } from '../common/fileUpload.js';
 import { addLog, updateProgress, showLogs } from '../common/utils.js';
 import Compressor from 'compressorjs';
+import { createSampleImageFile } from './sample-image.js';
 
 // Image compression tool template
 export const template = `
@@ -17,6 +18,8 @@ export const template = `
         <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Supports JPEG, PNG, WebP</p>
         <input type="file" id="fileInput" class="hidden" accept="image/jpeg,image/png,image/webp">
         <button class="file-select-btn px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm font-medium">Select File</button>
+        <button id="sampleImageBtn" type="button" class="mt-2 text-sm text-blue-700 dark:text-blue-300 hover:underline">Use built-in sample image</button>
+        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Sample loads automatically. You can replace it anytime.</p>
       </div>
 
       <div class="image-wrapper mt-4">
@@ -81,25 +84,15 @@ export const template = `
       </div>
 
       <div id="outputContainer" class="output-container bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-600 rounded-lg p-4 mt-4" style="display: none;">
-        <div id="downloadContainer" class="flex flex-col items-center py-4">
-          <div id="savingStats" class="mb-4 text-center text-green-600 dark:text-green-400 font-medium"></div>
-          <button id="downloadBtn" class="bg-green-600 dark:bg-green-500 hover:bg-green-700 dark:hover:bg-green-600 text-white font-medium py-2.5 px-6 rounded-md shadow-sm transition-colors flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-              <path d="M8 9.5a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 8.5H7.5a.5.5 0 0 1 .5.5z"/>
-              <path d="M.5 1a.5.5 0 0 0 0 1h1.875v11.25H.5a.5.5 0 0 0 0 1h14.5a.5.5 0 0 0 0-1h-1.875V2H14.5a.5.5 0 0 0 0-1H.5z"/>
-            </svg>
-            Download Compressed Image
-          </button>
-        </div>
+        <div id="savingStats" class="mb-2 text-center text-green-600 dark:text-green-400 font-medium"></div>
+        <div id="downloadContainer" class="py-2"></div>
       </div>
 
-      <div id="logContainer" class="mt-6 border border-slate-300 dark:border-gray-600 rounded-md overflow-hidden">
-        <div id="logHeader" class="cursor-pointer bg-slate-100 dark:bg-gray-700 p-3 flex justify-between items-center">
-          <span class="font-medium text-slate-700 dark:text-slate-300">Logs</span>
-          <span id="logToggle" class="text-sm">▶</span>
-        </div>
-        <textarea id="logContent" class="w-full h-48 p-4 rounded-b-md mt-px font-mono text-xs resize-none bg-slate-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300 border-0 focus:outline-none transition-colors" style="display: none;"></textarea>
+      <div id="logHeader" class="mt-6 bg-slate-100 dark:bg-gray-700 p-2.5 rounded-md cursor-pointer flex justify-between items-center transition-colors hover:bg-slate-200 dark:hover:bg-gray-600">
+        <span class="font-medium text-slate-700 dark:text-slate-300">Logs</span>
+        <span id="logToggle" class="text-slate-500 dark:text-slate-400 transform transition-transform">▼</span>
       </div>
+      <textarea id="logContent" class="w-full h-48 p-4 rounded-b-md mt-px font-mono text-xs resize-none bg-slate-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300 border-0 focus:outline-none transition-colors" readonly placeholder="Logs will appear here..."></textarea>
     </div>
 `;
 
@@ -147,6 +140,7 @@ export default class ImageCompressor extends Tool {
         dropZone: document.getElementById('dropZone'),
         fileInput: document.getElementById('fileInput'),
         preview: document.getElementById('preview'),
+        sampleImageBtn: document.getElementById('sampleImageBtn'),
         quality: document.getElementById('quality'),
         qualityValue: document.getElementById('qualityValue'),
         preserveExif: document.getElementById('preserveExif'),
@@ -162,8 +156,8 @@ export default class ImageCompressor extends Tool {
         compressedStats: document.getElementById('compressedStats'),
         outputContainer: document.getElementById('outputContainer'),
         savingStats: document.getElementById('savingStats'),
-        downloadBtn: document.getElementById('downloadBtn'),
-        logContainer: document.getElementById('logContainer'),
+        downloadContainer: document.getElementById('downloadContainer'),
+        logHeader: document.getElementById('logHeader'),
         logContent: document.getElementById('logContent')
       };
       
@@ -175,11 +169,14 @@ export default class ImageCompressor extends Tool {
 
       // Show logs
       showLogs();
+      this._setupCustomFooter();
       
       // Add to log
       addLog('Image Compressor tool initialized', 'info');
+      document.querySelector('.tool-container')?.setAttribute('data-tool-ready', 'true');
       
       this.initialized = true;
+      await this.loadBuiltInSample(true);
     } catch (error) {
       console.error('Failed to initialize Image Compressor tool:', error);
       addLog(`Initialization error: ${error.message}`, 'error');
@@ -211,7 +208,7 @@ export default class ImageCompressor extends Tool {
     const { 
       quality, qualityValue, 
       preserveExif, formatRadios, processBtn,
-      downloadBtn
+      sampleImageBtn
     } = this.elements;
     
     // Update quality value display
@@ -224,10 +221,21 @@ export default class ImageCompressor extends Tool {
       this.compressImage();
     });
     
-    // Download button click
-    downloadBtn.addEventListener('click', () => {
-      this.downloadCompressedImage();
+    sampleImageBtn?.addEventListener('click', () => {
+      this.loadBuiltInSample();
     });
+  }
+
+  async loadBuiltInSample(silent = false) {
+    try {
+      const sampleFile = await createSampleImageFile();
+      await this.onFileSelected(sampleFile);
+      if (!silent) {
+        addLog('Loaded built-in sample image. Select your own image anytime.', 'info');
+      }
+    } catch (error) {
+      addLog(`Failed to load built-in sample image: ${error.message}`, 'error');
+    }
   }
   
   /**
@@ -328,6 +336,7 @@ export default class ImageCompressor extends Tool {
             // Show comparison and output containers
             comparisonContainer.style.display = 'block';
             outputContainer.style.display = 'block';
+            this.renderResultDownload();
             
             // Re-enable process button
             processBtn.disabled = false;
@@ -405,56 +414,26 @@ export default class ImageCompressor extends Tool {
       savingStats.className = 'mb-4 text-center text-slate-600 dark:text-slate-400 font-medium';
     }
   }
-  
-  /**
-   * Download the compressed image
-   */
-  downloadCompressedImage() {
-    if (!this.compressed.blob) {
-      addLog('No compressed image to download', 'error');
-      return;
-    }
-    
-    try {
-      // Get file extension
-      const originalFileName = this.original.file.name;
-      const fileNameParts = originalFileName.split('.');
-      const extension = fileNameParts.pop(); // Get the extension
-      const fileNameWithoutExt = fileNameParts.join('.'); // Rejoin in case of multiple dots
-      
-      // Get compressed image mime type and determine appropriate extension
-      const mimeType = this.compressed.blob.type;
-      let newExtension = extension;
-      
-      if (mimeType === 'image/jpeg') newExtension = 'jpg';
-      else if (mimeType === 'image/png') newExtension = 'png';
-      else if (mimeType === 'image/webp') newExtension = 'webp';
-      
-      // Create a new filename
-      const newFileName = `${fileNameWithoutExt}-compressed.${newExtension}`;
-      
-      // Create download link
-      const url = URL.createObjectURL(this.compressed.blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
-      a.download = newFileName;
-      
-      // Append to body, click, and remove
-      document.body.appendChild(a);
-      a.click();
-      
-      // Clean up
-      setTimeout(() => {
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }, 100);
-      
-      addLog(`Image downloaded as ${newFileName}`, 'success');
-    } catch (error) {
-      console.error('Error downloading image:', error);
-      addLog(`Download error: ${error.message}`, 'error');
-    }
+
+  getCompressedFileName() {
+    if (!this.original.file || !this.compressed.blob) return 'image-compressed.jpg';
+
+    const originalFileName = this.original.file.name;
+    const fileNameParts = originalFileName.split('.');
+    const originalExt = (fileNameParts.pop() || 'png').toLowerCase();
+    const fileNameWithoutExt = fileNameParts.join('.') || 'image';
+
+    let newExtension = originalExt;
+    if (this.compressed.blob.type === 'image/jpeg') newExtension = 'jpg';
+    else if (this.compressed.blob.type === 'image/png') newExtension = 'png';
+    else if (this.compressed.blob.type === 'image/webp') newExtension = 'webp';
+
+    return `${fileNameWithoutExt}-compressed.${newExtension}`;
+  }
+
+  renderResultDownload() {
+    if (!this.compressed.blob) return;
+    this.displayOutputMedia(this.compressed.blob, 'compressedImage', this.getCompressedFileName(), 'downloadContainer');
   }
   
   /**

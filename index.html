@@ -12,18 +12,7 @@
     <link rel="preload" href="/src/styles/main.css" as="style">
     <link rel="preload" href="/src/assets/logo.svg" as="image" type="image/svg+xml">
     <link rel="stylesheet" href="/src/styles/main.css">
-    <!-- Defer non-critical JavaScript -->
     <script defer src="/src/main.js" type="module"></script>
-    <!-- Google Analytics with minimal impact on LCP -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-SK7DDP7ND6"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-SK7DDP7ND6', {
-            'send_page_view': false // Defer page view until after LCP
-        });
-    </script>
     <!-- COOP and COEP headers for SharedArrayBuffer support (needed for WASM) -->
     <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
     <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp">
@@ -248,7 +237,7 @@
                 </nav>
             </div>
         </header>
-        <main id="main-content" class="flex-grow container mx-auto px-4 py-8">
+        <main id="main-content" class="flex-grow min-h-screen container mx-auto px-4 py-8">
             <div class="loading"></div>
         </main>
         <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-600 transition-colors">
@@ -257,7 +246,7 @@
                     <img src="/src/assets/logo.svg" alt="SafeWebTool" class="h-6 w-6 mr-2" loading="lazy" decoding="async">
                     <p>© Dr. Ratheesh Kalarot</p>
                     <span class="mx-2">|</span>
-                    <span class="version">Version: 1.0.8</span>
+                    <span class="version">Version: 2026.4.25</span>
                 </div>
                 <div class="mt-4 md:mt-0 flex space-x-4 text-sm">
                     <a href="https://scholar.google.co.nz/citations?user=BuKGWPEAAAAJ&hl=en" target="_blank" rel="noopener" class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400">Google Scholar</a>
