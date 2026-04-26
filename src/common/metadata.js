@@ -47,9 +47,9 @@ export const categories = {
   time: {
     id: 'time',
     name: 'Time Tools',
-    description: 'Simple browser-based time tools that run locally on your device.',
+    description: 'Simple browser-based time tools for timers, meeting planning, time zones, deadlines, and date math.',
     icon: '⏱️',
-    keywords: ['timer', 'time tools', 'countdown', 'stopwatch']
+    keywords: ['timer', 'time tools', 'countdown', 'time zones', 'meeting planner', 'business days', 'date calculator']
   }
 };
 
@@ -286,6 +286,66 @@ export const tools = {
       'On iOS Safari, use Share then Add to Home Screen for standalone mode'
     ],
     useCase: 'Use as a lightweight browser-local timer for focus sessions, cooking, workouts, breaks, or reminders without installing a native app.'
+  },
+  'time/meeting-planner': {
+    id: 'meeting-planner',
+    category: 'time',
+    name: 'Meeting Time Finder',
+    description: 'Find overlapping working hours across time zones for distributed teams. Uses browser Intl time zone data for DST-aware results.',
+    icon: '🌐',
+    keywords: ['meeting time finder', 'time zone meeting planner', 'remote team scheduler', 'overlap hours', 'distributed teams'],
+    howToUse: [
+      'Pick the meeting date, duration, and normal working hours',
+      'Choose up to three participant time zones',
+      'Click Find Meeting Times to see overlap-friendly options',
+      'Use the local times shown for each participant when creating the calendar invite'
+    ],
+    useCase: 'Useful for PMs, founders, and remote teams coordinating standups, reviews, interviews, and client calls across regions.'
+  },
+  'time/timezone-converter': {
+    id: 'timezone-converter',
+    category: 'time',
+    name: 'Time Zone Converter',
+    description: 'Convert one date and time into several common team time zones with DST-aware browser-local calculations.',
+    icon: '🕘',
+    keywords: ['time zone converter', 'timezone converter', 'world time converter', 'DST aware time conversion'],
+    howToUse: [
+      'Enter the source date and time',
+      'Choose the source time zone',
+      'Select the time zones you want to compare',
+      'Click Convert Time to see every local time side by side'
+    ],
+    useCase: 'Quickly check release windows, demo times, interview slots, and cross-region handoffs before sending an invite.'
+  },
+  'time/business-days': {
+    id: 'business-days',
+    category: 'time',
+    name: 'Business Days Calculator',
+    description: 'Add or subtract business days from a start date while skipping weekends for deadline planning.',
+    icon: '📅',
+    keywords: ['business days calculator', 'deadline calculator', 'working days', 'project date calculator'],
+    howToUse: [
+      'Choose a start date',
+      'Enter the number of business days',
+      'Choose whether to add or subtract',
+      'Click Calculate Date to get the resulting deadline'
+    ],
+    useCase: 'Estimate sprint deadlines, review windows, launch lead times, procurement dates, and contract response periods.'
+  },
+  'time/date-difference': {
+    id: 'date-difference',
+    category: 'time',
+    name: 'Date Duration Calculator',
+    description: 'Calculate days, weeks, and weekdays between two dates for planning timelines and project phases.',
+    icon: '📆',
+    keywords: ['date duration calculator', 'date difference', 'days between dates', 'timeline calculator', 'weekday count'],
+    howToUse: [
+      'Choose start and end dates',
+      'Optionally include the end date',
+      'Click Calculate Duration',
+      'Review total days, weeks and days, and weekday count'
+    ],
+    useCase: 'Quickly size project phases, campaign windows, hiring timelines, trial periods, and delivery estimates.'
   },
   'ml/face_detect': {
     id: 'face_detect',
