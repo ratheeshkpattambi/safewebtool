@@ -43,6 +43,13 @@ export const categories = {
     description: 'Run machine learning models locally in your browser. No uploads, no server-side processing.',
     icon: '🤖',
     keywords: ['machine learning', 'ml', 'ai', 'face detection', 'local ml']
+  },
+  time: {
+    id: 'time',
+    name: 'Time Tools',
+    description: 'Simple browser-based time tools that run locally on your device.',
+    icon: '⏱️',
+    keywords: ['timer', 'time tools', 'countdown', 'stopwatch']
   }
 };
 
@@ -264,6 +271,21 @@ export const tools = {
       'Click "Download" to save the output.'
     ],
     useCase: 'Ideal for developers and data analysts to quickly inspect, clean up, or transform JSON data for various applications without server-side processing.'
+  },
+  'time/timer': {
+    id: 'timer',
+    category: 'time',
+    name: 'Timer',
+    description: 'A clean browser-local countdown timer with big phone-friendly controls, 1, 2, 3, and 5 minute presets, custom time, tick sound, and iOS home screen support.',
+    icon: '⏱️',
+    keywords: ['timer', 'countdown timer', 'focus timer', 'workout timer', 'cooking timer', 'ios home screen timer', 'pwa timer'],
+    howToUse: [
+      'Choose a 1, 2, 3, or 5 minute preset, or set a custom duration',
+      'Tap Start to begin the countdown and Pause to stop temporarily',
+      'Turn on Tick sound if you want an audible second-by-second cue',
+      'On iOS Safari, use Share then Add to Home Screen for standalone mode'
+    ],
+    useCase: 'Use as a lightweight browser-local timer for focus sessions, cooking, workouts, breaks, or reminders without installing a native app.'
   },
   'ml/face_detect': {
     id: 'face_detect',

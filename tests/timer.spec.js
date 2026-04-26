@@ -1,0 +1,45 @@
+// @ts-check
+import { test, expect } from '@playwright/test';
+
+test.describe('Timer tool', () => {
+  test('enables tick sound by default for mobile timer use', async ({ page }) => {
+    await page.goto('/time/timer');
+    await expect(page.locator('.tool-container[data-tool-ready="true"]')).toBeVisible();
+    await expect(page.locator('#tickToggle')).toBeChecked();
+  });
+
+  test('supports phone presets, custom time, and start pause flow', async ({ page }) => {
+    await page.goto('/time/timer');
+    await expect(page.locator('.tool-container[data-tool-ready="true"]')).toBeVisible();
+
+    await page.getByRole('button', { name: '1', exact: true }).click();
+    await expect(page.locator('#timerDisplay')).toHaveText('01:00');
+
+    await page.getByRole('button', { name: '3', exact: true }).click();
+    await expect(page.locator('#timerDisplay')).toHaveText('03:00');
+
+    await page.locator('#minutesInput').fill('0');
+    await page.locator('#secondsInput').fill('45');
+    await expect(page.locator('#timerDisplay')).toHaveText('00:45');
+
+    await page.locator('#startPauseBtn').scrollIntoViewIfNeeded();
+    await page.locator('#startPauseBtn').click({ force: true });
+    await expect(page.locator('#timerStatus')).toHaveText('Running');
+    await expect(page.locator('#minutesInput')).toBeDisabled();
+
+    await page.locator('#startPauseBtn').click({ force: true });
+    await expect(page.locator('#timerStatus')).toHaveText('Paused');
+    await expect(page.locator('#minutesInput')).toBeEnabled();
+  });
+
+  test('resets to the selected duration without requiring permissions', async ({ page }) => {
+    await page.goto('/time/timer');
+    await expect(page.locator('.tool-container[data-tool-ready="true"]')).toBeVisible();
+
+    await page.getByRole('button', { name: '2', exact: true }).click();
+    await page.locator('#resetBtn').scrollIntoViewIfNeeded();
+    await page.locator('#resetBtn').click({ force: true });
+    await expect(page.locator('#timerDisplay')).toHaveText('02:00');
+    await expect(page.locator('#timerStatus')).toHaveText('Tap Start');
+  });
+});

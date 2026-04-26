@@ -4,10 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SafeWebTool</title>
+    <meta name="theme-color" content="#ffffff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Timer">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="/manifest.json">
     <!-- Favicon -->
     <link rel="icon" href="/src/assets/logo.svg" type="image/svg+xml">
     <link rel="icon" href="/src/assets/kalarot.ico" type="image/x-icon">
-    <link rel="apple-touch-icon" href="/src/assets/logo.svg">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
     <!-- Preload critical assets -->
     <link rel="preload" href="/src/styles/main.css" as="style">
     <link rel="preload" href="/src/assets/logo.svg" as="image" type="image/svg+xml">
@@ -26,7 +31,7 @@
                     <h1 class="ml-2 text-xl font-semibold text-slate-700 dark:text-slate-300">SafeWebTool</h1>
                 </div>
                 <nav class="mt-2 md:mt-0 md:ml-auto">
-                    <ul class="flex items-center space-x-1">
+                    <ul class="flex flex-wrap items-center justify-center gap-1 md:flex-nowrap">
                         <li>
                             <a href="/" class="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors inline-flex items-center">Home</a>
                         </li>
@@ -171,6 +176,34 @@
                                             <div>
                                                 <div class="font-medium text-gray-800 dark:text-gray-200 group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400">JSON Formatter</div>
                                                 <div class="text-sm text-gray-500 dark:text-gray-400">Format, validate, and convert JSON</div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+
+                        <!-- Time Tools Flyout -->
+                        <li class="relative group">
+                            <a href="/time" class="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors inline-flex items-center">
+                                Time
+                                <svg class="ml-1 h-4 w-4 transform group-hover:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </a>
+                            <!-- Time Flyout Menu -->
+                            <div class="absolute left-0 mt-1 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                                <div class="p-4">
+                                    <div class="flex items-center mb-4 pb-3 border-b border-gray-100 dark:border-gray-600">
+                                        <span class="text-2xl mr-2">⏱️</span>
+                                        <h3 class="font-bold text-gray-900 dark:text-gray-100 text-lg">Time Tools</h3>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <a href="/time/timer" class="flex items-start p-3 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group/item">
+                                            <span class="text-lg mr-3 mt-0.5">⏱️</span>
+                                            <div>
+                                                <div class="font-medium text-gray-800 dark:text-gray-200 group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400">Timer</div>
+                                                <div class="text-sm text-gray-500 dark:text-gray-400">Countdown timer for focus, cooking, and workouts</div>
                                             </div>
                                         </a>
                                     </div>
