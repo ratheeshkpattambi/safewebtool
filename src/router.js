@@ -198,6 +198,7 @@ export async function handleRoute(path) {
   const route = resolveAppRoute(path);
   const token = ++navigationToken;
 
+  document.body.classList.remove('timer-app-mode');
   footerManager.restoreOriginalFooter();
   updateActiveNavigation(route.path);
 

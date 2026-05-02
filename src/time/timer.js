@@ -7,6 +7,133 @@ const DEFAULT_DURATION_MS = 60 * 1000;
 const TICK_INTERVAL_MS = 200;
 
 export const template = `
+  <style>
+    .timer-app {
+      min-height: min(82vh, 860px);
+      border-radius: 8px;
+      padding: clamp(16px, 4vw, 30px);
+      color: #ffffff;
+      background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+      border: 1px solid rgba(37, 99, 235, 0.35);
+      display: grid;
+      grid-template-rows: 1fr auto;
+      gap: clamp(14px, 3vh, 24px);
+    }
+
+    .dark .timer-app {
+      color: #f8fafc;
+      background: linear-gradient(180deg, #1d4ed8 0%, #1e3a8a 100%);
+      border-color: rgba(96, 165, 250, 0.28);
+    }
+
+    .timer-display-panel {
+      min-height: 250px;
+      border-radius: 8px;
+      padding: clamp(20px, 5vw, 44px);
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      box-shadow: 0 18px 48px rgba(15, 23, 42, 0.12);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .dark .timer-display-panel {
+      background: rgba(15, 23, 42, 0.62);
+      border-color: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+    }
+
+    #timerDisplay {
+      font-size: clamp(4.2rem, 18vw, 10rem);
+      line-height: 0.9;
+      letter-spacing: 0;
+    }
+
+    .timer-focus-page {
+      max-width: none;
+      padding-top: 12px;
+    }
+
+    .timer-focus-page > div {
+      background: transparent;
+      box-shadow: none;
+      border-radius: 0;
+    }
+
+    .timer-focus-page > div > div:first-child {
+      display: none;
+    }
+
+    .timer-focus-page .tool-content-area {
+      width: 100%;
+    }
+
+    .timer-focus-page > div > div:nth-child(2) {
+      padding: 0;
+    }
+
+    .timer-focus-page #logHeader,
+    .timer-focus-page #logContent {
+      display: none;
+    }
+
+    body.timer-app-mode header,
+    body.timer-app-mode footer {
+      display: none;
+    }
+
+    body.timer-app-mode main {
+      padding-top: 0;
+    }
+
+    .timer-controls {
+      display: grid;
+      gap: 12px;
+    }
+
+    .timer-app .timer-custom label > span {
+      color: rgba(255, 255, 255, 0.92);
+    }
+
+    .timer-presets,
+    .timer-custom {
+      display: grid;
+      gap: 10px;
+    }
+
+    .timer-presets {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .timer-custom {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @media (orientation: landscape) and (max-height: 520px) {
+      .timer-app {
+        min-height: 430px;
+        grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.65fr);
+        grid-template-rows: 1fr;
+        align-items: stretch;
+      }
+
+      .timer-display-panel {
+        min-height: 100%;
+      }
+
+      #timerDisplay {
+        font-size: clamp(3.5rem, 10vw, 6.8rem);
+      }
+
+      .timer-presets,
+      .timer-custom {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  </style>
+
   <div class="tool-container">
     <div id="iosInstallBanner" class="hidden mb-4 rounded-md border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/40 px-4 py-3 text-sm text-blue-900 dark:text-blue-100">
       <div class="flex gap-3 items-start justify-between">
@@ -15,45 +142,49 @@ export const template = `
       </div>
     </div>
 
-    <div class="mx-auto grid max-w-xl gap-5">
-      <div class="w-full min-w-0 overflow-hidden rounded-md border border-slate-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-900 px-3 py-8 sm:px-4 sm:py-12 text-center transition-colors">
-        <span id="timerDisplay" class="block font-mono text-6xl sm:text-8xl font-semibold leading-none text-slate-900 dark:text-slate-50 tabular-nums">01:00</span>
-        <span id="timerStatus" class="mt-4 block text-base font-medium text-slate-500 dark:text-slate-400" aria-live="polite">Tap Start</span>
-        <span class="mt-6 block h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-gray-700" aria-hidden="true">
-          <span id="timerProgress" class="block h-full w-0 rounded-full bg-blue-600 dark:bg-blue-400 transition-[width] duration-200"></span>
-        </span>
+    <div class="timer-app">
+      <div class="timer-display-panel">
+        <div class="w-full min-w-0">
+          <span id="timerDisplay" class="block font-mono font-black text-slate-950 dark:text-white tabular-nums">01:00</span>
+          <span id="timerStatus" class="mt-4 block text-lg font-bold text-slate-600 dark:text-slate-300" aria-live="polite">Tap Start</span>
+          <span class="mx-auto mt-7 block h-3 max-w-xl overflow-hidden rounded-full bg-white/60 dark:bg-slate-950/50" aria-hidden="true">
+            <span id="timerProgress" class="block h-full w-0 rounded-full bg-blue-600 dark:bg-blue-400 transition-[width] duration-200"></span>
+          </span>
+        </div>
       </div>
 
-      <div class="grid grid-cols-4 gap-2" aria-label="Quick timer presets">
-        <button type="button" class="presetBtn rounded-md bg-slate-100 dark:bg-gray-700 px-3 py-3 sm:py-4 text-lg font-semibold text-slate-800 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-gray-600 transition-colors" data-duration="60000">1</button>
-        <button type="button" class="presetBtn rounded-md bg-slate-100 dark:bg-gray-700 px-3 py-3 sm:py-4 text-lg font-semibold text-slate-800 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-gray-600 transition-colors" data-duration="120000">2</button>
-        <button type="button" class="presetBtn rounded-md bg-slate-100 dark:bg-gray-700 px-3 py-3 sm:py-4 text-lg font-semibold text-slate-800 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-gray-600 transition-colors" data-duration="180000">3</button>
-        <button type="button" class="presetBtn rounded-md bg-slate-100 dark:bg-gray-700 px-3 py-3 sm:py-4 text-lg font-semibold text-slate-800 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-gray-600 transition-colors" data-duration="300000">5</button>
-      </div>
+      <div class="timer-controls">
+        <div class="timer-presets" aria-label="Quick timer presets">
+          <button type="button" class="presetBtn rounded-md bg-white/80 dark:bg-white/10 px-3 py-4 text-xl font-black text-slate-900 dark:text-white shadow-sm hover:bg-white dark:hover:bg-white/15 transition-colors" data-duration="60000">1</button>
+          <button type="button" class="presetBtn rounded-md bg-white/80 dark:bg-white/10 px-3 py-4 text-xl font-black text-slate-900 dark:text-white shadow-sm hover:bg-white dark:hover:bg-white/15 transition-colors" data-duration="120000">2</button>
+          <button type="button" class="presetBtn rounded-md bg-white/80 dark:bg-white/10 px-3 py-4 text-xl font-black text-slate-900 dark:text-white shadow-sm hover:bg-white dark:hover:bg-white/15 transition-colors" data-duration="180000">3</button>
+          <button type="button" class="presetBtn rounded-md bg-white/80 dark:bg-white/10 px-3 py-4 text-xl font-black text-slate-900 dark:text-white shadow-sm hover:bg-white dark:hover:bg-white/15 transition-colors" data-duration="300000">5</button>
+        </div>
 
-      <div class="grid grid-cols-2 gap-3">
-        <label class="block">
-          <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Minutes</span>
-          <input id="minutesInput" type="number" min="0" max="999" value="1" inputmode="numeric" class="w-full rounded-md border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-3 text-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <div class="timer-custom">
+          <label class="block">
+            <span class="mb-1 block text-sm font-bold text-slate-700 dark:text-slate-200">Minutes</span>
+            <input id="minutesInput" type="number" min="0" max="999" value="1" inputmode="numeric" class="w-full rounded-md border-0 bg-white/85 dark:bg-slate-950/60 px-4 py-4 text-xl font-bold text-slate-950 dark:text-white shadow-sm focus:outline-none focus:ring-4 focus:ring-sky-400">
+          </label>
+          <label class="block">
+            <span class="mb-1 block text-sm font-bold text-slate-700 dark:text-slate-200">Seconds</span>
+            <input id="secondsInput" type="number" min="0" max="59" value="0" inputmode="numeric" class="w-full rounded-md border-0 bg-white/85 dark:bg-slate-950/60 px-4 py-4 text-xl font-bold text-slate-950 dark:text-white shadow-sm focus:outline-none focus:ring-4 focus:ring-sky-400">
+          </label>
+        </div>
+
+        <div class="grid grid-cols-[1fr_auto] gap-3">
+          <button id="startPauseBtn" type="button" class="rounded-md bg-slate-950 dark:bg-white px-6 py-5 text-xl font-black text-white dark:text-slate-950 shadow-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors">Start</button>
+          <button id="resetBtn" type="button" class="rounded-md bg-white/80 dark:bg-white/10 px-5 py-5 text-base font-black text-slate-800 dark:text-white shadow-sm hover:bg-white dark:hover:bg-white/15 transition-colors">Reset</button>
+        </div>
+
+        <label class="flex items-center justify-between gap-3 rounded-md bg-white/65 dark:bg-white/10 px-4 py-3 text-sm font-bold text-slate-800 dark:text-white shadow-sm">
+          <span>Tick sound</span>
+          <input id="tickToggle" type="checkbox" class="h-6 w-6 accent-blue-600">
         </label>
-        <label class="block">
-          <span class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">Seconds</span>
-          <input id="secondsInput" type="number" min="0" max="59" value="0" inputmode="numeric" class="w-full rounded-md border border-slate-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-3 text-lg text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
-        </label>
       </div>
-
-      <div class="grid grid-cols-[1fr_auto] gap-3">
-        <button id="startPauseBtn" type="button" class="rounded-md bg-blue-600 dark:bg-blue-500 px-5 py-4 text-lg font-semibold text-white hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">Start</button>
-        <button id="resetBtn" type="button" class="rounded-md border border-slate-300 dark:border-gray-600 px-5 py-4 text-base font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-gray-700 transition-colors">Reset</button>
-      </div>
-
-      <label class="flex items-center justify-between gap-3 rounded-md border border-slate-200 dark:border-gray-700 px-4 py-3 text-sm text-slate-700 dark:text-slate-200">
-        <span>Tick sound</span>
-        <input id="tickToggle" type="checkbox" class="h-5 w-5 accent-blue-600">
-      </label>
     </div>
 
-    <div id="logHeader" class="mt-6 bg-slate-100 dark:bg-gray-700 p-2.5 rounded-md cursor-pointer flex justify-between items-center transition-colors">
+    <div id="logHeader" class="mt-4 bg-slate-100 dark:bg-gray-700 p-2.5 rounded-md cursor-pointer flex justify-between items-center transition-colors">
       <span class="font-medium text-slate-700 dark:text-slate-300">Logs</span>
       <span id="logToggle" class="text-slate-500 dark:text-slate-400 transform transition-transform">▼</span>
     </div>
@@ -96,6 +227,7 @@ class TimerTool extends Tool {
     this.lastTickSecond = null;
     this.running = false;
     this.audioContext = null;
+    this.audioUnlocked = false;
     this.wakeLock = null;
   }
 
@@ -117,6 +249,8 @@ class TimerTool extends Tool {
   }
 
   async setup() {
+    document.body.classList.add('timer-app-mode');
+    document.querySelector('.tool-page')?.classList.add('timer-focus-page');
     this.setupInstallBanner();
     this.setupControls();
     this.setInputsFromDuration(this.durationMs);
@@ -129,6 +263,13 @@ class TimerTool extends Tool {
   }
 
   setupControls() {
+    ['pointerdown', 'touchstart'].forEach(eventName => {
+      this.elements.startPauseBtn?.addEventListener(eventName, () => {
+        if (this.elements.tickToggle.checked) {
+          this.prepareAudio({ unlock: true });
+        }
+      }, { passive: true });
+    });
     this.elements.startPauseBtn?.addEventListener('click', () => this.toggleTimer());
     this.elements.resetBtn?.addEventListener('click', () => this.resetTimer());
     [this.elements.minutesInput, this.elements.secondsInput].forEach(input => {
@@ -136,7 +277,7 @@ class TimerTool extends Tool {
       input?.addEventListener('change', () => this.normalizeInputs());
     });
     this.elements.tickToggle?.addEventListener('change', () => {
-      if (this.elements.tickToggle.checked) this.prepareAudio();
+      if (this.elements.tickToggle.checked) this.prepareAudio({ unlock: true });
       window.localStorage.setItem(TICK_KEY, String(this.elements.tickToggle.checked));
     });
 
@@ -231,7 +372,7 @@ class TimerTool extends Tool {
       return;
     }
 
-    await this.prepareAudio();
+    await this.prepareAudio({ unlock: true });
     this.running = true;
     this.lastTickSecond = Math.ceil(this.remainingMs / 1000);
     this.deadline = Date.now() + this.remainingMs;
@@ -242,6 +383,7 @@ class TimerTool extends Tool {
     this.intervalId = window.setInterval(() => this.tick(), TICK_INTERVAL_MS);
     await this.requestWakeLock();
     this.tick();
+    this.playStartCue();
     this.log('Timer started', 'info');
   }
 
@@ -317,7 +459,7 @@ class TimerTool extends Tool {
     this.elements.timerProgress.style.width = `${clampNumber(progress, 0, 1) * 100}%`;
   }
 
-  async prepareAudio() {
+  async prepareAudio(options = {}) {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextClass) return;
     if (!this.audioContext) {
@@ -326,14 +468,18 @@ class TimerTool extends Tool {
     if (this.audioContext.state === 'suspended') {
       await this.audioContext.resume().catch(() => {});
     }
+    if (options.unlock && !this.audioUnlocked && this.audioContext.state === 'running') {
+      this.audioUnlocked = true;
+      this.playTone(880, 0, 0.025, 0.01);
+    }
   }
 
-  playTone(frequency, startOffset = 0, duration = 0.05, volume = 0.12) {
-    if (!this.audioContext) return;
+  playTone(frequency, startOffset = 0, duration = 0.05, volume = 0.12, type = 'square') {
+    if (!this.audioContext || this.audioContext.state !== 'running') return;
     const now = this.audioContext.currentTime + startOffset;
     const oscillator = this.audioContext.createOscillator();
     const gain = this.audioContext.createGain();
-    oscillator.type = 'sine';
+    oscillator.type = type;
     oscillator.frequency.setValueAtTime(frequency, now);
     gain.gain.setValueAtTime(0.0001, now);
     gain.gain.exponentialRampToValueAtTime(volume, now + 0.01);
@@ -343,12 +489,17 @@ class TimerTool extends Tool {
     oscillator.stop(now + duration + 0.02);
   }
 
+  playStartCue() {
+    if (!this.elements.tickToggle.checked) return;
+    this.playTone(980, 0, 0.07, 0.16);
+  }
+
   playTickCue() {
     if (!this.elements.tickToggle.checked || !this.audioContext) return;
     const currentSecond = Math.ceil(this.remainingMs / 1000);
     if (currentSecond === this.lastTickSecond || currentSecond <= 0) return;
     this.lastTickSecond = currentSecond;
-    this.playTone(660, 0, 0.035, 0.08);
+    this.playTone(960, 0, 0.055, 0.18);
   }
 
   playFinishCue() {
@@ -356,8 +507,8 @@ class TimerTool extends Tool {
       navigator.vibrate([200, 100, 200]);
     }
     if (!this.audioContext) return;
-    this.playTone(880, 0, 0.16, 0.16);
-    this.playTone(1046, 0.22, 0.18, 0.16);
+    this.playTone(880, 0, 0.16, 0.2);
+    this.playTone(1046, 0.22, 0.18, 0.2);
   }
 
   async requestWakeLock() {
