@@ -141,16 +141,15 @@ export const template = `
       .timer-app {
         min-height: calc(100svh - 8px);
         height: calc(100svh - 8px);
-        padding: 10px;
-        gap: 10px;
-        grid-template-columns: minmax(0, 1fr) minmax(206px, 0.32fr);
-        grid-template-rows: 1fr;
+        padding: 8px;
+        gap: 8px;
+        grid-template-rows: minmax(0, 1fr) auto;
         align-items: stretch;
       }
 
       .timer-display-panel {
         min-height: 0;
-        padding: 12px;
+        padding: 10px 14px;
       }
 
       #iosInstallBanner {
@@ -170,21 +169,31 @@ export const template = `
       }
 
       #timerDisplay {
-        font-size: clamp(5rem, 15vw, 8.4rem);
+        font-size: clamp(5.2rem, 17vw, 8.8rem);
+        line-height: 0.82;
       }
 
       #timerStatus {
-        margin-top: 8px;
+        margin-top: 6px;
         font-size: 0.95rem;
       }
 
       .timer-display-panel [aria-hidden="true"] {
-        margin-top: 12px;
+        margin-top: 10px;
       }
 
-      .timer-presets,
+      .timer-controls {
+        grid-template-columns: repeat(4, minmax(52px, 1fr)) minmax(144px, 1.35fr) auto;
+        align-items: stretch;
+        gap: 8px;
+      }
+
+      .timer-presets {
+        display: contents;
+      }
+
       .timer-custom {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        display: none;
       }
 
       .timer-presets {
@@ -192,33 +201,22 @@ export const template = `
       }
 
       .presetBtn {
-        padding-top: 10px;
-        padding-bottom: 10px;
-        font-size: 1rem;
-      }
-
-      .timer-custom {
-        gap: 8px;
-      }
-
-      .timer-custom label > span {
-        font-size: 0.75rem;
-      }
-
-      .timer-custom input {
-        padding: 10px 12px;
-        font-size: 1rem;
+        padding: 10px 8px;
+        font-size: 1.05rem;
       }
 
       #startPauseBtn {
-        padding-top: 14px;
-        padding-bottom: 14px;
+        padding: 10px 18px;
         font-size: 1.1rem;
       }
 
       .timer-sound-control {
-        padding-top: 9px;
-        padding-bottom: 9px;
+        justify-content: center;
+        padding: 8px 10px;
+      }
+
+      .timer-sound-control span {
+        display: none;
       }
     }
   </style>
