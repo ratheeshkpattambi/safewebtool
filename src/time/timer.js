@@ -11,15 +11,16 @@ const FINISH_VOLUME = 0.92;
 export const template = `
   <style>
     .timer-app {
-      min-height: min(82vh, 860px);
+      min-height: min(82svh, 860px);
       border-radius: 8px;
       padding: clamp(16px, 4vw, 30px);
       color: #ffffff;
       background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
       border: 1px solid rgba(37, 99, 235, 0.35);
       display: grid;
-      grid-template-rows: 1fr auto;
+      grid-template-rows: minmax(0, 1fr) auto;
       gap: clamp(14px, 3vh, 24px);
+      overflow: hidden;
     }
 
     .dark .timer-app {
@@ -29,9 +30,9 @@ export const template = `
     }
 
     .timer-display-panel {
-      min-height: 250px;
+      min-height: 0;
       border-radius: 8px;
-      padding: clamp(20px, 5vw, 44px);
+      padding: clamp(18px, 5vw, 44px);
       background: rgba(255, 255, 255, 0.72);
       border: 1px solid rgba(255, 255, 255, 0.72);
       box-shadow: 0 18px 48px rgba(15, 23, 42, 0.12);
@@ -48,14 +49,14 @@ export const template = `
     }
 
     #timerDisplay {
-      font-size: clamp(4.2rem, 18vw, 10rem);
+      font-size: clamp(4.8rem, 21vw, 11rem);
       line-height: 0.9;
       letter-spacing: 0;
     }
 
     .timer-focus-page {
       max-width: none;
-      padding-top: 12px;
+      padding: 8px;
     }
 
     .timer-focus-page > div {
@@ -70,6 +71,7 @@ export const template = `
 
     .timer-focus-page .tool-content-area {
       width: 100%;
+      min-height: calc(100svh - 16px);
     }
 
     .timer-focus-page > div > div:nth-child(2) {
@@ -90,9 +92,14 @@ export const template = `
       padding-top: 0;
     }
 
+    body.timer-app-mode {
+      overflow-x: hidden;
+    }
+
     .timer-controls {
       display: grid;
       gap: 12px;
+      min-width: 0;
     }
 
     .timer-app .timer-custom label > span {
@@ -115,23 +122,86 @@ export const template = `
 
     @media (orientation: landscape) and (max-height: 520px) {
       .timer-app {
-        min-height: 430px;
-        grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.65fr);
+        min-height: calc(100svh - 8px);
+        height: calc(100svh - 8px);
+        padding: 10px;
+        gap: 10px;
+        grid-template-columns: minmax(0, 1fr) minmax(206px, 0.32fr);
         grid-template-rows: 1fr;
         align-items: stretch;
       }
 
       .timer-display-panel {
-        min-height: 100%;
+        min-height: 0;
+        padding: 12px;
+      }
+
+      #iosInstallBanner {
+        display: none !important;
+      }
+
+      .timer-focus-page {
+        padding: 4px;
+      }
+
+      .timer-focus-page .tool-content-area {
+        min-height: calc(100svh - 8px);
+      }
+
+      body.timer-app-mode {
+        overflow: hidden;
       }
 
       #timerDisplay {
-        font-size: clamp(3.5rem, 10vw, 6.8rem);
+        font-size: clamp(5rem, 15vw, 8.4rem);
+      }
+
+      #timerStatus {
+        margin-top: 8px;
+        font-size: 0.95rem;
+      }
+
+      .timer-display-panel [aria-hidden="true"] {
+        margin-top: 12px;
       }
 
       .timer-presets,
       .timer-custom {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .timer-presets {
+        gap: 8px;
+      }
+
+      .presetBtn {
+        padding-top: 10px;
+        padding-bottom: 10px;
+        font-size: 1rem;
+      }
+
+      .timer-custom {
+        gap: 8px;
+      }
+
+      .timer-custom label > span {
+        font-size: 0.75rem;
+      }
+
+      .timer-custom input {
+        padding: 10px 12px;
+        font-size: 1rem;
+      }
+
+      #startPauseBtn {
+        padding-top: 14px;
+        padding-bottom: 14px;
+        font-size: 1.1rem;
+      }
+
+      .timer-controls label:last-child {
+        padding-top: 9px;
+        padding-bottom: 9px;
       }
     }
   </style>
@@ -174,10 +244,7 @@ export const template = `
           </label>
         </div>
 
-        <div class="grid grid-cols-[1fr_auto] gap-3">
-          <button id="startPauseBtn" type="button" class="rounded-md bg-slate-950 dark:bg-white px-6 py-5 text-xl font-black text-white dark:text-slate-950 shadow-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors">Start</button>
-          <button id="resetBtn" type="button" class="rounded-md bg-white/80 dark:bg-white/10 px-5 py-5 text-base font-black text-slate-800 dark:text-white shadow-sm hover:bg-white dark:hover:bg-white/15 transition-colors">Reset</button>
-        </div>
+        <button id="startPauseBtn" type="button" class="rounded-md bg-slate-950 dark:bg-white px-6 py-5 text-xl font-black text-white dark:text-slate-950 shadow-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors">Start</button>
 
         <label class="flex items-center justify-between gap-3 rounded-md bg-white/65 dark:bg-white/10 px-4 py-3 text-sm font-bold text-slate-800 dark:text-white shadow-sm">
           <span>Tick sound</span>
@@ -288,7 +355,6 @@ class TimerTool extends Tool {
       minutesInput: 'minutesInput',
       secondsInput: 'secondsInput',
       startPauseBtn: 'startPauseBtn',
-      resetBtn: 'resetBtn',
       tickToggle: 'tickToggle',
       logHeader: 'logHeader',
       logContent: 'logContent'
@@ -318,7 +384,6 @@ class TimerTool extends Tool {
       }, { passive: true });
     });
     this.elements.startPauseBtn?.addEventListener('click', () => this.toggleTimer());
-    this.elements.resetBtn?.addEventListener('click', () => this.resetTimer());
     [this.elements.minutesInput, this.elements.secondsInput].forEach(input => {
       input?.addEventListener('input', () => this.syncFromInputs());
       input?.addEventListener('change', () => this.normalizeInputs());
@@ -404,7 +469,7 @@ class TimerTool extends Tool {
 
   toggleTimer() {
     if (this.running) {
-      this.pauseTimer();
+      this.stopAndResetTimer();
       return;
     }
     this.startTimer();
@@ -423,7 +488,7 @@ class TimerTool extends Tool {
     this.running = true;
     this.lastTickSecond = Math.ceil(this.remainingMs / 1000);
     this.deadline = Date.now() + this.remainingMs;
-    this.elements.startPauseBtn.textContent = 'Pause';
+    this.elements.startPauseBtn.textContent = 'Stop';
     this.elements.timerStatus.textContent = 'Running';
     this.setInputsDisabled(true);
     this.stopInterval();
@@ -434,21 +499,9 @@ class TimerTool extends Tool {
     this.log('Timer started', 'info');
   }
 
-  pauseTimer() {
-    this.running = false;
-    this.stopInterval();
-    this.remainingMs = Math.max(0, this.deadline - Date.now());
-    this.elements.startPauseBtn.textContent = 'Start';
-    this.elements.timerStatus.textContent = 'Paused';
-    this.setInputsDisabled(false);
-    this.updateDisplay();
-    this.releaseWakeLock();
-  }
-
-  resetTimer() {
+  stopAndResetTimer() {
     this.stopInterval();
     this.running = false;
-    this.durationMs = this.getInputDurationMs() || DEFAULT_DURATION_MS;
     this.remainingMs = this.durationMs;
     this.lastTickSecond = null;
     this.setInputsFromDuration(this.durationMs);
@@ -458,6 +511,7 @@ class TimerTool extends Tool {
     this.storeDuration();
     this.updateDisplay();
     this.releaseWakeLock();
+    this.log('Timer stopped', 'info');
   }
 
   tick() {

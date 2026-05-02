@@ -8,7 +8,7 @@ test.describe('Timer tool', () => {
     await expect(page.locator('#tickToggle')).toBeChecked();
   });
 
-  test('supports phone presets, custom time, and start pause flow', async ({ page }) => {
+  test('supports phone presets, custom time, and start stop flow', async ({ page }) => {
     await page.goto('/time/timer');
     await expect(page.locator('.tool-container[data-tool-ready="true"]')).toBeVisible();
 
@@ -25,20 +25,23 @@ test.describe('Timer tool', () => {
     await page.locator('#startPauseBtn').scrollIntoViewIfNeeded();
     await page.locator('#startPauseBtn').click({ force: true });
     await expect(page.locator('#timerStatus')).toHaveText('Running');
+    await expect(page.locator('#startPauseBtn')).toHaveText('Stop');
     await expect(page.locator('#minutesInput')).toBeDisabled();
 
     await page.locator('#startPauseBtn').click({ force: true });
-    await expect(page.locator('#timerStatus')).toHaveText('Paused');
+    await expect(page.locator('#timerStatus')).toHaveText('Tap Start');
+    await expect(page.locator('#timerDisplay')).toHaveText('00:45');
     await expect(page.locator('#minutesInput')).toBeEnabled();
   });
 
-  test('resets to the selected duration without requiring permissions', async ({ page }) => {
+  test('keeps reset behavior in the single stop button', async ({ page }) => {
     await page.goto('/time/timer');
     await expect(page.locator('.tool-container[data-tool-ready="true"]')).toBeVisible();
 
     await page.getByRole('button', { name: '2', exact: true }).click();
-    await page.locator('#resetBtn').scrollIntoViewIfNeeded();
-    await page.locator('#resetBtn').click({ force: true });
+    await page.locator('#startPauseBtn').click({ force: true });
+    await expect(page.locator('#timerStatus')).toHaveText('Running');
+    await page.locator('#startPauseBtn').click({ force: true });
     await expect(page.locator('#timerDisplay')).toHaveText('02:00');
     await expect(page.locator('#timerStatus')).toHaveText('Tap Start');
   });
