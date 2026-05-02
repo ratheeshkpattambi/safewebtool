@@ -5,6 +5,7 @@ const DURATION_KEY = 'safewebtool.timer.durationMs';
 const TICK_KEY = 'safewebtool.timer.tickEnabled';
 const DEFAULT_DURATION_MS = 60 * 1000;
 const TICK_INTERVAL_MS = 200;
+const SOUND_INTERVAL_MS = 1000;
 const TICK_VOLUME = 0.78;
 const FINISH_VOLUME = 0.92;
 
@@ -352,7 +353,8 @@ class TimerTool extends Tool {
     this.remainingMs = this.durationMs;
     this.deadline = 0;
     this.intervalId = null;
-    this.lastTickSecond = null;
+    this.soundTimeoutId = null;
+    this.nextSoundAt = 0;
     this.running = false;
     this.audioContext = null;
     this.audioUnlocked = false;
@@ -406,7 +408,12 @@ class TimerTool extends Tool {
       input?.addEventListener('change', () => this.normalizeInputs());
     });
     this.elements.tickToggle?.addEventListener('change', () => {
-      if (this.elements.tickToggle.checked) this.prepareAudio({ unlock: true });
+      if (this.elements.tickToggle.checked) {
+        this.prepareAudio({ unlock: true });
+        if (this.running) this.startSoundSchedule();
+      } else {
+        this.stopSoundSchedule();
+      }
       window.localStorage.setItem(TICK_KEY, String(this.elements.tickToggle.checked));
     });
 
@@ -471,10 +478,10 @@ class TimerTool extends Tool {
   applyPreset(durationMs) {
     if (!Number.isFinite(durationMs) || durationMs <= 0) return;
     this.stopInterval();
+    this.stopSoundSchedule();
     this.running = false;
     this.durationMs = durationMs;
     this.remainingMs = durationMs;
-    this.lastTickSecond = null;
     this.lastSoundSecond = null;
     this.setInputsFromDuration(durationMs);
     this.setInputsDisabled(false);
@@ -504,7 +511,6 @@ class TimerTool extends Tool {
 
     await this.prepareAudio({ unlock: true });
     this.running = true;
-    this.lastTickSecond = Math.ceil(this.remainingMs / 1000);
     this.lastSoundSecond = null;
     this.deadline = Date.now() + this.remainingMs;
     this.elements.startPauseBtn.textContent = 'Stop';
@@ -512,6 +518,7 @@ class TimerTool extends Tool {
     this.setInputsDisabled(true);
     this.stopInterval();
     this.intervalId = window.setInterval(() => this.tick(), TICK_INTERVAL_MS);
+    this.startSoundSchedule();
     await this.requestWakeLock();
     this.tick();
     this.log('Timer started', 'info');
@@ -519,9 +526,9 @@ class TimerTool extends Tool {
 
   stopAndResetTimer() {
     this.stopInterval();
+    this.stopSoundSchedule();
     this.running = false;
     this.remainingMs = this.durationMs;
-    this.lastTickSecond = null;
     this.lastSoundSecond = null;
     this.setInputsFromDuration(this.durationMs);
     this.elements.startPauseBtn.textContent = 'Start';
@@ -535,7 +542,6 @@ class TimerTool extends Tool {
 
   tick() {
     this.remainingMs = Math.max(0, this.deadline - Date.now());
-    this.playTickCue();
     this.updateDisplay();
 
     if (this.remainingMs > 0) return;
@@ -545,6 +551,7 @@ class TimerTool extends Tool {
 
   finishTimer() {
     this.stopInterval();
+    this.stopSoundSchedule();
     this.running = false;
     this.remainingMs = 0;
     this.lastSoundSecond = null;
@@ -562,6 +569,48 @@ class TimerTool extends Tool {
       window.clearInterval(this.intervalId);
       this.intervalId = null;
     }
+  }
+
+  stopSoundSchedule() {
+    if (this.soundTimeoutId) {
+      window.clearTimeout(this.soundTimeoutId);
+      this.soundTimeoutId = null;
+    }
+    this.nextSoundAt = 0;
+  }
+
+  startSoundSchedule() {
+    this.stopSoundSchedule();
+    if (!this.elements.tickToggle.checked || this.remainingMs <= SOUND_INTERVAL_MS) return;
+    this.nextSoundAt = Date.now() + this.getMsUntilNextSecondBoundary();
+    this.scheduleNextSoundTick();
+  }
+
+  getMsUntilNextSecondBoundary() {
+    const remaining = Math.max(0, this.deadline - Date.now());
+    const untilBoundary = remaining % SOUND_INTERVAL_MS;
+    return untilBoundary === 0 ? SOUND_INTERVAL_MS : untilBoundary;
+  }
+
+  scheduleNextSoundTick() {
+    if (!this.running || !this.nextSoundAt) return;
+    const delay = Math.max(0, this.nextSoundAt - Date.now());
+    this.soundTimeoutId = window.setTimeout(() => this.handleScheduledSoundTick(), delay);
+  }
+
+  handleScheduledSoundTick() {
+    this.soundTimeoutId = null;
+    if (!this.running || !this.elements.tickToggle.checked) return;
+
+    const remaining = Math.max(0, this.deadline - Date.now());
+    if (remaining <= 0) return;
+
+    this.playSingleTick(Math.ceil(remaining / 1000));
+    this.nextSoundAt += SOUND_INTERVAL_MS;
+    if (this.nextSoundAt <= Date.now()) {
+      this.nextSoundAt = Date.now() + this.getMsUntilNextSecondBoundary();
+    }
+    this.scheduleNextSoundTick();
   }
 
   setInputsDisabled(disabled) {
@@ -658,14 +707,6 @@ class TimerTool extends Tool {
     oscillator.connect(gain).connect(this.audioContext.destination);
     oscillator.start(now);
     oscillator.stop(now + duration + 0.02);
-  }
-
-  playTickCue() {
-    if (!this.elements.tickToggle.checked) return;
-    const currentSecond = Math.ceil(this.remainingMs / 1000);
-    if (currentSecond === this.lastTickSecond || currentSecond <= 0) return;
-    this.lastTickSecond = currentSecond;
-    this.playSingleTick(currentSecond);
   }
 
   async playSingleTick(currentSecond) {
