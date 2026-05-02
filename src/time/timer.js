@@ -5,6 +5,8 @@ const DURATION_KEY = 'safewebtool.timer.durationMs';
 const TICK_KEY = 'safewebtool.timer.tickEnabled';
 const DEFAULT_DURATION_MS = 60 * 1000;
 const TICK_INTERVAL_MS = 200;
+const TICK_VOLUME = 0.82;
+const FINISH_VOLUME = 0.92;
 
 export const template = `
   <style>
@@ -208,6 +210,49 @@ function clampNumber(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }
 
+function createToneDataUrl(frequency = 960, durationMs = 72, volume = 0.7) {
+  const sampleRate = 22050;
+  const sampleCount = Math.floor(sampleRate * (durationMs / 1000));
+  const bytesPerSample = 2;
+  const dataSize = sampleCount * bytesPerSample;
+  const buffer = new ArrayBuffer(44 + dataSize);
+  const view = new DataView(buffer);
+  const writeString = (offset, value) => {
+    for (let i = 0; i < value.length; i += 1) {
+      view.setUint8(offset + i, value.charCodeAt(i));
+    }
+  };
+
+  writeString(0, 'RIFF');
+  view.setUint32(4, 36 + dataSize, true);
+  writeString(8, 'WAVE');
+  writeString(12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * bytesPerSample, true);
+  view.setUint16(32, bytesPerSample, true);
+  view.setUint16(34, 8 * bytesPerSample, true);
+  writeString(36, 'data');
+  view.setUint32(40, dataSize, true);
+
+  for (let i = 0; i < sampleCount; i += 1) {
+    const progress = i / sampleCount;
+    const envelope = Math.sin(Math.PI * progress);
+    const wave = Math.sin((2 * Math.PI * frequency * i) / sampleRate);
+    view.setInt16(44 + (i * bytesPerSample), wave * envelope * volume * 32767, true);
+  }
+
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  for (let i = 0; i < bytes.byteLength; i += 1) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+
+  return `data:audio/wav;base64,${window.btoa(binary)}`;
+}
+
 class TimerTool extends Tool {
   constructor() {
     super({
@@ -228,6 +273,8 @@ class TimerTool extends Tool {
     this.running = false;
     this.audioContext = null;
     this.audioUnlocked = false;
+    this.tickAudio = null;
+    this.finishAudio = null;
     this.wakeLock = null;
   }
 
@@ -266,7 +313,7 @@ class TimerTool extends Tool {
     ['pointerdown', 'touchstart'].forEach(eventName => {
       this.elements.startPauseBtn?.addEventListener(eventName, () => {
         if (this.elements.tickToggle.checked) {
-          this.prepareAudio({ unlock: true });
+          this.prepareAudio({ unlock: true, audible: eventName === 'pointerdown' });
         }
       }, { passive: true });
     });
@@ -277,7 +324,7 @@ class TimerTool extends Tool {
       input?.addEventListener('change', () => this.normalizeInputs());
     });
     this.elements.tickToggle?.addEventListener('change', () => {
-      if (this.elements.tickToggle.checked) this.prepareAudio({ unlock: true });
+      if (this.elements.tickToggle.checked) this.prepareAudio({ unlock: true, audible: true });
       window.localStorage.setItem(TICK_KEY, String(this.elements.tickToggle.checked));
     });
 
@@ -372,7 +419,7 @@ class TimerTool extends Tool {
       return;
     }
 
-    await this.prepareAudio({ unlock: true });
+    await this.prepareAudio({ unlock: true, audible: true });
     this.running = true;
     this.lastTickSecond = Math.ceil(this.remainingMs / 1000);
     this.deadline = Date.now() + this.remainingMs;
@@ -460,17 +507,52 @@ class TimerTool extends Tool {
   }
 
   async prepareAudio(options = {}) {
+    this.ensureAudioElements();
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContextClass) return;
-    if (!this.audioContext) {
+    if (AudioContextClass && !this.audioContext) {
       this.audioContext = new AudioContextClass();
     }
-    if (this.audioContext.state === 'suspended') {
+    if (this.audioContext?.state === 'suspended') {
       await this.audioContext.resume().catch(() => {});
     }
-    if (options.unlock && !this.audioUnlocked && this.audioContext.state === 'running') {
+    if (!options.unlock || this.audioUnlocked) return;
+
+    if (this.audioContext?.state === 'running') {
       this.audioUnlocked = true;
-      this.playTone(880, 0, 0.025, 0.01);
+      if (options.audible) {
+        this.playTone(980, 0, 0.06, 0.22);
+      }
+    }
+
+    if (this.tickAudio) {
+      const played = await this.playAudioElement(this.tickAudio, options.audible ? TICK_VOLUME : 0.01);
+      this.audioUnlocked = this.audioUnlocked || played;
+      if (!played && options.audible) {
+        this.log('Tap Start again if your browser blocked timer sound.', 'warning');
+      }
+    }
+  }
+
+  ensureAudioElements() {
+    if (this.tickAudio || typeof Audio === 'undefined') return;
+    this.tickAudio = new Audio(createToneDataUrl(1040, 76, 0.86));
+    this.finishAudio = new Audio(createToneDataUrl(760, 220, 0.82));
+    [this.tickAudio, this.finishAudio].forEach(audio => {
+      audio.preload = 'auto';
+      audio.playsInline = true;
+    });
+  }
+
+  async playAudioElement(audio, volume = TICK_VOLUME) {
+    if (!audio) return false;
+    try {
+      const sound = audio.cloneNode(true);
+      sound.volume = clampNumber(volume, 0, 1);
+      sound.playsInline = true;
+      await sound.play();
+      return true;
+    } catch (error) {
+      return false;
     }
   }
 
@@ -491,24 +573,26 @@ class TimerTool extends Tool {
 
   playStartCue() {
     if (!this.elements.tickToggle.checked) return;
-    this.playTone(980, 0, 0.07, 0.16);
+    this.playTone(980, 0, 0.08, 0.24);
+    this.playAudioElement(this.tickAudio, TICK_VOLUME);
   }
 
   playTickCue() {
-    if (!this.elements.tickToggle.checked || !this.audioContext) return;
+    if (!this.elements.tickToggle.checked) return;
     const currentSecond = Math.ceil(this.remainingMs / 1000);
     if (currentSecond === this.lastTickSecond || currentSecond <= 0) return;
     this.lastTickSecond = currentSecond;
-    this.playTone(960, 0, 0.055, 0.18);
+    this.playTone(960, 0, 0.07, 0.24);
+    this.playAudioElement(this.tickAudio, TICK_VOLUME);
   }
 
   playFinishCue() {
     if ('vibrate' in navigator) {
       navigator.vibrate([200, 100, 200]);
     }
-    if (!this.audioContext) return;
-    this.playTone(880, 0, 0.16, 0.2);
-    this.playTone(1046, 0.22, 0.18, 0.2);
+    this.playTone(880, 0, 0.16, 0.24);
+    this.playTone(1046, 0.22, 0.18, 0.24);
+    this.playAudioElement(this.finishAudio, FINISH_VOLUME);
   }
 
   async requestWakeLock() {
