@@ -5,7 +5,7 @@ const DURATION_KEY = 'safewebtool.timer.durationMs';
 const TICK_KEY = 'safewebtool.timer.tickEnabled';
 const DEFAULT_DURATION_MS = 60 * 1000;
 const TICK_INTERVAL_MS = 200;
-const TICK_VOLUME = 0.82;
+const TICK_VOLUME = 0.78;
 const FINISH_VOLUME = 0.92;
 
 export const template = `
@@ -52,6 +52,18 @@ export const template = `
       font-size: clamp(4.8rem, 21vw, 11rem);
       line-height: 0.9;
       letter-spacing: 0;
+      color: #0f172a;
+      background: linear-gradient(135deg, #020617 0%, #1d4ed8 48%, #2563eb 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 10px 26px rgba(15, 23, 42, 0.12);
+    }
+
+    .dark #timerDisplay {
+      background: linear-gradient(135deg, #ffffff 0%, #bfdbfe 48%, #60a5fa 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
     }
 
     .timer-focus-page {
@@ -104,6 +116,10 @@ export const template = `
 
     .timer-app .timer-custom label > span {
       color: rgba(255, 255, 255, 0.92);
+    }
+
+    .timer-sound-control {
+      opacity: 0.82;
     }
 
     .timer-presets,
@@ -199,7 +215,7 @@ export const template = `
         font-size: 1.1rem;
       }
 
-      .timer-controls label:last-child {
+      .timer-sound-control {
         padding-top: 9px;
         padding-bottom: 9px;
       }
@@ -217,7 +233,7 @@ export const template = `
     <div class="timer-app">
       <div class="timer-display-panel">
         <div class="w-full min-w-0">
-          <span id="timerDisplay" class="block font-mono font-black text-slate-950 dark:text-white tabular-nums">01:00</span>
+          <span id="timerDisplay" class="block font-mono font-black tabular-nums">01:00</span>
           <span id="timerStatus" class="mt-4 block text-lg font-bold text-slate-600 dark:text-slate-300" aria-live="polite">Tap Start</span>
           <span class="mx-auto mt-7 block h-3 max-w-xl overflow-hidden rounded-full bg-white/60 dark:bg-slate-950/50" aria-hidden="true">
             <span id="timerProgress" class="block h-full w-0 rounded-full bg-blue-600 dark:bg-blue-400 transition-[width] duration-200"></span>
@@ -246,9 +262,9 @@ export const template = `
 
         <button id="startPauseBtn" type="button" class="rounded-md bg-slate-950 dark:bg-white px-6 py-5 text-xl font-black text-white dark:text-slate-950 shadow-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors">Start</button>
 
-        <label class="flex items-center justify-between gap-3 rounded-md bg-white/65 dark:bg-white/10 px-4 py-3 text-sm font-bold text-slate-800 dark:text-white shadow-sm">
-          <span>Tick sound</span>
-          <input id="tickToggle" type="checkbox" class="h-6 w-6 accent-blue-600">
+        <label class="timer-sound-control flex items-center justify-between gap-3 rounded-md bg-white/35 dark:bg-white/10 px-3 py-2 text-xs font-bold text-slate-900 dark:text-white">
+          <span>Tick</span>
+          <input id="tickToggle" type="checkbox" class="h-4 w-4 accent-blue-600">
         </label>
       </div>
     </div>
@@ -342,6 +358,7 @@ class TimerTool extends Tool {
     this.audioUnlocked = false;
     this.tickAudio = null;
     this.finishAudio = null;
+    this.lastSoundSecond = null;
     this.wakeLock = null;
   }
 
@@ -379,7 +396,7 @@ class TimerTool extends Tool {
     ['pointerdown', 'touchstart'].forEach(eventName => {
       this.elements.startPauseBtn?.addEventListener(eventName, () => {
         if (this.elements.tickToggle.checked) {
-          this.prepareAudio({ unlock: true, audible: eventName === 'pointerdown' });
+          this.prepareAudio({ unlock: true });
         }
       }, { passive: true });
     });
@@ -389,7 +406,7 @@ class TimerTool extends Tool {
       input?.addEventListener('change', () => this.normalizeInputs());
     });
     this.elements.tickToggle?.addEventListener('change', () => {
-      if (this.elements.tickToggle.checked) this.prepareAudio({ unlock: true, audible: true });
+      if (this.elements.tickToggle.checked) this.prepareAudio({ unlock: true });
       window.localStorage.setItem(TICK_KEY, String(this.elements.tickToggle.checked));
     });
 
@@ -458,6 +475,7 @@ class TimerTool extends Tool {
     this.durationMs = durationMs;
     this.remainingMs = durationMs;
     this.lastTickSecond = null;
+    this.lastSoundSecond = null;
     this.setInputsFromDuration(durationMs);
     this.setInputsDisabled(false);
     this.elements.startPauseBtn.textContent = 'Start';
@@ -484,9 +502,10 @@ class TimerTool extends Tool {
       return;
     }
 
-    await this.prepareAudio({ unlock: true, audible: true });
+    await this.prepareAudio({ unlock: true });
     this.running = true;
     this.lastTickSecond = Math.ceil(this.remainingMs / 1000);
+    this.lastSoundSecond = null;
     this.deadline = Date.now() + this.remainingMs;
     this.elements.startPauseBtn.textContent = 'Stop';
     this.elements.timerStatus.textContent = 'Running';
@@ -495,7 +514,6 @@ class TimerTool extends Tool {
     this.intervalId = window.setInterval(() => this.tick(), TICK_INTERVAL_MS);
     await this.requestWakeLock();
     this.tick();
-    this.playStartCue();
     this.log('Timer started', 'info');
   }
 
@@ -504,6 +522,7 @@ class TimerTool extends Tool {
     this.running = false;
     this.remainingMs = this.durationMs;
     this.lastTickSecond = null;
+    this.lastSoundSecond = null;
     this.setInputsFromDuration(this.durationMs);
     this.elements.startPauseBtn.textContent = 'Start';
     this.elements.timerStatus.textContent = 'Tap Start';
@@ -528,6 +547,7 @@ class TimerTool extends Tool {
     this.stopInterval();
     this.running = false;
     this.remainingMs = 0;
+    this.lastSoundSecond = null;
     this.elements.startPauseBtn.textContent = 'Start';
     this.elements.timerStatus.textContent = 'Done';
     this.setInputsDisabled(false);
@@ -573,15 +593,12 @@ class TimerTool extends Tool {
 
     if (this.audioContext?.state === 'running') {
       this.audioUnlocked = true;
-      if (options.audible) {
-        this.playTone(980, 0, 0.06, 0.22);
-      }
     }
 
     if (this.tickAudio) {
-      const played = await this.playAudioElement(this.tickAudio, options.audible ? TICK_VOLUME : 0.01);
+      const played = await this.unlockAudioElement(this.tickAudio);
       this.audioUnlocked = this.audioUnlocked || played;
-      if (!played && options.audible) {
+      if (!played) {
         this.log('Tap Start again if your browser blocked timer sound.', 'warning');
       }
     }
@@ -597,13 +614,31 @@ class TimerTool extends Tool {
     });
   }
 
+  async unlockAudioElement(audio) {
+    if (!audio) return false;
+    try {
+      audio.muted = true;
+      audio.currentTime = 0;
+      await audio.play();
+      audio.pause();
+      audio.currentTime = 0;
+      audio.muted = false;
+      return true;
+    } catch (error) {
+      audio.muted = false;
+      return false;
+    }
+  }
+
   async playAudioElement(audio, volume = TICK_VOLUME) {
     if (!audio) return false;
     try {
-      const sound = audio.cloneNode(true);
-      sound.volume = clampNumber(volume, 0, 1);
-      sound.playsInline = true;
-      await sound.play();
+      audio.pause();
+      audio.currentTime = 0;
+      audio.volume = clampNumber(volume, 0, 1);
+      audio.muted = false;
+      audio.playsInline = true;
+      await audio.play();
       return true;
     } catch (error) {
       return false;
@@ -625,28 +660,35 @@ class TimerTool extends Tool {
     oscillator.stop(now + duration + 0.02);
   }
 
-  playStartCue() {
-    if (!this.elements.tickToggle.checked) return;
-    this.playTone(980, 0, 0.08, 0.24);
-    this.playAudioElement(this.tickAudio, TICK_VOLUME);
-  }
-
   playTickCue() {
     if (!this.elements.tickToggle.checked) return;
     const currentSecond = Math.ceil(this.remainingMs / 1000);
     if (currentSecond === this.lastTickSecond || currentSecond <= 0) return;
     this.lastTickSecond = currentSecond;
-    this.playTone(960, 0, 0.07, 0.24);
-    this.playAudioElement(this.tickAudio, TICK_VOLUME);
+    this.playSingleTick(currentSecond);
+  }
+
+  async playSingleTick(currentSecond) {
+    if (this.lastSoundSecond === currentSecond) return;
+    this.lastSoundSecond = currentSecond;
+    const played = await this.playAudioElement(this.tickAudio, TICK_VOLUME);
+    if (!played) {
+      this.playTone(960, 0, 0.07, 0.24);
+    }
   }
 
   playFinishCue() {
     if ('vibrate' in navigator) {
       navigator.vibrate([200, 100, 200]);
     }
-    this.playTone(880, 0, 0.16, 0.24);
-    this.playTone(1046, 0.22, 0.18, 0.24);
-    this.playAudioElement(this.finishAudio, FINISH_VOLUME);
+    this.playSingleFinishCue();
+  }
+
+  async playSingleFinishCue() {
+    const played = await this.playAudioElement(this.finishAudio, FINISH_VOLUME);
+    if (!played) {
+      this.playTone(880, 0, 0.18, 0.24);
+    }
   }
 
   async requestWakeLock() {
