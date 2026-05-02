@@ -19,7 +19,7 @@ export const template = `
       background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
       border: 1px solid rgba(37, 99, 235, 0.35);
       display: grid;
-      grid-template-rows: minmax(0, 1fr) auto;
+      grid-template-rows: auto minmax(0, 1fr) auto;
       gap: clamp(14px, 3vh, 24px);
       overflow: hidden;
     }
@@ -47,6 +47,63 @@ export const template = `
       background: rgba(15, 23, 42, 0.62);
       border-color: rgba(255, 255, 255, 0.1);
       box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+    }
+
+    .timer-context-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 0;
+      color: rgba(255, 255, 255, 0.92);
+    }
+
+    .timer-back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 36px;
+      border-radius: 8px;
+      padding: 0 12px;
+      background: rgba(255, 255, 255, 0.16);
+      color: #ffffff;
+      font-size: 0.9rem;
+      font-weight: 800;
+      transition: background-color 160ms ease;
+    }
+
+    .timer-back-link:hover {
+      background: rgba(255, 255, 255, 0.24);
+    }
+
+    .timer-context-title {
+      min-width: 0;
+      text-align: right;
+    }
+
+    .timer-context-title strong,
+    .timer-context-title span {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .timer-context-title strong {
+      font-size: 0.95rem;
+      font-weight: 900;
+      color: #ffffff;
+    }
+
+    .timer-context-title span {
+      font-size: 0.78rem;
+      font-weight: 700;
+      opacity: 0.78;
+    }
+
+    #timerApp[data-state="running"] .timer-display-panel {
+      border-color: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 22px 60px rgba(15, 23, 42, 0.18);
     }
 
     #timerDisplay {
@@ -143,7 +200,7 @@ export const template = `
         height: calc(100svh - 8px);
         padding: 8px;
         gap: 8px;
-        grid-template-rows: minmax(0, 1fr) auto;
+        grid-template-rows: auto minmax(0, 1fr) auto;
         align-items: stretch;
       }
 
@@ -169,8 +226,26 @@ export const template = `
       }
 
       #timerDisplay {
-        font-size: clamp(5.2rem, 17vw, 8.8rem);
+        font-size: clamp(4.9rem, 16vw, 8.3rem);
         line-height: 0.82;
+      }
+
+      .timer-context-bar {
+        min-height: 32px;
+      }
+
+      .timer-back-link {
+        min-height: 32px;
+        padding: 0 10px;
+        font-size: 0.82rem;
+      }
+
+      .timer-context-title strong {
+        font-size: 0.86rem;
+      }
+
+      .timer-context-title span {
+        display: none;
       }
 
       #timerStatus {
@@ -229,7 +304,18 @@ export const template = `
       </div>
     </div>
 
-    <div class="timer-app">
+    <div id="timerApp" class="timer-app" data-state="idle">
+      <div class="timer-context-bar" aria-label="Timer navigation">
+        <a href="/time" class="timer-back-link" aria-label="Back to Time tools">
+          <span aria-hidden="true">&larr;</span>
+          <span>Time tools</span>
+        </a>
+        <div class="timer-context-title">
+          <strong>Timer</strong>
+          <span>Safe Web Tool</span>
+        </div>
+      </div>
+
       <div class="timer-display-panel">
         <div class="w-full min-w-0">
           <span id="timerDisplay" class="block font-mono font-black tabular-nums">01:00</span>
@@ -366,6 +452,7 @@ class TimerTool extends Tool {
     return {
       iosInstallBanner: 'iosInstallBanner',
       dismissInstallBanner: 'dismissInstallBanner',
+      timerApp: 'timerApp',
       timerDisplay: 'timerDisplay',
       timerStatus: 'timerStatus',
       timerProgress: 'timerProgress',
@@ -485,6 +572,7 @@ class TimerTool extends Tool {
     this.setInputsDisabled(false);
     this.elements.startPauseBtn.textContent = 'Start';
     this.elements.timerStatus.textContent = 'Tap Start';
+    this.setTimerState('idle');
     this.storeDuration();
     this.updateDisplay();
     this.releaseWakeLock();
@@ -513,6 +601,7 @@ class TimerTool extends Tool {
     this.deadline = Date.now() + this.remainingMs;
     this.elements.startPauseBtn.textContent = 'Stop';
     this.elements.timerStatus.textContent = 'Running';
+    this.setTimerState('running');
     this.setInputsDisabled(true);
     this.stopInterval();
     this.intervalId = window.setInterval(() => this.tick(), TICK_INTERVAL_MS);
@@ -531,6 +620,7 @@ class TimerTool extends Tool {
     this.setInputsFromDuration(this.durationMs);
     this.elements.startPauseBtn.textContent = 'Start';
     this.elements.timerStatus.textContent = 'Tap Start';
+    this.setTimerState('idle');
     this.setInputsDisabled(false);
     this.storeDuration();
     this.updateDisplay();
@@ -555,6 +645,7 @@ class TimerTool extends Tool {
     this.lastSoundSecond = null;
     this.elements.startPauseBtn.textContent = 'Start';
     this.elements.timerStatus.textContent = 'Done';
+    this.setTimerState('done');
     this.setInputsDisabled(false);
     this.updateDisplay();
     this.releaseWakeLock();
@@ -614,6 +705,10 @@ class TimerTool extends Tool {
   setInputsDisabled(disabled) {
     this.elements.minutesInput.disabled = disabled;
     this.elements.secondsInput.disabled = disabled;
+  }
+
+  setTimerState(state) {
+    this.elements.timerApp?.setAttribute('data-state', state);
   }
 
   updateDisplay() {
