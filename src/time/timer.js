@@ -378,6 +378,13 @@ function clampNumber(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }
 
+function formatDuration(ms) {
+  const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
 function createToneDataUrl(frequency = 960, durationMs = 72, volume = 0.7) {
   const sampleRate = 22050;
   const sampleCount = Math.floor(sampleRate * (durationMs / 1000));
@@ -712,14 +719,19 @@ class TimerTool extends Tool {
   }
 
   updateDisplay() {
-    const totalSeconds = Math.ceil(this.remainingMs / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
+    const elapsedMs = clampNumber(this.durationMs - this.remainingMs, 0, this.durationMs);
+    const progress = this.durationMs > 0 ? elapsedMs / this.durationMs : 0;
 
-    this.elements.timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-
-    const progress = this.durationMs > 0 ? 1 - (this.remainingMs / this.durationMs) : 0;
+    this.elements.timerDisplay.textContent = formatDuration(elapsedMs);
     this.elements.timerProgress.style.width = `${clampNumber(progress, 0, 1) * 100}%`;
+
+    if (this.running) {
+      this.elements.timerStatus.textContent = `${formatDuration(this.remainingMs)} left of ${formatDuration(this.durationMs)}`;
+    } else if (this.remainingMs <= 0) {
+      this.elements.timerStatus.textContent = `Done at ${formatDuration(this.durationMs)}`;
+    } else {
+      this.elements.timerStatus.textContent = `Target ${formatDuration(this.durationMs)}`;
+    }
   }
 
   async prepareAudio(options = {}) {
