@@ -211,6 +211,21 @@ export const tools = {
     ],
     useCase: 'Perfect for removing unwanted edges, extracting a subject, or preparing exact image dimensions for websites and social media.'
   },
+  'image/passport-photo': {
+    id: 'passport-photo',
+    category: 'image',
+    name: 'Passport Photo Maker',
+    description: 'Free private passport, visa, and ID photo maker. Crop to official sizes, export digital JPEGs, and create print sheets locally in your browser with no uploads.',
+    icon: '🪪',
+    keywords: ['passport photo maker', 'visa photo', 'id photo', '2x2 photo', '35x45 photo', 'passport photo online', 'private photo tool'],
+    howToUse: [
+      'Choose a passport, visa, or ID photo preset',
+      'Upload a portrait photo from your device',
+      'Drag and zoom the image until the head fits the guide',
+      'Download a digital photo or a 4x6 print sheet'
+    ],
+    useCase: 'Make correctly sized passport, visa, and ID photos without uploading your face photo to a server or paying for a simple digital export.'
+  },
   'text/editor': {
     id: 'editor',
     category: 'text',
