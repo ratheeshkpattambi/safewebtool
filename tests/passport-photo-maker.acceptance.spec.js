@@ -76,10 +76,10 @@ test.describe('Passport Photo Maker acceptance criteria', () => {
   });
 
   test('loads from the short share URL', async ({ page }) => {
-    await page.goto('/passport');
+    await page.goto('/image/passport');
     await expect(page.locator('.tool-page')).toBeVisible();
     await expect(page.locator('.tool-page h1').first()).toContainText(/Passport Photo/i);
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://safewebtool.com/passport');
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://safewebtool.com/image/passport');
   });
 
   test('defaults to a US passport 2x2 preset and exposes official-size guidance', async ({ page }) => {

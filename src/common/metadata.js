@@ -15,7 +15,7 @@ export const siteInfo = {
 const baseUrl = 'https://safewebtool.com';
 
 export const routeAliases = {
-  '/passport': 'image/passport-photo'
+  '/image/passport': 'image/passport-photo'
 };
 
 const canonicalRouteByToolPath = Object.fromEntries(
