@@ -182,7 +182,7 @@ export const template = `
     }
   </style>
 
-  <div class="tool-container passport-workspace">
+  <div class="tool-container passport-workspace" data-agent-scope="passport-photo">
     <section class="passport-hero">
       <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
@@ -198,8 +198,8 @@ export const template = `
       <div class="mb-2 text-4xl">🪪</div>
       <p class="text-lg font-bold text-slate-800 dark:text-slate-100">Drop a portrait photo here</p>
       <p class="mb-3 text-sm text-slate-500 dark:text-slate-400">JPG, PNG, WebP. Works with camera photos on mobile.</p>
-      <input id="fileInput" type="file" class="hidden" accept="image/*" capture="user">
-      <button type="button" class="file-select-btn rounded-md bg-blue-600 px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-blue-700">Choose Photo</button>
+      <input id="fileInput" type="file" class="hidden" accept="image/*" capture="user" data-agent-input="photo">
+      <button type="button" class="file-select-btn rounded-md bg-blue-600 px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-blue-700" data-agent-action="choose-photo">Choose Photo</button>
     </div>
 
     <div class="passport-grid">
@@ -236,7 +236,7 @@ export const template = `
         <div class="grid gap-4">
           <label class="block">
             <span class="mb-1 block text-sm font-bold text-slate-700 dark:text-slate-200">Photo type</span>
-            <select id="presetSelect" data-testid="preset-select" class="w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-base text-slate-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-slate-100">
+            <select id="presetSelect" data-testid="preset-select" data-agent-input="preset" class="w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-base text-slate-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-slate-100">
               ${Object.entries(PRESETS).map(([id, preset]) => `<option value="${id}">${preset.label}</option>`).join('')}
             </select>
           </label>
@@ -252,13 +252,13 @@ export const template = `
             </div>
             <div class="passport-status-item">
               <strong class="block text-slate-900 dark:text-white">Face assist</strong>
-              <span id="faceStatus" data-testid="face-status">Ready after upload</span>
+              <span id="faceStatus" data-testid="face-status" data-agent-status="face-assist">Ready after upload</span>
             </div>
           </div>
 
           <div id="presetNote" class="rounded-md bg-slate-50 p-3 text-sm leading-relaxed text-slate-600 dark:bg-slate-900/50 dark:text-slate-300"></div>
 
-          <button id="autoAlignBtn" type="button" class="rounded-md border border-blue-200 bg-blue-50 px-5 py-3 text-base font-black text-blue-700 transition-colors hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-200 dark:hover:bg-blue-950" disabled>Auto Align Face</button>
+          <button id="autoAlignBtn" type="button" class="rounded-md border border-blue-200 bg-blue-50 px-5 py-3 text-base font-black text-blue-700 transition-colors hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-200 dark:hover:bg-blue-950" data-agent-action="auto-align-face" disabled>Auto Align Face</button>
           <p class="-mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">Uses MediaPipe in your browser. The model downloads once; your photo is not uploaded.</p>
 
           <div class="rounded-md border border-slate-200 p-3 dark:border-gray-600">
@@ -279,8 +279,8 @@ export const template = `
           </label>
 
           <div class="grid gap-2">
-            <button id="downloadDigitalBtn" type="button" class="rounded-md bg-blue-600 px-5 py-3 text-base font-black text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50" disabled>Download Digital Photo</button>
-            <button id="downloadPrintBtn" type="button" class="rounded-md bg-slate-950 px-5 py-3 text-base font-black text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100" disabled>Download Print Sheet</button>
+            <button id="downloadDigitalBtn" type="button" class="rounded-md bg-blue-600 px-5 py-3 text-base font-black text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50" data-agent-action="download-digital" disabled>Download Digital Photo</button>
+            <button id="downloadPrintBtn" type="button" class="rounded-md bg-slate-950 px-5 py-3 text-base font-black text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100" data-agent-action="download-print-sheet" disabled>Download Print Sheet</button>
           </div>
 
           <div id="downloadContainer" class="grid gap-2 text-sm"></div>

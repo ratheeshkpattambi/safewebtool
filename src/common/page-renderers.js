@@ -27,7 +27,7 @@ export function renderCategoryPage(categoryConfig, categoryId) {
 
 export function renderToolPageShell(toolInfo) {
   return `
-    <div class="tool-page container mx-auto px-4 py-8" itemscope itemtype="https://schema.org/SoftwareApplication">
+    <div class="tool-page container mx-auto px-4 py-8" itemscope itemtype="https://schema.org/SoftwareApplication" data-agent-page="tool" data-agent-tool="${toolInfo.category}/${toolInfo.id}" data-agent-category="${toolInfo.category}">
       <meta itemprop="applicationCategory" content="WebApplication">
       <meta itemprop="offers" itemscope itemtype="https://schema.org/Offer">
       <meta itemprop="price" content="0">
@@ -38,7 +38,7 @@ export function renderToolPageShell(toolInfo) {
           <p class="text-slate-600 dark:text-slate-300 leading-relaxed mt-2">${toolInfo.description || ''}</p>
         </div>
         <div class="px-4 py-5 sm:p-6">
-          <div class="tool-content-area"></div>
+          <div class="tool-content-area" data-agent-region="tool-ui"></div>
         </div>
       </div>
     </div>
@@ -60,4 +60,3 @@ export function createFFmpegLoadingElement() {
   `;
   return loadingEl;
 }
-

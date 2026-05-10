@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "1.0",
+  "id": "timer",
+  "path": "time/timer",
+  "canonicalPath": "/time/timer",
+  "canonicalUrl": "https://safewebtool.com/time/timer",
+  "category": {
+    "id": "time",
+    "name": "Time Tools"
+  },
+  "name": "Timer",
+  "description": "A clean browser-local countdown timer with big phone-friendly controls, 1, 2, 3, and 5 minute presets, custom time, tick sound, and iOS home screen support.",
+  "privacy": {
+    "mode": "browser-local",
+    "fileUpload": false,
+    "note": "SafeWebTool tools are designed to process user data locally in the browser."
+  },
+  "inputs": [
+    {
+      "name": "settings",
+      "type": "form"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "browser result",
+      "formats": [
+        "text/html"
+      ]
+    }
+  ],
+  "selectors": {
+    "ready": ".tool-container[data-tool-ready=\"true\"]",
+    "process": "#processBtn",
+    "log": "#logContent"
+  },
+  "howToUse": [
+    "Choose a 1, 2, 3, or 5 minute preset, or set a custom duration",
+    "Tap Start to begin the countdown and Pause to stop temporarily",
+    "Turn on Tick sound if you want an audible second-by-second cue",
+    "On iOS Safari, use Share then Add to Home Screen for standalone mode"
+  ],
+  "useCase": "Use as a lightweight browser-local timer for focus sessions, cooking, workouts, breaks, or reminders without installing a native app.",
+  "keywords": [
+    "timer",
+    "countdown timer",
+    "focus timer",
+    "workout timer",
+    "cooking timer",
+    "ios home screen timer",
+    "pwa timer"
+  ],
+  "externalDownloads": [],
+  "exampleTasks": [
+    "Open https://safewebtool.com/time/timer and use Timer."
+  ],
+  "automationNotes": [
+    "Prefer the stable selectors in this contract over visible text where possible.",
+    "Wait for selectors.ready before interacting with the tool UI.",
+    "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+  ]
+}

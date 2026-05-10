@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "1.0",
+  "id": "image2text",
+  "path": "ml/image2text",
+  "canonicalPath": "/ml/image2text",
+  "canonicalUrl": "https://safewebtool.com/ml/image2text",
+  "category": {
+    "id": "ml",
+    "name": "ML Tools"
+  },
+  "name": "Image to Text (OCR)",
+  "description": "Convert images to text with 100% privacy. This offline OCR tool runs entirely in your browser using Tesseract.js. No uploads, no servers — just fast and secure image-to-text conversion.",
+  "privacy": {
+    "mode": "browser-local",
+    "fileUpload": false,
+    "note": "SafeWebTool tools are designed to process user data locally in the browser."
+  },
+  "inputs": [
+    {
+      "name": "file or text",
+      "type": "mixed",
+      "accept": "*/*"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "download or browser result",
+      "formats": [
+        "varies by tool"
+      ]
+    }
+  ],
+  "selectors": {
+    "ready": ".tool-container[data-tool-ready=\"true\"]",
+    "fileInput": "#fileInput",
+    "process": "#processBtn",
+    "log": "#logContent"
+  },
+  "howToUse": [
+    "Upload an image containing text",
+    "Select the language of the text in the image",
+    "Click \"Extract Text\" to start OCR processing",
+    "View the extracted text with confidence score",
+    "Copy or download the text as needed"
+  ],
+  "useCase": "Extract text from screenshots, scanned documents, photos of signs, receipts, or any image containing text. Perfect for digitizing printed content while maintaining complete privacy.",
+  "keywords": [
+    "ocr",
+    "image to text",
+    "text recognition",
+    "optical character recognition",
+    "tesseract",
+    "ml",
+    "ai",
+    "local ml"
+  ],
+  "externalDownloads": [],
+  "exampleTasks": [
+    "Open https://safewebtool.com/ml/image2text and use Image to Text (OCR)."
+  ],
+  "automationNotes": [
+    "Prefer the stable selectors in this contract over visible text where possible.",
+    "Wait for selectors.ready before interacting with the tool UI.",
+    "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+  ]
+}

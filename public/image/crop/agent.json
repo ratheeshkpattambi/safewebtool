@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "1.0",
+  "id": "crop",
+  "path": "image/crop",
+  "canonicalPath": "/image/crop",
+  "canonicalUrl": "https://safewebtool.com/image/crop",
+  "category": {
+    "id": "image",
+    "name": "Image Tools"
+  },
+  "name": "Image Crop",
+  "description": "Free online image crop tool. Crop images by exact pixel dimensions and position, all processed locally in your browser.",
+  "privacy": {
+    "mode": "browser-local",
+    "fileUpload": false,
+    "note": "SafeWebTool tools are designed to process user data locally in the browser."
+  },
+  "inputs": [
+    {
+      "name": "file",
+      "type": "file",
+      "accept": "image/*"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "download or browser result",
+      "formats": [
+        "varies by tool"
+      ]
+    }
+  ],
+  "selectors": {
+    "ready": ".tool-container[data-tool-ready=\"true\"]",
+    "fileInput": "#fileInput",
+    "process": "#processBtn",
+    "log": "#logContent"
+  },
+  "howToUse": [
+    "Open the page and start with the built-in sample image or upload your own image",
+    "Set X/Y position and crop width/height in pixels",
+    "Use quick actions to center or reset the crop area",
+    "Click \"Crop Image\" to process and download the result"
+  ],
+  "useCase": "Perfect for removing unwanted edges, extracting a subject, or preparing exact image dimensions for websites and social media.",
+  "keywords": [
+    "image crop",
+    "crop image",
+    "trim image",
+    "image editor",
+    "crop by pixels"
+  ],
+  "externalDownloads": [],
+  "exampleTasks": [
+    "Open https://safewebtool.com/image/crop and use Image Crop."
+  ],
+  "automationNotes": [
+    "Prefer the stable selectors in this contract over visible text where possible.",
+    "Wait for selectors.ready before interacting with the tool UI.",
+    "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "1.0",
+  "id": "face_detect",
+  "path": "ml/face_detect",
+  "canonicalPath": "/ml/face_detect",
+  "canonicalUrl": "https://safewebtool.com/ml/face_detect",
+  "category": {
+    "id": "ml",
+    "name": "ML Tools"
+  },
+  "name": "Face Detection",
+  "description": "Detect faces in images using a MediaPipe model, all in your browser. No uploads, no server-side processing.",
+  "privacy": {
+    "mode": "browser-local",
+    "fileUpload": false,
+    "note": "SafeWebTool tools are designed to process user data locally in the browser."
+  },
+  "inputs": [
+    {
+      "name": "file or text",
+      "type": "mixed",
+      "accept": "*/*"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "download or browser result",
+      "formats": [
+        "varies by tool"
+      ]
+    }
+  ],
+  "selectors": {
+    "ready": ".tool-container[data-tool-ready=\"true\"]",
+    "fileInput": "#fileInput",
+    "process": "#processBtn",
+    "log": "#logContent"
+  },
+  "howToUse": [
+    "Upload an image with faces.",
+    "The tool will highlight detected faces on the image.",
+    "No data leaves your browser."
+  ],
+  "useCase": "Quickly detect faces in images for privacy, fun, or research.",
+  "keywords": [
+    "face detection",
+    "mediapipe",
+    "ml",
+    "ai",
+    "local ml"
+  ],
+  "externalDownloads": [],
+  "exampleTasks": [
+    "Open https://safewebtool.com/ml/face_detect and use Face Detection."
+  ],
+  "automationNotes": [
+    "Prefer the stable selectors in this contract over visible text where possible.",
+    "Wait for selectors.ready before interacting with the tool UI.",
+    "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "1.0",
+  "id": "remove-extra-spaces",
+  "path": "text/remove-extra-spaces",
+  "canonicalPath": "/text/remove-extra-spaces",
+  "canonicalUrl": "https://safewebtool.com/text/remove-extra-spaces",
+  "category": {
+    "id": "text",
+    "name": "Text Tools"
+  },
+  "name": "Remove Extra Spaces",
+  "description": "Remove extra spaces from text, such as leading/trailing spaces and multiple spaces between words. All processing happens in your browser.",
+  "privacy": {
+    "mode": "browser-local",
+    "fileUpload": false,
+    "note": "SafeWebTool tools are designed to process user data locally in the browser."
+  },
+  "inputs": [
+    {
+      "name": "text",
+      "type": "text"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "browser result",
+      "formats": [
+        "text/html"
+      ]
+    }
+  ],
+  "selectors": {
+    "ready": ".tool-container[data-tool-ready=\"true\"]",
+    "process": "#processBtn",
+    "log": "#logContent"
+  },
+  "howToUse": [
+    "Paste your text into the input area",
+    "Click the \"Remove Extra Spaces\" button",
+    "The cleaned text will appear in the output area",
+    "Copy the cleaned text to your clipboard"
+  ],
+  "useCase": "Clean up text by removing unnecessary spaces, making it ready for use in documents, code, or other applications.",
+  "keywords": [
+    "text tools",
+    "remove spaces",
+    "trim text",
+    "text cleanup"
+  ],
+  "externalDownloads": [],
+  "exampleTasks": [
+    "Open https://safewebtool.com/text/remove-extra-spaces and use Remove Extra Spaces."
+  ],
+  "automationNotes": [
+    "Prefer the stable selectors in this contract over visible text where possible.",
+    "Wait for selectors.ready before interacting with the tool UI.",
+    "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "1.0",
+  "id": "timezone-converter",
+  "path": "time/timezone-converter",
+  "canonicalPath": "/time/timezone-converter",
+  "canonicalUrl": "https://safewebtool.com/time/timezone-converter",
+  "category": {
+    "id": "time",
+    "name": "Time Tools"
+  },
+  "name": "Time Zone Converter",
+  "description": "Convert one date and time into several common team time zones with DST-aware browser-local calculations.",
+  "privacy": {
+    "mode": "browser-local",
+    "fileUpload": false,
+    "note": "SafeWebTool tools are designed to process user data locally in the browser."
+  },
+  "inputs": [
+    {
+      "name": "settings",
+      "type": "form"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "browser result",
+      "formats": [
+        "text/html"
+      ]
+    }
+  ],
+  "selectors": {
+    "ready": ".tool-container[data-tool-ready=\"true\"]",
+    "process": "#processBtn",
+    "log": "#logContent"
+  },
+  "howToUse": [
+    "Enter the source date and time",
+    "Choose the source time zone",
+    "Select the time zones you want to compare",
+    "Click Convert Time to see every local time side by side"
+  ],
+  "useCase": "Quickly check release windows, demo times, interview slots, and cross-region handoffs before sending an invite.",
+  "keywords": [
+    "time zone converter",
+    "timezone converter",
+    "world time converter",
+    "DST aware time conversion"
+  ],
+  "externalDownloads": [],
+  "exampleTasks": [
+    "Open https://safewebtool.com/time/timezone-converter and use Time Zone Converter."
+  ],
+  "automationNotes": [
+    "Prefer the stable selectors in this contract over visible text where possible.",
+    "Wait for selectors.ready before interacting with the tool UI.",
+    "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+  ]
+}

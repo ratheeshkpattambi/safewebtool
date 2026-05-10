@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "1.0",
+  "id": "gif",
+  "path": "video/gif",
+  "canonicalPath": "/video/gif",
+  "canonicalUrl": "https://safewebtool.com/video/gif",
+  "category": {
+    "id": "video",
+    "name": "Video Tools"
+  },
+  "name": "Video to GIF",
+  "description": "Free online video to GIF converter. Create optimized GIF animations from video files with custom settings, all processed locally in your browser.",
+  "privacy": {
+    "mode": "browser-local",
+    "fileUpload": false,
+    "note": "SafeWebTool tools are designed to process user data locally in the browser."
+  },
+  "inputs": [
+    {
+      "name": "file",
+      "type": "file",
+      "accept": "video/*"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "download or browser result",
+      "formats": [
+        "varies by tool"
+      ]
+    }
+  ],
+  "selectors": {
+    "ready": ".tool-container[data-tool-ready=\"true\"]",
+    "fileInput": "#fileInput",
+    "process": "#processBtn",
+    "log": "#logContent"
+  },
+  "howToUse": [
+    "Upload your video file",
+    "Set the dimensions, framerate, and duration for your GIF",
+    "Adjust quality settings to balance file size and appearance",
+    "Click \"Create GIF\" to convert",
+    "Download your new GIF animation"
+  ],
+  "useCase": "Perfect for creating shareable animations for social media, forums, or messaging apps from your videos.",
+  "keywords": [
+    "video to gif",
+    "gif maker",
+    "convert video to gif",
+    "create gif from video"
+  ],
+  "externalDownloads": [],
+  "exampleTasks": [
+    "Open https://safewebtool.com/video/gif and use Video to GIF."
+  ],
+  "automationNotes": [
+    "Prefer the stable selectors in this contract over visible text where possible.",
+    "Wait for selectors.ready before interacting with the tool UI.",
+    "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "1.0",
+  "id": "compressor",
+  "path": "image/compressor",
+  "canonicalPath": "/image/compressor",
+  "canonicalUrl": "https://safewebtool.com/image/compressor",
+  "category": {
+    "id": "image",
+    "name": "Image Tools"
+  },
+  "name": "Image Compressor",
+  "description": "Free online image compressor. Reduce file size of JPEG, PNG, and WebP images while maintaining visual quality, all processed locally in your browser.",
+  "privacy": {
+    "mode": "browser-local",
+    "fileUpload": false,
+    "note": "SafeWebTool tools are designed to process user data locally in the browser."
+  },
+  "inputs": [
+    {
+      "name": "file",
+      "type": "file",
+      "accept": "image/*"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "download or browser result",
+      "formats": [
+        "varies by tool"
+      ]
+    }
+  ],
+  "selectors": {
+    "ready": ".tool-container[data-tool-ready=\"true\"]",
+    "fileInput": "#fileInput",
+    "process": "#processBtn",
+    "log": "#logContent"
+  },
+  "howToUse": [
+    "Upload your image by dropping it or selecting from your device",
+    "Adjust compression quality using the slider (lower = smaller file)",
+    "Choose output format (auto, JPEG, PNG, or WebP)",
+    "Optionally preserve EXIF metadata",
+    "Click \"Compress Image\" to process",
+    "Compare before and after results",
+    "Download the compressed image"
+  ],
+  "useCase": "Perfect for reducing image file sizes for web use, email attachments, or storage optimization while maintaining good visual quality.",
+  "keywords": [
+    "image compressor",
+    "compress image",
+    "reduce image size",
+    "optimize images",
+    "image optimization"
+  ],
+  "externalDownloads": [],
+  "exampleTasks": [
+    "Open https://safewebtool.com/image/compressor and use Image Compressor."
+  ],
+  "automationNotes": [
+    "Prefer the stable selectors in this contract over visible text where possible.",
+    "Wait for selectors.ready before interacting with the tool UI.",
+    "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+  ]
+}

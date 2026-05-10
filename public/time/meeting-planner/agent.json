@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "1.0",
+  "id": "meeting-planner",
+  "path": "time/meeting-planner",
+  "canonicalPath": "/time/meeting-planner",
+  "canonicalUrl": "https://safewebtool.com/time/meeting-planner",
+  "category": {
+    "id": "time",
+    "name": "Time Tools"
+  },
+  "name": "Meeting Time Finder",
+  "description": "Find overlapping working hours across time zones for distributed teams. Uses browser Intl time zone data for DST-aware results.",
+  "privacy": {
+    "mode": "browser-local",
+    "fileUpload": false,
+    "note": "SafeWebTool tools are designed to process user data locally in the browser."
+  },
+  "inputs": [
+    {
+      "name": "settings",
+      "type": "form"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "browser result",
+      "formats": [
+        "text/html"
+      ]
+    }
+  ],
+  "selectors": {
+    "ready": ".tool-container[data-tool-ready=\"true\"]",
+    "process": "#processBtn",
+    "log": "#logContent"
+  },
+  "howToUse": [
+    "Pick the meeting date, duration, and normal working hours",
+    "Choose up to three participant time zones",
+    "Click Find Meeting Times to see overlap-friendly options",
+    "Use the local times shown for each participant when creating the calendar invite"
+  ],
+  "useCase": "Useful for PMs, founders, and remote teams coordinating standups, reviews, interviews, and client calls across regions.",
+  "keywords": [
+    "meeting time finder",
+    "time zone meeting planner",
+    "remote team scheduler",
+    "overlap hours",
+    "distributed teams"
+  ],
+  "externalDownloads": [],
+  "exampleTasks": [
+    "Open https://safewebtool.com/time/meeting-planner and use Meeting Time Finder."
+  ],
+  "automationNotes": [
+    "Prefer the stable selectors in this contract over visible text where possible.",
+    "Wait for selectors.ready before interacting with the tool UI.",
+    "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+  ]
+}

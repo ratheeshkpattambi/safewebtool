@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "1.0",
+  "id": "transcribe",
+  "path": "ml/transcribe",
+  "canonicalPath": "/ml/transcribe",
+  "canonicalUrl": "https://safewebtool.com/ml/transcribe",
+  "category": {
+    "id": "ml",
+    "name": "ML Tools"
+  },
+  "name": "Audio/Video Transcription",
+  "description": "Convert speech to text with 100% privacy using Whisper. This offline transcription tool runs entirely in your browser. Supports audio and video files with automatic audio extraction.",
+  "privacy": {
+    "mode": "browser-local",
+    "fileUpload": false,
+    "note": "SafeWebTool tools are designed to process user data locally in the browser."
+  },
+  "inputs": [
+    {
+      "name": "file or text",
+      "type": "mixed",
+      "accept": "*/*"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "download or browser result",
+      "formats": [
+        "varies by tool"
+      ]
+    }
+  ],
+  "selectors": {
+    "ready": ".tool-container[data-tool-ready=\"true\"]",
+    "fileInput": "#fileInput",
+    "process": "#processBtn",
+    "log": "#logContent"
+  },
+  "howToUse": [
+    "Upload an audio or video file",
+    "Select the Whisper model (Tiny English)",
+    "Click \"Transcribe Audio\" to start processing",
+    "View the transcript with timestamps",
+    "Copy or download in TXT, SRT, or VTT format"
+  ],
+  "useCase": "Transcribe podcasts, meetings, interviews, lectures, or any audio/video content. Perfect for creating captions, notes, or text records while maintaining complete privacy.",
+  "keywords": [
+    "transcription",
+    "speech to text",
+    "whisper",
+    "audio transcription",
+    "video transcription",
+    "asr",
+    "ml",
+    "ai",
+    "local ml"
+  ],
+  "externalDownloads": [],
+  "exampleTasks": [
+    "Open https://safewebtool.com/ml/transcribe and use Audio/Video Transcription."
+  ],
+  "automationNotes": [
+    "Prefer the stable selectors in this contract over visible text where possible.",
+    "Wait for selectors.ready before interacting with the tool UI.",
+    "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+  ]
+}

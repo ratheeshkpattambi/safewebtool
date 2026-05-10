@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "1.0",
+  "id": "json-formatter",
+  "path": "text/json-formatter",
+  "canonicalPath": "/text/json-formatter",
+  "canonicalUrl": "https://safewebtool.com/text/json-formatter",
+  "category": {
+    "id": "text",
+    "name": "Text Tools"
+  },
+  "name": "JSON Formatter & Converter",
+  "description": "Validate, format, minify, and convert JSON to XML, CSV, or YAML. All processing happens in your browser, no uploads required.",
+  "privacy": {
+    "mode": "browser-local",
+    "fileUpload": false,
+    "note": "SafeWebTool tools are designed to process user data locally in the browser."
+  },
+  "inputs": [
+    {
+      "name": "text",
+      "type": "text"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "browser result",
+      "formats": [
+        "text/html"
+      ]
+    }
+  ],
+  "selectors": {
+    "ready": ".tool-container[data-tool-ready=\"true\"]",
+    "process": "#processBtn",
+    "log": "#logContent"
+  },
+  "howToUse": [
+    "Paste your JSON data into the input area or click \"Upload Data\" to load from a file.",
+    "Click \"Validate\" to check if the JSON is well-formed.",
+    "Select tab spacing and click \"Format / Beautify\" for readable JSON.",
+    "Click \"Minify / Compact\" to get a compact version.",
+    "Choose a target format (XML, CSV, YAML) and click \"Convert\".",
+    "Click \"Download\" to save the output."
+  ],
+  "useCase": "Ideal for developers and data analysts to quickly inspect, clean up, or transform JSON data for various applications without server-side processing.",
+  "keywords": [
+    "json formatter",
+    "json validator",
+    "json beautifier",
+    "json minifier",
+    "json to xml",
+    "json to csv",
+    "json to yaml",
+    "text tools",
+    "developer tools"
+  ],
+  "externalDownloads": [],
+  "exampleTasks": [
+    "Open https://safewebtool.com/text/json-formatter and use JSON Formatter & Converter."
+  ],
+  "automationNotes": [
+    "Prefer the stable selectors in this contract over visible text where possible.",
+    "Wait for selectors.ready before interacting with the tool UI.",
+    "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+  ]
+}

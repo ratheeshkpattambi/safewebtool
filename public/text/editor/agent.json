@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "1.0",
+  "id": "editor",
+  "path": "text/editor",
+  "canonicalPath": "/text/editor",
+  "canonicalUrl": "https://safewebtool.com/text/editor",
+  "category": {
+    "id": "text",
+    "name": "Text Tools"
+  },
+  "name": "Text Editor",
+  "description": "Free online text editor for writing and formatting text content. All processing happens locally in your browser.",
+  "privacy": {
+    "mode": "browser-local",
+    "fileUpload": false,
+    "note": "SafeWebTool tools are designed to process user data locally in the browser."
+  },
+  "inputs": [
+    {
+      "name": "text",
+      "type": "text"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "browser result",
+      "formats": [
+        "text/html"
+      ]
+    }
+  ],
+  "selectors": {
+    "ready": ".tool-container[data-tool-ready=\"true\"]",
+    "process": "#processBtn",
+    "log": "#logContent"
+  },
+  "howToUse": [
+    "Type or paste your text in the editor",
+    "Edit and format as needed",
+    "Download your text when complete"
+  ],
+  "useCase": "Use for quickly writing and saving text content without needing to install an app.",
+  "keywords": [
+    "text editor",
+    "online editor",
+    "write text",
+    "edit text"
+  ],
+  "externalDownloads": [],
+  "exampleTasks": [
+    "Open https://safewebtool.com/text/editor and use Text Editor."
+  ],
+  "automationNotes": [
+    "Prefer the stable selectors in this contract over visible text where possible.",
+    "Wait for selectors.ready before interacting with the tool UI.",
+    "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+  ]
+}

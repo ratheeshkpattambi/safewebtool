@@ -1,0 +1,72 @@
+# SafeWebTool
+
+> Privacy-focused browser tools for video, image, text, ML, and time utilities. User files should stay in the browser.
+
+Primary site: https://safewebtool.com/
+Machine-readable tool catalog: https://safewebtool.com/tools.json
+Sitemap: https://safewebtool.com/sitemap.xml
+
+## Agent Policy
+
+- Prefer browser automation for tools that process private files.
+- Do not send user media to a remote service for SafeWebTool processing.
+- Use per-tool agent.json files for stable selectors, inputs, outputs, and privacy notes.
+- MCP, if used, should initially expose read-only discovery resources, not remote private-media processing.
+
+## Tool URLs
+
+- Image Compressor: https://safewebtool.com/image/compressor
+  - Agent contract: https://safewebtool.com/image/compressor/agent.json
+- Image Crop: https://safewebtool.com/image/crop
+  - Agent contract: https://safewebtool.com/image/crop/agent.json
+- Passport Photo Maker: https://safewebtool.com/image/passport
+  - Agent contract: https://safewebtool.com/image/passport/agent.json
+  - Legacy URL: https://safewebtool.com/image/passport-photo
+- Image Resize: https://safewebtool.com/image/resize
+  - Agent contract: https://safewebtool.com/image/resize/agent.json
+- Face Detection: https://safewebtool.com/ml/face_detect
+  - Agent contract: https://safewebtool.com/ml/face_detect/agent.json
+- Image to Text (OCR): https://safewebtool.com/ml/image2text
+  - Agent contract: https://safewebtool.com/ml/image2text/agent.json
+- Audio/Video Transcription: https://safewebtool.com/ml/transcribe
+  - Agent contract: https://safewebtool.com/ml/transcribe/agent.json
+- Text Editor: https://safewebtool.com/text/editor
+  - Agent contract: https://safewebtool.com/text/editor/agent.json
+- JSON Formatter & Converter: https://safewebtool.com/text/json-formatter
+  - Agent contract: https://safewebtool.com/text/json-formatter/agent.json
+- Remove Extra Spaces: https://safewebtool.com/text/remove-extra-spaces
+  - Agent contract: https://safewebtool.com/text/remove-extra-spaces/agent.json
+- YAML Validator: https://safewebtool.com/text/yaml
+  - Agent contract: https://safewebtool.com/text/yaml/agent.json
+- Business Days Calculator: https://safewebtool.com/time/business-days
+  - Agent contract: https://safewebtool.com/time/business-days/agent.json
+- Date Duration Calculator: https://safewebtool.com/time/date-difference
+  - Agent contract: https://safewebtool.com/time/date-difference/agent.json
+- Meeting Time Finder: https://safewebtool.com/time/meeting-planner
+  - Agent contract: https://safewebtool.com/time/meeting-planner/agent.json
+- Timer: https://safewebtool.com/time/timer
+  - Agent contract: https://safewebtool.com/time/timer/agent.json
+- Time Zone Converter: https://safewebtool.com/time/timezone-converter
+  - Agent contract: https://safewebtool.com/time/timezone-converter/agent.json
+- Video to GIF: https://safewebtool.com/video/gif
+  - Agent contract: https://safewebtool.com/video/gif/agent.json
+- Extract Video Metadata: https://safewebtool.com/video/info
+  - Agent contract: https://safewebtool.com/video/info/agent.json
+- Convert to MP4: https://safewebtool.com/video/mp4
+  - Agent contract: https://safewebtool.com/video/mp4/agent.json
+- Video Re-encode: https://safewebtool.com/video/reencode
+  - Agent contract: https://safewebtool.com/video/reencode/agent.json
+- Video Resize: https://safewebtool.com/video/resize
+  - Agent contract: https://safewebtool.com/video/resize/agent.json
+- Video Reverse: https://safewebtool.com/video/reverse
+  - Agent contract: https://safewebtool.com/video/reverse/agent.json
+- Video Trimmer: https://safewebtool.com/video/trim
+  - Agent contract: https://safewebtool.com/video/trim/agent.json
+
+## Categories
+
+- Video Tools: https://safewebtool.com/video
+- Image Tools: https://safewebtool.com/image
+- Text Tools: https://safewebtool.com/text
+- ML Tools: https://safewebtool.com/ml
+- Time Tools: https://safewebtool.com/time

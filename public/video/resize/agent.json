@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "1.0",
+  "id": "resize",
+  "path": "video/resize",
+  "canonicalPath": "/video/resize",
+  "canonicalUrl": "https://safewebtool.com/video/resize",
+  "category": {
+    "id": "video",
+    "name": "Video Tools"
+  },
+  "name": "Video Resize",
+  "description": "Free online video resizer. Change video dimensions and resolution while maintaining quality, all processed locally in your browser.",
+  "privacy": {
+    "mode": "browser-local",
+    "fileUpload": false,
+    "note": "SafeWebTool tools are designed to process user data locally in the browser."
+  },
+  "inputs": [
+    {
+      "name": "file",
+      "type": "file",
+      "accept": "video/*"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "download or browser result",
+      "formats": [
+        "varies by tool"
+      ]
+    }
+  ],
+  "selectors": {
+    "ready": ".tool-container[data-tool-ready=\"true\"]",
+    "fileInput": "#fileInput",
+    "process": "#processBtn",
+    "log": "#logContent"
+  },
+  "howToUse": [
+    "Upload your video by dropping it or selecting from your device",
+    "Set the desired width and height (maintains aspect ratio by default)",
+    "Click \"Resize Video\" to process",
+    "Download the resized video when complete"
+  ],
+  "useCase": "Perfect for reducing video size for sharing on social media or adjusting dimensions for specific platforms.",
+  "keywords": [
+    "video resize",
+    "resize video",
+    "change video resolution",
+    "video dimensions"
+  ],
+  "externalDownloads": [],
+  "exampleTasks": [
+    "Open https://safewebtool.com/video/resize and use Video Resize."
+  ],
+  "automationNotes": [
+    "Prefer the stable selectors in this contract over visible text where possible.",
+    "Wait for selectors.ready before interacting with the tool UI.",
+    "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+  ]
+}

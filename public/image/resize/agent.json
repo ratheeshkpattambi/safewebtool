@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "1.0",
+  "id": "resize",
+  "path": "image/resize",
+  "canonicalPath": "/image/resize",
+  "canonicalUrl": "https://safewebtool.com/image/resize",
+  "category": {
+    "id": "image",
+    "name": "Image Tools"
+  },
+  "name": "Image Resize",
+  "description": "Free online image resizer. Change image dimensions and resolution while maintaining quality, all processed locally in your browser.",
+  "privacy": {
+    "mode": "browser-local",
+    "fileUpload": false,
+    "note": "SafeWebTool tools are designed to process user data locally in the browser."
+  },
+  "inputs": [
+    {
+      "name": "file",
+      "type": "file",
+      "accept": "image/*"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "download or browser result",
+      "formats": [
+        "varies by tool"
+      ]
+    }
+  ],
+  "selectors": {
+    "ready": ".tool-container[data-tool-ready=\"true\"]",
+    "fileInput": "#fileInput",
+    "process": "#processBtn",
+    "log": "#logContent"
+  },
+  "howToUse": [
+    "Upload your image by dropping it or selecting from your device",
+    "Set the desired width and height (maintains aspect ratio by default)",
+    "Click \"Resize Image\" to process",
+    "Download the resized image when complete"
+  ],
+  "useCase": "Perfect for reducing image size for websites, social media, or email attachments.",
+  "keywords": [
+    "image resize",
+    "resize image",
+    "image dimensions",
+    "optimize images"
+  ],
+  "externalDownloads": [],
+  "exampleTasks": [
+    "Open https://safewebtool.com/image/resize and use Image Resize."
+  ],
+  "automationNotes": [
+    "Prefer the stable selectors in this contract over visible text where possible.",
+    "Wait for selectors.ready before interacting with the tool UI.",
+    "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+  ]
+}

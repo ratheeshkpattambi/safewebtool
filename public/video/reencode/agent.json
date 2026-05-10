@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "1.0",
+  "id": "reencode",
+  "path": "video/reencode",
+  "canonicalPath": "/video/reencode",
+  "canonicalUrl": "https://safewebtool.com/video/reencode",
+  "category": {
+    "id": "video",
+    "name": "Video Tools"
+  },
+  "name": "Video Re-encode",
+  "description": "Free online video converter. Convert videos between MP4, WebM, and MOV formats with adjustable quality settings, processed entirely in your browser.",
+  "privacy": {
+    "mode": "browser-local",
+    "fileUpload": false,
+    "note": "SafeWebTool tools are designed to process user data locally in the browser."
+  },
+  "inputs": [
+    {
+      "name": "file",
+      "type": "file",
+      "accept": "video/*"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "download or browser result",
+      "formats": [
+        "varies by tool"
+      ]
+    }
+  ],
+  "selectors": {
+    "ready": ".tool-container[data-tool-ready=\"true\"]",
+    "fileInput": "#fileInput",
+    "process": "#processBtn",
+    "log": "#logContent"
+  },
+  "howToUse": [
+    "Upload your video using the drop area or file selector",
+    "Choose your desired output format (MP4, WebM, or MOV)",
+    "Select quality level and bitrate",
+    "Click \"Re-encode Video\" to start processing",
+    "Download the converted video once complete"
+  ],
+  "useCase": "Use when you need to convert videos to a specific format for compatibility with different devices or platforms.",
+  "keywords": [
+    "video converter",
+    "video format converter",
+    "mp4 converter",
+    "webm converter"
+  ],
+  "externalDownloads": [],
+  "exampleTasks": [
+    "Open https://safewebtool.com/video/reencode and use Video Re-encode."
+  ],
+  "automationNotes": [
+    "Prefer the stable selectors in this contract over visible text where possible.",
+    "Wait for selectors.ready before interacting with the tool UI.",
+    "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+  ]
+}

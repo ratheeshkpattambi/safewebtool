@@ -78,6 +78,7 @@ test.describe('Passport Photo Maker acceptance criteria', () => {
   test('loads from the short share URL', async ({ page }) => {
     await page.goto('/image/passport');
     await expect(page.locator('.tool-page')).toBeVisible();
+    await expect(page.locator('[data-agent-page="tool"][data-agent-tool="image/passport-photo"]')).toBeVisible();
     await expect(page.locator('.tool-page h1').first()).toContainText(/Passport Photo/i);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://safewebtool.com/image/passport');
   });

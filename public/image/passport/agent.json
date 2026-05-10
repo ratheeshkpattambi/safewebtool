@@ -1,0 +1,87 @@
+{
+  "schemaVersion": "1.0",
+  "id": "passport-photo",
+  "path": "image/passport-photo",
+  "canonicalPath": "/image/passport",
+  "canonicalUrl": "https://safewebtool.com/image/passport",
+  "legacyUrl": "https://safewebtool.com/image/passport-photo",
+  "category": {
+    "id": "image",
+    "name": "Image Tools"
+  },
+  "name": "Passport Photo Maker",
+  "description": "Free private passport, visa, and ID photo maker. Auto-align faces in your browser, crop to official sizes, export digital JPEGs, and create print sheets with no uploads.",
+  "privacy": {
+    "mode": "browser-local",
+    "fileUpload": false,
+    "note": "Photos are processed in the browser. MediaPipe face assist may download a model/library, but the user photo is not uploaded."
+  },
+  "inputs": [
+    {
+      "name": "photo",
+      "type": "file",
+      "accept": "image/*"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "digital photo",
+      "formats": [
+        "image/jpeg"
+      ]
+    },
+    {
+      "name": "print sheet",
+      "formats": [
+        "image/jpeg"
+      ]
+    }
+  ],
+  "selectors": {
+    "ready": ".tool-container[data-tool-ready=\"true\"]",
+    "fileInput": "#fileInput",
+    "process": "#processBtn",
+    "log": "#logContent",
+    "preset": "#presetSelect",
+    "faceAssistStatus": "#faceStatus",
+    "autoAlignFace": "#autoAlignBtn",
+    "downloadDigital": "#downloadDigitalBtn",
+    "downloadPrintSheet": "#downloadPrintBtn",
+    "resultContainer": "#downloadContainer"
+  },
+  "howToUse": [
+    "Choose a passport, visa, or ID photo preset",
+    "Upload a portrait photo from your device",
+    "Use browser face assist to auto-align the head, then fine-tune manually",
+    "Download a digital photo or a 4x6 print sheet"
+  ],
+  "useCase": "Make correctly sized passport, visa, and ID photos without uploading your face photo to a server or paying for a simple digital export.",
+  "keywords": [
+    "passport photo maker",
+    "visa photo",
+    "id photo",
+    "2x2 photo",
+    "35x45 photo",
+    "passport photo online",
+    "private photo tool"
+  ],
+  "externalDownloads": [
+    {
+      "purpose": "optional browser face assist",
+      "hosts": [
+        "cdn.jsdelivr.net",
+        "storage.googleapis.com"
+      ]
+    }
+  ],
+  "exampleTasks": [
+    "Create a 600x600 US passport photo from a local portrait image.",
+    "Create a US visa digital JPEG under the target file-size limit.",
+    "Create a 4x6 print sheet for local printing."
+  ],
+  "automationNotes": [
+    "Prefer the stable selectors in this contract over visible text where possible.",
+    "Wait for selectors.ready before interacting with the tool UI.",
+    "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+  ]
+}

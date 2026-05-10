@@ -249,7 +249,53 @@ export const tools = {
       'Use browser face assist to auto-align the head, then fine-tune manually',
       'Download a digital photo or a 4x6 print sheet'
     ],
-    useCase: 'Make correctly sized passport, visa, and ID photos without uploading your face photo to a server or paying for a simple digital export.'
+    useCase: 'Make correctly sized passport, visa, and ID photos without uploading your face photo to a server or paying for a simple digital export.',
+    agent: {
+      canonicalPath: '/image/passport',
+      privacy: {
+        mode: 'browser-local',
+        fileUpload: false,
+        note: 'Photos are processed in the browser. MediaPipe face assist may download a model/library, but the user photo is not uploaded.'
+      },
+      inputs: [
+        {
+          name: 'photo',
+          type: 'file',
+          accept: 'image/*'
+        }
+      ],
+      outputs: [
+        {
+          name: 'digital photo',
+          formats: ['image/jpeg']
+        },
+        {
+          name: 'print sheet',
+          formats: ['image/jpeg']
+        }
+      ],
+      selectors: {
+        ready: '.tool-container[data-tool-ready="true"]',
+        fileInput: '#fileInput',
+        preset: '#presetSelect',
+        faceAssistStatus: '#faceStatus',
+        autoAlignFace: '#autoAlignBtn',
+        downloadDigital: '#downloadDigitalBtn',
+        downloadPrintSheet: '#downloadPrintBtn',
+        resultContainer: '#downloadContainer'
+      },
+      externalDownloads: [
+        {
+          purpose: 'optional browser face assist',
+          hosts: ['cdn.jsdelivr.net', 'storage.googleapis.com']
+        }
+      ],
+      exampleTasks: [
+        'Create a 600x600 US passport photo from a local portrait image.',
+        'Create a US visa digital JPEG under the target file-size limit.',
+        'Create a 4x6 print sheet for local printing.'
+      ]
+    }
   },
   'text/editor': {
     id: 'editor',

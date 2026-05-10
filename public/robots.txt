@@ -3,3 +3,9 @@
 
 User-agent: *
 Allow: /
+
+Sitemap: https://safewebtool.com/sitemap.xml
+
+# Agent discovery
+# https://safewebtool.com/llms.txt
+# https://safewebtool.com/tools.json

@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "1.0",
+  "id": "business-days",
+  "path": "time/business-days",
+  "canonicalPath": "/time/business-days",
+  "canonicalUrl": "https://safewebtool.com/time/business-days",
+  "category": {
+    "id": "time",
+    "name": "Time Tools"
+  },
+  "name": "Business Days Calculator",
+  "description": "Add or subtract business days from a start date while skipping weekends for deadline planning.",
+  "privacy": {
+    "mode": "browser-local",
+    "fileUpload": false,
+    "note": "SafeWebTool tools are designed to process user data locally in the browser."
+  },
+  "inputs": [
+    {
+      "name": "settings",
+      "type": "form"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "browser result",
+      "formats": [
+        "text/html"
+      ]
+    }
+  ],
+  "selectors": {
+    "ready": ".tool-container[data-tool-ready=\"true\"]",
+    "process": "#processBtn",
+    "log": "#logContent"
+  },
+  "howToUse": [
+    "Choose a start date",
+    "Enter the number of business days",
+    "Choose whether to add or subtract",
+    "Click Calculate Date to get the resulting deadline"
+  ],
+  "useCase": "Estimate sprint deadlines, review windows, launch lead times, procurement dates, and contract response periods.",
+  "keywords": [
+    "business days calculator",
+    "deadline calculator",
+    "working days",
+    "project date calculator"
+  ],
+  "externalDownloads": [],
+  "exampleTasks": [
+    "Open https://safewebtool.com/time/business-days and use Business Days Calculator."
+  ],
+  "automationNotes": [
+    "Prefer the stable selectors in this contract over visible text where possible.",
+    "Wait for selectors.ready before interacting with the tool UI.",
+    "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+  ]
+}

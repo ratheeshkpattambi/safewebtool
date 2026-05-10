@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "1.0",
+  "id": "date-difference",
+  "path": "time/date-difference",
+  "canonicalPath": "/time/date-difference",
+  "canonicalUrl": "https://safewebtool.com/time/date-difference",
+  "category": {
+    "id": "time",
+    "name": "Time Tools"
+  },
+  "name": "Date Duration Calculator",
+  "description": "Calculate days, weeks, and weekdays between two dates for planning timelines and project phases.",
+  "privacy": {
+    "mode": "browser-local",
+    "fileUpload": false,
+    "note": "SafeWebTool tools are designed to process user data locally in the browser."
+  },
+  "inputs": [
+    {
+      "name": "settings",
+      "type": "form"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "browser result",
+      "formats": [
+        "text/html"
+      ]
+    }
+  ],
+  "selectors": {
+    "ready": ".tool-container[data-tool-ready=\"true\"]",
+    "process": "#processBtn",
+    "log": "#logContent"
+  },
+  "howToUse": [
+    "Choose start and end dates",
+    "Optionally include the end date",
+    "Click Calculate Duration",
+    "Review total days, weeks and days, and weekday count"
+  ],
+  "useCase": "Quickly size project phases, campaign windows, hiring timelines, trial periods, and delivery estimates.",
+  "keywords": [
+    "date duration calculator",
+    "date difference",
+    "days between dates",
+    "timeline calculator",
+    "weekday count"
+  ],
+  "externalDownloads": [],
+  "exampleTasks": [
+    "Open https://safewebtool.com/time/date-difference and use Date Duration Calculator."
+  ],
+  "automationNotes": [
+    "Prefer the stable selectors in this contract over visible text where possible.",
+    "Wait for selectors.ready before interacting with the tool UI.",
+    "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+  ]
+}
