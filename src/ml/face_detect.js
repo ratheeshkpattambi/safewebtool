@@ -1,4 +1,4 @@
-import * as vision from 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/vision_bundle.js';
+import * as vision from 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.1/vision_bundle.js';
 import { Tool } from '../common/base.js';
 import { formatFileSize } from '../common/utils.js';
 
@@ -119,7 +119,7 @@ class FaceDetectionTool extends Tool {
       }
       
       const filesetResolver = await vision.FilesetResolver.forVisionTasks(
-        'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22-rc.20250304/wasm'
+        'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.1/wasm'
       );
       
       this.updateProgress(40, 'Initializing detector...');
@@ -353,4 +353,4 @@ class FaceDetectionTool extends Tool {
 export function initTool() {
   const tool = new FaceDetectionTool();
   return tool.init();
-} 
+}
