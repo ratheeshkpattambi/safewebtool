@@ -14,6 +14,31 @@ export const siteInfo = {
 
 const baseUrl = 'https://safewebtool.com';
 
+export const routeAliases = {
+  '/passport': 'image/passport-photo'
+};
+
+const canonicalRouteByToolPath = Object.fromEntries(
+  Object.entries(routeAliases).map(([aliasPath, toolPath]) => [toolPath, aliasPath])
+);
+
+function normalizeMetadataPath(path = '/') {
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  return normalizedPath.split('?')[0].split('#')[0] || '/';
+}
+
+function resolveMetadataPath(path) {
+  const normalizedPath = normalizeMetadataPath(path);
+  return routeAliases[normalizedPath] ? `/${routeAliases[normalizedPath]}` : normalizedPath;
+}
+
+function getCanonicalPath(path) {
+  const normalizedPath = normalizeMetadataPath(path);
+  const metadataPath = resolveMetadataPath(normalizedPath);
+  const toolPath = metadataPath.split('/').filter(Boolean).join('/');
+  return canonicalRouteByToolPath[toolPath] || normalizedPath;
+}
+
 // Tool categories metadata
 export const categories = {
   video: {
@@ -434,8 +459,10 @@ export function getCategoryMetadata(categoryId) {
  * @returns {string} HTML metadata tags
  */
 export function generateMetaTags(path) {
-  const parts = path.split('/').filter(p => p);
-  const canonicalPath = path === '/' || path === '/home' ? '' : path;
+  const metadataPath = resolveMetadataPath(path);
+  const parts = metadataPath.split('/').filter(p => p);
+  const canonicalPathValue = getCanonicalPath(path);
+  const canonicalPath = canonicalPathValue === '/' || canonicalPathValue === '/home' ? '' : canonicalPathValue;
   
   // Default metadata for home page
   let title = siteInfo.name;

@@ -1,4 +1,4 @@
-import { categories, tools } from './metadata.js';
+import { categories, routeAliases, tools } from './metadata.js';
 
 // Vite discovers one-level tool modules at build time. A category becomes routable
 // when it exists in metadata; adding tools to that category should not require a
@@ -27,7 +27,9 @@ function buildFallbackTool(categoryId, toolId) {
  */
 export function resolveAppRoute(path) {
   const normalizedPath = normalizePath(path);
-  const segments = normalizedPath.split('/').filter(Boolean);
+  const aliasedToolPath = routeAliases[normalizedPath];
+  const routePath = aliasedToolPath ? `/${aliasedToolPath}` : normalizedPath;
+  const segments = routePath.split('/').filter(Boolean);
 
   if (normalizedPath === '/sitemap.xml') {
     return { kind: 'sitemap', path: normalizedPath, segments };
@@ -56,6 +58,7 @@ export function resolveAppRoute(path) {
     kind: 'tool',
     path: normalizedPath,
     segments,
+    aliasFor: aliasedToolPath || null,
     categoryId,
     toolId,
     toolPath,

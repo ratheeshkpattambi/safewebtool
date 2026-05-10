@@ -1,4 +1,4 @@
-import { categories, tools } from './metadata.js';
+import { categories, routeAliases, tools } from './metadata.js';
 
 /**
  * Generate an XML sitemap for the website
@@ -44,6 +44,18 @@ export function generateSitemap(baseUrl) {
   <!-- ${tool.name} tool page -->
   <url>
     <loc>${baseUrl}${toolKey}</loc>
+    <lastmod>${now}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>`;
+  });
+
+  // Add short share URLs
+  Object.keys(routeAliases).forEach(aliasPath => {
+    xml += `
+  <!-- Short share URL -->
+  <url>
+    <loc>${baseUrl}${aliasPath.replace(/^\//, '')}</loc>
     <lastmod>${now}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
