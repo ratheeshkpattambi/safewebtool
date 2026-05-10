@@ -91,17 +91,61 @@ test.describe('Passport Photo Maker acceptance criteria', () => {
     await expect(page.getByText(/do not guarantee government acceptance/i)).toBeVisible();
   });
 
+  test('auto-aligns the crop from browser face detection results', async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__safewebtoolFaceDetectorMock = {
+        async detect() {
+          return {
+            detections: [
+              {
+                boundingBox: {
+                  originX: 310,
+                  originY: 310,
+                  width: 280,
+                  height: 360
+                },
+                categories: [{ score: 0.96 }]
+              }
+            ]
+          };
+        }
+      };
+    });
+
+    await page.goto('/image/passport-photo');
+    await uploadSyntheticPortrait(page);
+    await page.getByRole('button', { name: /auto align face/i }).click();
+    await expect(page.locator('[data-testid="face-status"]')).toContainText(/Aligned/i);
+    await expect(page.locator('[data-testid="last-face-detection"]')).toHaveAttribute('data-aligned', 'true');
+
+    const result = await page.locator('[data-testid="last-face-detection"]').evaluate(element => ({
+      faces: Number(element.getAttribute('data-faces')),
+      confidence: Number(element.getAttribute('data-confidence')),
+      zoom: Number(element.getAttribute('data-zoom'))
+    }));
+
+    expect(result.faces).toBe(1);
+    expect(result.confidence).toBe(96);
+    expect(result.zoom).toBeGreaterThanOrEqual(1);
+  });
+
   test('renders a local preview from an uploaded image without network upload', async ({ page }) => {
     const requests = [];
 
     await page.goto('/image/passport-photo');
-    page.on('request', request => requests.push(request.url()));
+    page.on('request', request => requests.push({
+      method: request.method(),
+      url: request.url()
+    }));
     await uploadSyntheticPortrait(page);
 
     await expect(page.locator('[data-testid="crop-canvas"]')).toBeVisible();
 
     const origin = new URL(page.url()).origin;
-    const uploadRequests = requests.filter(url => !url.startsWith(origin) && /upload|api|photo|passport/i.test(url));
+    const uploadRequests = requests.filter(request => (
+      !request.url.startsWith(origin) &&
+      ['POST', 'PUT', 'PATCH'].includes(request.method)
+    ));
     expect(uploadRequests).toEqual([]);
   });
 

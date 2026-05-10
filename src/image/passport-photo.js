@@ -68,6 +68,10 @@ const PRINT_SHEETS = {
   }
 };
 
+const MEDIAPIPE_VISION_URL = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22-rc.20250304/vision_bundle.js';
+const MEDIAPIPE_WASM_ROOT = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22-rc.20250304/wasm';
+const MEDIAPIPE_FACE_MODEL_URL = 'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite';
+
 export const template = `
   <style>
     .passport-workspace {
@@ -246,9 +250,16 @@ export const template = `
               <strong class="block text-slate-900 dark:text-white">Privacy</strong>
               <span>Local only, no upload</span>
             </div>
+            <div class="passport-status-item">
+              <strong class="block text-slate-900 dark:text-white">Face assist</strong>
+              <span id="faceStatus" data-testid="face-status">Ready after upload</span>
+            </div>
           </div>
 
           <div id="presetNote" class="rounded-md bg-slate-50 p-3 text-sm leading-relaxed text-slate-600 dark:bg-slate-900/50 dark:text-slate-300"></div>
+
+          <button id="autoAlignBtn" type="button" class="rounded-md border border-blue-200 bg-blue-50 px-5 py-3 text-base font-black text-blue-700 transition-colors hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-200 dark:hover:bg-blue-950" disabled>Auto Align Face</button>
+          <p class="-mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">Uses MediaPipe in your browser. The model downloads once; your photo is not uploaded.</p>
 
           <div class="rounded-md border border-slate-200 p-3 dark:border-gray-600">
             <h4 class="font-bold text-slate-900 dark:text-white">Guide checklist</h4>
@@ -275,6 +286,7 @@ export const template = `
           <div id="downloadContainer" class="grid gap-2 text-sm"></div>
           <div id="lastExport" data-testid="last-export" hidden></div>
           <div id="lastPrintSheet" data-testid="last-print-sheet" hidden></div>
+          <div id="lastFaceDetection" data-testid="last-face-detection" hidden></div>
         </div>
       </section>
     </div>
@@ -332,6 +344,10 @@ class PassportPhotoTool extends Tool {
     this.centerX = 0;
     this.centerY = 0;
     this.dragState = null;
+    this.faceDetector = null;
+    this.faceDetectorPromise = null;
+    this.faceBox = null;
+    this.autoAlignAttempted = false;
   }
 
   getElementsMap() {
@@ -343,6 +359,8 @@ class PassportPhotoTool extends Tool {
       presetSelect: 'presetSelect',
       outputSize: 'outputSize',
       presetNote: 'presetNote',
+      faceStatus: 'faceStatus',
+      autoAlignBtn: 'autoAlignBtn',
       zoomInput: 'zoomInput',
       resetCropBtn: 'resetCropBtn',
       rotateLeftBtn: 'rotateLeftBtn',
@@ -353,6 +371,7 @@ class PassportPhotoTool extends Tool {
       downloadContainer: 'downloadContainer',
       lastExport: 'lastExport',
       lastPrintSheet: 'lastPrintSheet',
+      lastFaceDetection: 'lastFaceDetection',
       progress: 'progress',
       logHeader: 'logHeader',
       logContent: 'logContent'
@@ -380,6 +399,7 @@ class PassportPhotoTool extends Tool {
     this.elements.resetCropBtn.addEventListener('click', () => this.resetCrop());
     this.elements.rotateLeftBtn.addEventListener('click', () => this.rotate(-90));
     this.elements.rotateRightBtn.addEventListener('click', () => this.rotate(90));
+    this.elements.autoAlignBtn.addEventListener('click', () => this.autoAlignFace());
     this.elements.downloadDigitalBtn.addEventListener('click', () => this.exportDigital());
     this.elements.downloadPrintBtn.addEventListener('click', () => this.exportPrintSheet());
 
@@ -436,10 +456,14 @@ class PassportPhotoTool extends Tool {
       URL.revokeObjectURL(url);
       this.image = image;
       this.imageName = file.name.replace(/\.[^.]+$/, '') || 'photo';
+      this.faceBox = null;
+      this.autoAlignAttempted = false;
+      this.setFaceStatus('Detecting face...', 'loading');
       this.emptyStateVisible(false);
       this.setControlsEnabled(true);
       this.resetCrop();
       this.log(`Image loaded: ${file.name} (${formatFileSize(file.size)})`, 'info');
+      window.setTimeout(() => this.autoAlignFace({ automatic: true }), 0);
     };
     image.onerror = () => {
       URL.revokeObjectURL(url);
@@ -457,6 +481,7 @@ class PassportPhotoTool extends Tool {
       this.elements.zoomInput,
       this.elements.rotateLeftBtn,
       this.elements.rotateRightBtn,
+      this.elements.autoAlignBtn,
       this.elements.downloadDigitalBtn,
       this.elements.downloadPrintBtn
     ].forEach(element => {
@@ -466,6 +491,7 @@ class PassportPhotoTool extends Tool {
 
   rotate(delta) {
     this.rotation = (this.rotation + delta + 360) % 360;
+    this.faceBox = null;
     this.resetCrop();
   }
 
@@ -477,6 +503,11 @@ class PassportPhotoTool extends Tool {
     this.zoom = 1;
     this.elements.zoomInput.value = '1';
     this.drawPreview();
+  }
+
+  setFaceStatus(message, state = 'idle') {
+    this.elements.faceStatus.textContent = message;
+    this.elements.faceStatus.dataset.state = state;
   }
 
   updatePresetUI() {
@@ -560,6 +591,7 @@ class PassportPhotoTool extends Tool {
     this.clampCenter();
     const crop = this.getCropRect();
     this.drawCroppedImage(ctx, frame.width, frame.height, crop);
+    this.drawFaceAssistOverlay(ctx, frame.width, frame.height, crop);
     this.drawGuides(ctx, frame.width, frame.height);
   }
 
@@ -587,6 +619,24 @@ class PassportPhotoTool extends Tool {
       tempCtx.restore();
       ctx.drawImage(tempCanvas, crop.x, crop.y, crop.width, crop.height, 0, 0, outputWidth, outputHeight);
     }
+    ctx.restore();
+  }
+
+  drawFaceAssistOverlay(ctx, width, height, crop) {
+    if (!this.faceBox) return;
+
+    const scaleX = width / crop.width;
+    const scaleY = height / crop.height;
+    const x = (this.faceBox.x - crop.x) * scaleX;
+    const y = (this.faceBox.y - crop.y) * scaleY;
+    const boxWidth = this.faceBox.width * scaleX;
+    const boxHeight = this.faceBox.height * scaleY;
+
+    ctx.save();
+    ctx.strokeStyle = 'rgba(14, 165, 233, 0.92)';
+    ctx.lineWidth = Math.max(2, width * 0.006);
+    ctx.setLineDash([8, 6]);
+    ctx.strokeRect(x, y, boxWidth, boxHeight);
     ctx.restore();
   }
 
@@ -673,6 +723,119 @@ class PassportPhotoTool extends Tool {
     } catch (error) {
       this.log(`Print sheet failed: ${error.message}`, 'error');
     }
+  }
+
+  async setupFaceDetector() {
+    if (window.__safewebtoolFaceDetectorMock) {
+      return window.__safewebtoolFaceDetectorMock;
+    }
+
+    if (!this.faceDetectorPromise) {
+      this.faceDetectorPromise = (async () => {
+        const vision = await import(/* @vite-ignore */ MEDIAPIPE_VISION_URL);
+        const filesetResolver = await vision.FilesetResolver.forVisionTasks(MEDIAPIPE_WASM_ROOT);
+        return vision.FaceDetector.createFromOptions(filesetResolver, {
+          baseOptions: {
+            modelAssetPath: MEDIAPIPE_FACE_MODEL_URL
+          },
+          runningMode: 'IMAGE',
+          minDetectionConfidence: 0.55
+        });
+      })();
+    }
+
+    this.faceDetector = await this.faceDetectorPromise;
+    return this.faceDetector;
+  }
+
+  async autoAlignFace(options = {}) {
+    if (!this.image) {
+      this.log('Choose a photo before using face alignment.', 'warning');
+      return;
+    }
+
+    const { automatic = false } = options;
+    if (automatic && this.autoAlignAttempted) return;
+    this.autoAlignAttempted = true;
+
+    try {
+      this.elements.autoAlignBtn.disabled = true;
+      this.setFaceStatus('Loading detector...', 'loading');
+      if (!automatic) this.log('Loading browser face detector...', 'info');
+
+      const detector = await this.setupFaceDetector();
+      this.setFaceStatus('Finding face...', 'loading');
+      const detections = await detector.detect(this.image);
+      const detection = this.getPrimaryDetection(detections?.detections || []);
+
+      if (!detection) {
+        this.faceBox = null;
+        this.setExportMetadata(this.elements.lastFaceDetection, {
+          faces: 0,
+          aligned: false
+        });
+        this.setFaceStatus('No face found', 'warning');
+        this.log('No face detected. Use manual crop controls.', automatic ? 'info' : 'warning');
+        this.drawPreview();
+        return;
+      }
+
+      this.applyFaceDetection(detection, detections.detections.length);
+      this.drawPreview();
+    } catch (error) {
+      this.setFaceStatus('Manual mode available', 'warning');
+      this.log(`Face assist unavailable: ${error.message}`, automatic ? 'info' : 'warning');
+    } finally {
+      this.elements.autoAlignBtn.disabled = !this.image;
+    }
+  }
+
+  getPrimaryDetection(detections) {
+    return detections
+      .filter(detection => detection?.boundingBox)
+      .sort((a, b) => (b.boundingBox.width * b.boundingBox.height) - (a.boundingBox.width * a.boundingBox.height))[0] || null;
+  }
+
+  applyFaceDetection(detection, faceCount) {
+    const box = detection.boundingBox;
+    const score = detection.categories?.[0]?.score || 0;
+    this.rotation = 0;
+    const preset = this.getPreset();
+    const aspect = preset.width / preset.height;
+    const sourceWidth = this.getSourceWidth();
+    const sourceHeight = this.getSourceHeight();
+    const baseCrop = this.getCropRect();
+    const desiredCropHeight = Math.min(sourceHeight, Math.max(box.height / 0.48, box.width / 0.42 / aspect));
+    const desiredCropWidth = Math.min(sourceWidth, desiredCropHeight * aspect);
+    const zoomFromWidth = baseCrop.width / desiredCropWidth;
+    const zoomFromHeight = baseCrop.height / desiredCropHeight;
+
+    this.zoom = Math.max(1, Math.min(3, Math.min(zoomFromWidth, zoomFromHeight)));
+    this.elements.zoomInput.value = String(this.zoom);
+    this.centerX = box.originX + box.width / 2;
+    this.centerY = box.originY + box.height * 0.58;
+    this.faceBox = {
+      x: box.originX,
+      y: box.originY,
+      width: box.width,
+      height: box.height,
+      score
+    };
+    this.clampCenter();
+
+    this.setExportMetadata(this.elements.lastFaceDetection, {
+      faces: faceCount,
+      aligned: true,
+      confidence: Math.round(score * 100),
+      centerX: Math.round(this.centerX),
+      centerY: Math.round(this.centerY),
+      zoom: this.zoom.toFixed(2)
+    });
+
+    const confidence = score ? ` (${Math.round(score * 100)}%)` : '';
+    const multiple = faceCount > 1 ? `, ${faceCount} faces found` : '';
+    this.setFaceStatus(`Aligned${confidence}${multiple}`, 'success');
+    this.log(`Face aligned${confidence}${multiple}. Review the guide before downloading.`, 'success');
   }
 
   renderPrintSheetCanvas(photoCanvas, sheet) {
