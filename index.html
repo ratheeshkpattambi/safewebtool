@@ -4,6 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SafeWebTool</title>
+    <meta name="description" content="Free browser-based tools for working with videos, images, text, time, and ML. No uploads - all processing happens locally in your browser." data-static-seo="true">
+    <meta property="og:title" content="SafeWebTool - Private Browser Tools" data-static-seo="true">
+    <meta property="og:description" content="Free video, image, text, time, and ML tools that run locally in your browser. No uploads, no login." data-static-seo="true">
+    <meta property="og:type" content="website" data-static-seo="true">
+    <meta property="og:url" content="https://safewebtool.com/" data-static-seo="true">
+    <meta property="og:image" content="https://safewebtool.com/og/safewebtool.png" data-static-seo="true">
+    <meta property="og:image:width" content="1200" data-static-seo="true">
+    <meta property="og:image:height" content="630" data-static-seo="true">
+    <meta name="twitter:card" content="summary_large_image" data-static-seo="true">
+    <meta name="twitter:title" content="SafeWebTool - Private Browser Tools" data-static-seo="true">
+    <meta name="twitter:description" content="Free tools that run locally in your browser. No uploads, no login." data-static-seo="true">
+    <meta name="twitter:image" content="https://safewebtool.com/og/safewebtool.png" data-static-seo="true">
     <meta name="theme-color" content="#ffffff">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Timer">
@@ -32,10 +44,15 @@
 <body>
     <div id="app" class="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900 text-slate-800 dark:text-slate-200 transition-colors">
         <header class="bg-white dark:bg-gray-800 shadow-md transition-colors">
-            <div class="container mx-auto px-4 py-2 flex flex-col md:flex-row items-center">
+            <div class="container mx-auto px-4 py-3 flex flex-col gap-3 lg:flex-row lg:items-center">
                 <div class="flex items-center">
                     <img src="/src/assets/logo.svg" alt="SafeWebTool Logo" class="h-8 w-8 drop-shadow-sm" fetchpriority="high" decoding="async">
                     <h1 class="ml-2 text-xl font-semibold text-slate-700 dark:text-slate-300">SafeWebTool</h1>
+                </div>
+                <div class="relative w-full max-w-xl lg:ml-6">
+                    <label class="sr-only" for="globalToolSearch">Search tools</label>
+                    <input id="globalToolSearch" type="search" autocomplete="off" placeholder="Search tools..." class="w-full rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:focus:ring-blue-950">
+                    <div id="globalToolSearchResults" class="absolute left-0 right-0 top-full z-50 mt-2 hidden overflow-hidden rounded-md border border-slate-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800"></div>
                 </div>
                 <nav class="mt-2 md:mt-0 md:ml-auto">
                     <ul class="flex flex-wrap items-center justify-center gap-1 md:flex-nowrap">

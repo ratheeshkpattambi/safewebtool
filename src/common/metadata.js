@@ -12,7 +12,7 @@ export const siteInfo = {
   keywords: ['online tools', 'privacy tools', 'browser tools', 'no upload tools', 'local processing', 'ad-free tools', 'no login']
 };
 
-const baseUrl = 'https://safewebtool.com';
+export const baseUrl = 'https://safewebtool.com';
 
 export const routeAliases = {
   '/image/passport': 'image/passport-photo'
@@ -37,6 +37,34 @@ function getCanonicalPath(path) {
   const metadataPath = resolveMetadataPath(normalizedPath);
   const toolPath = metadataPath.split('/').filter(Boolean).join('/');
   return canonicalRouteByToolPath[toolPath] || normalizedPath;
+}
+
+export function getCanonicalPathForToolPath(toolPath) {
+  return canonicalRouteByToolPath[toolPath] || `/${toolPath}`;
+}
+
+export function getCanonicalUrlForToolPath(toolPath) {
+  return `${baseUrl}${getCanonicalPathForToolPath(toolPath)}`;
+}
+
+export function getToolEntries() {
+  return Object.entries(tools).map(([path, tool]) => ({
+    path,
+    tool,
+    canonicalPath: getCanonicalPathForToolPath(path),
+    canonicalUrl: getCanonicalUrlForToolPath(path)
+  }));
+}
+
+export function getToolSearchText(path, tool) {
+  return [
+    path,
+    tool.name,
+    tool.description,
+    tool.useCase,
+    tool.category,
+    ...(tool.keywords || [])
+  ].filter(Boolean).join(' ').toLowerCase();
 }
 
 // Tool categories metadata
@@ -171,7 +199,8 @@ export const tools = {
       'Click "Create GIF" to convert',
       'Download your new GIF animation'
     ],
-    useCase: 'Perfect for creating shareable animations for social media, forums, or messaging apps from your videos.'
+    useCase: 'Perfect for creating shareable animations for social media, forums, or messaging apps from your videos.',
+    featured: true
   },
   'video/mp4': {
     id: 'mp4',
@@ -219,7 +248,8 @@ export const tools = {
       'Compare before and after results',
       'Download the compressed image'
     ],
-    useCase: 'Perfect for reducing image file sizes for web use, email attachments, or storage optimization while maintaining good visual quality.'
+    useCase: 'Perfect for reducing image file sizes for web use, email attachments, or storage optimization while maintaining good visual quality.',
+    featured: true
   },
   'image/crop': {
     id: 'crop',
@@ -250,6 +280,7 @@ export const tools = {
       'Download a digital photo or a 4x6 print sheet'
     ],
     useCase: 'Make correctly sized passport, visa, and ID photos without uploading your face photo to a server or paying for a simple digital export.',
+    featured: true,
     agent: {
       canonicalPath: '/image/passport',
       privacy: {
@@ -371,7 +402,8 @@ export const tools = {
       'Turn on Tick sound if you want an audible second-by-second cue',
       'On iOS Safari, use Share then Add to Home Screen for standalone mode'
     ],
-    useCase: 'Use as a lightweight browser-local timer for focus sessions, cooking, workouts, breaks, or reminders without installing a native app.'
+    useCase: 'Use as a lightweight browser-local timer for focus sessions, cooking, workouts, breaks, or reminders without installing a native app.',
+    featured: true
   },
   'time/meeting-planner': {
     id: 'meeting-planner',
@@ -549,9 +581,13 @@ export function generateMetaTags(path) {
     <meta property="og:description" content="${description}">
     <meta property="og:type" content="website">
     <meta property="og:url" content="${baseUrl}${canonicalPath}">
-    <meta name="twitter:card" content="summary">
+    <meta property="og:image" content="${baseUrl}/og/safewebtool.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${title}">
     <meta name="twitter:description" content="${description}">
+    <meta name="twitter:image" content="${baseUrl}/og/safewebtool.png">
   `;
 }
 
@@ -579,7 +615,7 @@ export function generateStructuredData(path) {
       "price": "0",
       "priceCurrency": "USD"
     },
-    "url": `${baseUrl}/${tool.category}/${tool.id}`
+    "url": getCanonicalUrlForToolPath(path)
   };
   
   return `

@@ -35,6 +35,9 @@ npm run dev
 # Regenerate machine-readable agent discovery files
 npm run generate:agent-manifest
 
+# Regenerate the default social preview image
+npm run generate:share-image
+
 # Build for production (standard)
 npm run build
 
@@ -85,11 +88,13 @@ Generated files, do not hand-edit:
 - `public/llms.txt`
 - `public/tools.json`
 - `public/**/agent.json`
+- `public/og/safewebtool.png`
 
 After metadata changes:
 
 ```bash
 npm run generate:agent-manifest
+npm run generate:share-image
 npm run test:contract
 npm run test:tool -- <category/toolId>
 ```

@@ -1,12 +1,11 @@
 import {
   generateMetaTags,
   generateStructuredData,
-  getWelcomeContent,
   get404Template,
   getErrorTemplate
 } from './common/metadata.js';
 import { footerManager } from './common/footer-manager.js';
-import { createFFmpegLoadingElement, renderCategoryPage, renderToolPageShell } from './common/page-renderers.js';
+import { createFFmpegLoadingElement, renderCategoryPage, renderHomePage, renderToolPageShell } from './common/page-renderers.js';
 import { serveSitemap } from './common/sitemap.js';
 import { loadToolModule, resolveAppRoute } from './common/tool-registry.js';
 
@@ -69,7 +68,7 @@ function renderSitemap() {
 function renderRouteShell(route) {
   switch (route.kind) {
     case 'home':
-      return getWelcomeContent();
+      return renderHomePage();
     case 'category':
       return renderCategoryPage(route.category, route.categoryId);
     case 'tool':
@@ -156,7 +155,7 @@ async function initializeToolRoute(route, main, tokenAtStart) {
 }
 
 function updateMetadata(path) {
-  document.querySelectorAll('meta[data-dynamic="true"]').forEach(el => el.remove());
+  document.querySelectorAll('meta[data-dynamic="true"], link[data-dynamic="true"], meta[data-static-seo="true"], link[data-static-seo="true"]').forEach(el => el.remove());
   document.querySelectorAll('script[type="application/ld+json"]').forEach(el => el.remove());
 
   const head = document.head;
