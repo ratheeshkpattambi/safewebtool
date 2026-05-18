@@ -9,7 +9,7 @@
     "name": "Video Tools"
   },
   "name": "Add or Remove Audio from Video",
-  "description": "Remove audio from a video, or replace it with audio copied from another video or audio file. Handles different lengths, outputs MP4, and runs locally in your browser.",
+  "description": "Add new audio to a video or remove its sound. Copy audio from another video or audio file, handle different lengths, and export MP4 locally in your browser.",
   "privacy": {
     "mode": "browser-local",
     "fileUpload": false,
@@ -37,8 +37,7 @@
       "selector": "input[name=\"audioMode\"]",
       "values": [
         "replace",
-        "remove",
-        "add"
+        "remove"
       ]
     },
     {
@@ -74,7 +73,6 @@
     "audioFileInput": "#audioFileInput",
     "modeReplace": "#modeReplace",
     "modeRemove": "#modeRemove",
-    "modeAdd": "#modeAdd",
     "lengthMatch": "#lengthMatch",
     "lengthLoop": "#lengthLoop",
     "lengthKeep": "#lengthKeep",
@@ -84,8 +82,8 @@
   },
   "howToUse": [
     "Choose the video whose picture you want to keep",
-    "Pick Replace, Remove, or Add audio",
-    "For Replace or Add, choose a second video or audio file as the sound source",
+    "Pick Use new audio or Remove audio",
+    "For Use new audio, choose a second video or audio file as the sound source",
     "Choose how to handle audio/video length differences",
     "Click the process button and download the MP4 result"
   ],
@@ -100,7 +98,7 @@
   ],
   "externalDownloads": [],
   "exampleTasks": [
-    "Copy audio from one video into another video.",
+    "Use audio from one video in another video.",
     "Remove audio from a video and download a silent MP4.",
     "Add an audio file to a silent video while keeping files in the browser."
   ],

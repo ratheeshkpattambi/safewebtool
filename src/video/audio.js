@@ -11,13 +11,13 @@ import {
 } from './ffmpeg-utils.js';
 import { buildVideoAudioCommand } from './audio-command.js';
 
-const AUDIO_SOURCE_MODES = new Set(['replace', 'add']);
+const AUDIO_SOURCE_MODES = new Set(['replace']);
 
 export const template = `
   <div class="tool-container">
     <div class="mb-5">
       <h1 class="text-2xl font-black text-slate-950 dark:text-white">Add or Remove Audio from Video</h1>
-      <p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">Remove sound from a video, or copy audio from another video or audio file into your source video. Everything runs in your browser.</p>
+      <p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">Choose a video. Use a new sound track from another file, or make the video silent. Everything runs in your browser.</p>
     </div>
 
     <div class="grid gap-4 lg:grid-cols-2">
@@ -67,24 +67,19 @@ export const template = `
 
     <section class="mt-4 rounded-md border border-slate-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
       <h2 class="text-base font-black text-slate-900 dark:text-white">What do you want to do?</h2>
-      <div class="mt-3 grid gap-2 md:grid-cols-3" role="radiogroup" aria-label="Audio action">
+      <div class="mt-3 grid gap-2 md:grid-cols-2" role="radiogroup" aria-label="Audio action">
         <label class="audio-choice rounded-md border border-blue-200 bg-blue-50 p-3 text-sm dark:border-blue-900 dark:bg-blue-950/30">
           <input id="modeReplace" type="radio" name="audioMode" value="replace" checked class="mr-2 accent-blue-600">
-          <span class="font-black text-slate-900 dark:text-white">Replace audio</span>
-          <span class="mt-1 block text-slate-600 dark:text-slate-300">Copy sound from another video/audio file into this video.</span>
+          <span class="font-black text-slate-900 dark:text-white">Use new audio</span>
+          <span class="mt-1 block text-slate-600 dark:text-slate-300">Add sound to a silent video, or replace the sound it already has.</span>
         </label>
         <label class="audio-choice rounded-md border border-slate-200 p-3 text-sm dark:border-gray-700">
           <input id="modeRemove" type="radio" name="audioMode" value="remove" class="mr-2 accent-blue-600">
           <span class="font-black text-slate-900 dark:text-white">Remove audio</span>
           <span class="mt-1 block text-slate-600 dark:text-slate-300">Make a silent video. No second file needed.</span>
         </label>
-        <label class="audio-choice rounded-md border border-slate-200 p-3 text-sm dark:border-gray-700">
-          <input id="modeAdd" type="radio" name="audioMode" value="add" class="mr-2 accent-blue-600">
-          <span class="font-black text-slate-900 dark:text-white">Add audio</span>
-          <span class="mt-1 block text-slate-600 dark:text-slate-300">Use when your source video is silent.</span>
-        </label>
       </div>
-      <p id="modeHelp" class="mt-3 rounded-md bg-slate-50 p-3 text-sm text-slate-600 dark:bg-slate-900/50 dark:text-slate-300">Best for copying audio from one video into another. If lengths differ, the default keeps the output the same length as your source video.</p>
+      <p id="modeHelp" class="mt-3 rounded-md bg-slate-50 p-3 text-sm text-slate-600 dark:bg-slate-900/50 dark:text-slate-300">Best for copying audio from one video into another, or adding music/voice to a silent clip. If lengths differ, the default keeps the output the same length as your source video.</p>
     </section>
 
     <section id="timingPanel" class="mt-4 rounded-md border border-slate-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
@@ -118,7 +113,7 @@ export const template = `
       </div>
     </section>
 
-    <button id="processBtn" class="mt-4 w-full rounded-md bg-blue-600 px-5 py-3 text-base font-black text-white shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-600" disabled>Replace Audio</button>
+    <button id="processBtn" class="mt-4 w-full rounded-md bg-blue-600 px-5 py-3 text-base font-black text-white shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-600" disabled>Use New Audio</button>
 
     <div id="progress" class="my-4 overflow-hidden rounded-full bg-slate-200 transition-colors dark:bg-gray-700" style="display: none;">
       <div class="h-5 rounded-full bg-blue-600 transition-all duration-300 ease-in-out dark:bg-blue-500" style="width: 0%;"></div>
@@ -144,9 +139,8 @@ export const template = `
 
 function getModeLabel(mode) {
   return {
-    replace: 'Replace Audio',
-    remove: 'Remove Audio',
-    add: 'Add Audio'
+    replace: 'Use New Audio',
+    remove: 'Remove Audio'
   }[mode] || 'Process Video';
 }
 
@@ -301,9 +295,8 @@ class VideoAudioTool extends Tool {
   updateLengthSummary() {
     const mode = this.getMode();
     const modeHelp = {
-      replace: 'Best for copying audio from one video into another. The original sound in your source video is removed.',
-      remove: 'Creates a silent video while keeping the picture. No second file is needed.',
-      add: 'Best when your source video is silent. If it already has sound, the selected audio becomes the output sound.'
+      replace: 'Adds or replaces sound using the audio source you choose.',
+      remove: 'Creates a silent video while keeping the picture. No second file is needed.'
     }[mode];
 
     if (!AUDIO_SOURCE_MODES.has(mode)) {
@@ -362,7 +355,8 @@ class VideoAudioTool extends Tool {
       this.updateProgress(25);
 
       const videoInputName = `source-video${getExtension(this.videoFile.name)}`;
-      const outputFileName = `${getBaseName(this.videoFile.name)}-${mode}-audio.mp4`;
+      const outputSuffix = mode === 'replace' ? 'new-audio' : `${mode}-audio`;
+      const outputFileName = `${getBaseName(this.videoFile.name)}-${outputSuffix}.mp4`;
       await writeInputFile(this.ffmpeg, videoInputName, this.videoFile);
 
       let audioInputName = '';

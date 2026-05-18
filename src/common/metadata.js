@@ -206,13 +206,13 @@ export const tools = {
     id: 'audio',
     category: 'video',
     name: 'Add or Remove Audio from Video',
-    description: 'Remove audio from a video, or replace it with audio copied from another video or audio file. Handles different lengths, outputs MP4, and runs locally in your browser.',
+    description: 'Add new audio to a video or remove its sound. Copy audio from another video or audio file, handle different lengths, and export MP4 locally in your browser.',
     icon: '🔊',
     keywords: ['add audio to video', 'remove audio from video', 'replace video audio', 'copy audio from video', 'mute video', 'video audio tool'],
     howToUse: [
       'Choose the video whose picture you want to keep',
-      'Pick Replace, Remove, or Add audio',
-      'For Replace or Add, choose a second video or audio file as the sound source',
+      'Pick Use new audio or Remove audio',
+      'For Use new audio, choose a second video or audio file as the sound source',
       'Choose how to handle audio/video length differences',
       'Click the process button and download the MP4 result'
     ],
@@ -221,7 +221,7 @@ export const tools = {
       inputs: [
         { name: 'source video', type: 'file', accept: 'video/*', selector: '#fileInput' },
         { name: 'audio source', type: 'file', accept: 'video/*,audio/*', selector: '#audioFileInput', optionalForModes: ['remove'] },
-        { name: 'mode', type: 'radio', selector: 'input[name="audioMode"]', values: ['replace', 'remove', 'add'] },
+        { name: 'mode', type: 'radio', selector: 'input[name="audioMode"]', values: ['replace', 'remove'] },
         { name: 'length handling', type: 'radio', selector: 'input[name="lengthMode"]', values: ['match', 'loop', 'keep'] },
         { name: 'audio delay seconds', type: 'number', selector: '#audioDelay' }
       ],
@@ -232,7 +232,6 @@ export const tools = {
         audioFileInput: '#audioFileInput',
         modeReplace: '#modeReplace',
         modeRemove: '#modeRemove',
-        modeAdd: '#modeAdd',
         lengthMatch: '#lengthMatch',
         lengthLoop: '#lengthLoop',
         lengthKeep: '#lengthKeep',
@@ -241,7 +240,7 @@ export const tools = {
         download: '#downloadContainer a[download]'
       },
       exampleTasks: [
-        'Copy audio from one video into another video.',
+        'Use audio from one video in another video.',
         'Remove audio from a video and download a silent MP4.',
         'Add an audio file to a silent video while keeping files in the browser.'
       ]

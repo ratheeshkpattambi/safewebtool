@@ -91,16 +91,17 @@ async function clickProcessButton(page) {
 }
 
 test.describe('Add or Remove Audio from Video UI', () => {
-  test('defaults to replacing audio from another video or audio file', async ({ page }) => {
+  test('defaults to using a new audio file for silent or already-sounding videos', async ({ page }) => {
     await page.goto('/video/audio');
 
     await expect(page.locator('.tool-container[data-tool-ready="true"]')).toBeVisible();
     await expect(page.locator('.tool-page h1').first()).toContainText('Add or Remove Audio from Video');
     await expect(page.locator('#modeReplace')).toBeChecked();
     await expect(page.locator('#lengthMatch')).toBeChecked();
-    await expect(page.locator('#processBtn')).toContainText('Replace Audio');
+    await expect(page.locator('#processBtn')).toContainText('Use New Audio');
     await expect(page.locator('#processBtn')).toBeDisabled();
-    await expect(page.getByText('Copy sound from another video/audio file into this video.')).toBeVisible();
+    await expect(page.getByText('Add sound to a silent video, or replace the sound it already has.')).toBeVisible();
+    await expect(page.locator('#modeAdd')).toHaveCount(0);
     await expect(page.getByText('Trim long audio. Pad short audio with silence.')).toBeVisible();
   });
 
@@ -211,6 +212,6 @@ test.describe('Add or Remove Audio from Video UI', () => {
 
     await expect(page.locator('#lastCommandSummary')).toHaveAttribute('data-mode', 'replace');
     await expect(page.locator('#lastCommandSummary')).toHaveAttribute('data-length-mode', 'match');
-    await expect(page.locator('#downloadContainer a[download]')).toHaveAttribute('download', /source-video-replace-audio\.mp4/);
+    await expect(page.locator('#downloadContainer a[download]')).toHaveAttribute('download', /source-video-new-audio\.mp4/);
   });
 });
