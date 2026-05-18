@@ -225,6 +225,21 @@ test.describe('SafeWebTool Tests', () => {
       console.log(`✅ No critical console errors in ${toolPath}`);
     }
   });
+
+  test('output containers are hidden until results exist', async ({ page }) => {
+    test.setTimeout(120000);
+
+    for (const toolPath of Object.keys(tools)) {
+      await page.goto(`/${toolPath}`);
+      await expect(page.locator('.tool-page')).toBeVisible();
+
+      const outputContainers = page.locator('.output-container');
+      const count = await outputContainers.count();
+      for (let index = 0; index < count; index += 1) {
+        await expect(outputContainers.nth(index), `${toolPath} output container ${index}`).toBeHidden();
+      }
+    }
+  });
   
   // SEO tests
   test('homepage metadata', async ({ page }) => {

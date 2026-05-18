@@ -283,6 +283,11 @@ export class Tool {
       container.appendChild(fileInfoDiv);
       container.appendChild(downloadLink);
       container.style.display = 'block';
+
+      const outputContainer = container.closest('.output-container');
+      if (outputContainer) {
+        outputContainer.style.display = 'block';
+      }
     }
     return url;
   }

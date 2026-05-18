@@ -98,7 +98,7 @@ export const template = `
         <div class="text-center text-xs font-medium text-slate-700 dark:text-slate-300 -mt-4 leading-5">0%</div>
       </div>
 
-      <div id="outputContainer" class="output-container dark:bg-slate-800">
+      <div id="outputContainer" class="output-container dark:bg-slate-800" style="display: none;">
         <div class="video-wrapper">
           <video id="output-video" controls style="display: none; max-width: 100%; height: auto;" ></video>
         </div>
