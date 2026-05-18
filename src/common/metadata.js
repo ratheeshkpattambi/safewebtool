@@ -206,13 +206,13 @@ export const tools = {
     id: 'audio',
     category: 'video',
     name: 'Add or Remove Audio from Video',
-    description: 'Add new audio to a video or remove its sound. Copy audio from another video or audio file, handle different lengths, and export MP4 locally in your browser.',
+    description: 'Add audio to a video or remove its sound. Copy audio from another video or audio file, handle different lengths, and export MP4 locally in your browser.',
     icon: '🔊',
     keywords: ['add audio to video', 'remove audio from video', 'replace video audio', 'copy audio from video', 'mute video', 'video audio tool'],
     howToUse: [
       'Choose the video whose picture you want to keep',
-      'Pick Use new audio or Remove audio',
-      'For Use new audio, choose a second video or audio file as the sound source',
+      'Pick Add audio or Remove audio',
+      'For Add audio, choose a second video or audio file as the sound source',
       'Click the process button and download the MP4 result'
     ],
     useCase: 'Use when you need to mute a video, add sound to a silent video, or copy audio from one video into another without uploading private media.',

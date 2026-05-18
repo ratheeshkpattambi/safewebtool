@@ -17,7 +17,7 @@ export const template = `
   <div class="tool-container">
     <div class="mb-5">
       <h1 class="text-2xl font-black text-slate-950 dark:text-white">Add or Remove Audio from Video</h1>
-      <p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">Choose a video. Use a new sound track from another file, or make the video silent. Everything runs in your browser.</p>
+      <p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">Choose a video. Add audio from another file, or make the video silent. Everything runs in your browser.</p>
     </div>
 
     <section class="rounded-md border border-slate-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
@@ -46,7 +46,7 @@ export const template = `
       <div class="mt-3 grid gap-2 md:grid-cols-2" role="radiogroup" aria-label="Audio action">
         <label class="audio-choice rounded-md border border-blue-200 bg-blue-50 p-3 text-sm dark:border-blue-900 dark:bg-blue-950/30">
           <input id="modeReplace" type="radio" name="audioMode" value="replace" checked class="mr-2 accent-blue-600">
-          <span class="font-black text-slate-900 dark:text-white">Use new audio</span>
+          <span class="font-black text-slate-900 dark:text-white">Add audio</span>
           <span class="mt-1 block text-slate-600 dark:text-slate-300">Add sound to a silent video, or replace the sound it already has.</span>
         </label>
         <label class="audio-choice rounded-md border border-slate-200 p-3 text-sm dark:border-gray-700">
@@ -60,7 +60,7 @@ export const template = `
 
     <section id="audioSourcePanel" class="mt-4 rounded-md border border-slate-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
       <div class="mb-3">
-        <h2 class="text-base font-black text-slate-900 dark:text-white">3. Choose new audio</h2>
+        <h2 class="text-base font-black text-slate-900 dark:text-white">3. Choose audio to add</h2>
         <p class="text-sm text-slate-500 dark:text-slate-400">Pick a video with sound, or an audio file. The output stays the same length as your video: long audio is trimmed, short audio ends in silence.</p>
       </div>
       <div id="audioDropZone" class="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-300 p-6 text-center transition-colors hover:border-blue-500 hover:bg-slate-50 dark:border-gray-600 dark:hover:border-blue-400 dark:hover:bg-gray-700">
@@ -77,7 +77,7 @@ export const template = `
       </div>
     </section>
 
-    <button id="processBtn" class="mt-4 w-full rounded-md bg-blue-600 px-5 py-3 text-base font-black text-white shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-600" disabled>Use New Audio</button>
+    <button id="processBtn" class="mt-4 w-full rounded-md bg-blue-600 px-5 py-3 text-base font-black text-white shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-600" disabled>Add Audio</button>
 
     <div id="progress" class="my-4 overflow-hidden rounded-full bg-slate-200 transition-colors dark:bg-gray-700" style="display: none;">
       <div class="h-5 rounded-full bg-blue-600 transition-all duration-300 ease-in-out dark:bg-blue-500" style="width: 0%;"></div>
@@ -103,7 +103,7 @@ export const template = `
 
 function getModeLabel(mode) {
   return {
-    replace: 'Use New Audio',
+    replace: 'Add Audio',
     remove: 'Remove Audio'
   }[mode] || 'Process Video';
 }
@@ -268,7 +268,7 @@ class VideoAudioTool extends Tool {
   updateLengthSummary() {
     const mode = this.getMode();
     const modeHelp = {
-      replace: 'Adds or replaces sound using the audio source you choose. The output stays the same length as your video: long audio is trimmed, short audio ends in silence.',
+      replace: 'Adds the selected audio to your video. If the video already has sound, it is replaced. The output stays the same length as your video: long audio is trimmed, short audio ends in silence.',
       remove: 'Creates a silent video while keeping the picture. No second file is needed.'
     }[mode];
 
@@ -316,7 +316,7 @@ class VideoAudioTool extends Tool {
       this.updateProgress(25);
 
       const videoInputName = `source-video${getExtension(this.videoFile.name)}`;
-      const outputSuffix = mode === 'replace' ? 'new-audio' : `${mode}-audio`;
+      const outputSuffix = mode === 'replace' ? 'add-audio' : `${mode}-audio`;
       const outputFileName = `${getBaseName(this.videoFile.name)}-${outputSuffix}.mp4`;
       await writeInputFile(this.ffmpeg, videoInputName, this.videoFile);
 
@@ -324,7 +324,6 @@ class VideoAudioTool extends Tool {
       if (AUDIO_SOURCE_MODES.has(mode)) {
         audioInputName = `audio-source${getExtension(this.audioFile.name)}`;
         await writeInputFile(this.ffmpeg, audioInputName, this.audioFile);
-        await this.ensureAudioSourceContainsAudio(audioInputName);
       }
       this.updateProgress(45);
 
@@ -348,8 +347,9 @@ class VideoAudioTool extends Tool {
       );
 
       try {
-        await executeFFmpeg(this.ffmpeg, args);
+        await this.executeAudioCommand(args);
       } catch (copyError) {
+        if (this.isNoAudioTrackError(copyError)) throw copyError;
         if (!tryCopyVideo) throw copyError;
         this.log(`Fast video copy failed, retrying with browser-compatible MP4 video: ${copyError.message}`, 'warning');
         try {
@@ -358,7 +358,7 @@ class VideoAudioTool extends Tool {
           // Output may not exist after a failed FFmpeg run.
         }
         args = buildVideoAudioCommand({ ...commandOptions, copyVideo: false });
-        await executeFFmpeg(this.ffmpeg, args);
+        await this.executeAudioCommand(args);
       }
 
       this.updateProgress(80);
@@ -385,23 +385,28 @@ class VideoAudioTool extends Tool {
     this.elements.lastCommandSummary.setAttribute('data-delay-seconds', String(delaySeconds));
   }
 
-  async ensureAudioSourceContainsAudio(audioInputName) {
-    this.log('Checking audio source for an audio track...', 'info');
-    try {
-      const exitCode = await this.ffmpeg.exec([
-        '-i', audioInputName,
-        '-map', '0:a:0',
-        '-t', '0.1',
-        '-f', 'null',
-        '-'
-      ]);
+  async executeAudioCommand(args) {
+    const commandLogs = [];
+    const collectLog = ({ message }) => {
+      if (message) commandLogs.push(message);
+    };
 
-      if (exitCode !== 0) {
-        throw new Error('No audio track found');
+    this.ffmpeg.on('log', collectLog);
+    try {
+      await executeFFmpeg(this.ffmpeg, args);
+    } catch (error) {
+      const combinedLogs = commandLogs.join('\n');
+      if (/matches no streams|Stream map .*matches no streams|Stream specifier .*matches no streams/i.test(combinedLogs)) {
+        throw new Error('The selected audio source does not contain an audio track. Choose a video with sound or an audio file.');
       }
-    } catch {
-      throw new Error('The selected audio source does not contain an audio track. Choose a video with sound or an audio file.');
+      throw error;
+    } finally {
+      this.ffmpeg.off('log', collectLog);
     }
+  }
+
+  isNoAudioTrackError(error) {
+    return error?.message?.includes('selected audio source does not contain an audio track');
   }
 }
 

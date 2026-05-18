@@ -31,6 +31,7 @@ export function buildVideoAudioCommand({
 
   if (mode === 'remove') {
     return [
+      '-hide_banner',
       '-i', videoInputName,
       '-map', '0:v:0',
       ...outputArgs,
@@ -41,6 +42,7 @@ export function buildVideoAudioCommand({
   }
 
   const args = [];
+  args.push('-hide_banner');
   args.push('-i', videoInputName);
   if (lengthMode === 'loop') args.push('-stream_loop', '-1');
   args.push('-i', audioInputName);

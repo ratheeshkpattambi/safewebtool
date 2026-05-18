@@ -141,13 +141,13 @@ async function clickProcessButton(page) {
 }
 
 test.describe('Add or Remove Audio from Video UI', () => {
-  test('defaults to using a new audio file for silent or already-sounding videos', async ({ page }) => {
+  test('defaults to adding audio for silent or already-sounding videos', async ({ page }) => {
     await page.goto('/video/audio');
 
     await expect(page.locator('.tool-container[data-tool-ready="true"]')).toBeVisible();
     await expect(page.locator('.tool-page h1').first()).toContainText('Add or Remove Audio from Video');
     await expect(page.locator('#modeReplace')).toBeChecked();
-    await expect(page.locator('#processBtn')).toContainText('Use New Audio');
+    await expect(page.locator('#processBtn')).toContainText('Add Audio');
     await expect(page.locator('#processBtn')).toBeDisabled();
     await expect(page.getByText('Add sound to a silent video, or replace the sound it already has.')).toBeVisible();
     await expect(page.locator('#modeHelp')).toContainText('long audio is trimmed, short audio ends in silence');
@@ -157,7 +157,7 @@ test.describe('Add or Remove Audio from Video UI', () => {
     await expect(page.locator('#audioDelay')).toHaveCount(0);
   });
 
-  test('use new audio mode requires a second source and enables processing when both files are present', async ({ page }) => {
+  test('add audio mode requires a second source and enables processing when both files are present', async ({ page }) => {
     await page.goto('/video/audio');
 
     await page.setInputFiles('#fileInput', tinyVideoFile);
@@ -196,7 +196,7 @@ test.describe('Add or Remove Audio from Video UI', () => {
     expect(overflow).toBe(false);
   });
 
-  test('builds safe FFmpeg commands for remove and default new-audio modes', () => {
+  test('builds safe FFmpeg commands for remove and default add-audio modes', () => {
     expect(buildVideoAudioCommand({
       mode: 'remove',
       videoInputName: 'video.webm',
@@ -247,7 +247,7 @@ test.describe('Add or Remove Audio from Video UI', () => {
 
     await expect(page.locator('#lastCommandSummary')).toHaveAttribute('data-mode', 'replace');
     await expect(page.locator('#lastCommandSummary')).toHaveAttribute('data-length-mode', 'match');
-    await expect(page.locator('#downloadContainer a[download]')).toHaveAttribute('download', /source-video-new-audio\.mp4/);
+    await expect(page.locator('#downloadContainer a[download]')).toHaveAttribute('download', /source-video-add-audio\.mp4/);
     await expect(page.locator('#downloadContainer a[download]')).toContainText('Download MP4');
     await expect(page.locator('#outputContainer')).toBeVisible();
   });
