@@ -6,9 +6,9 @@
 // Site-wide information
 export const siteInfo = {
   name: 'SafeWebTool',
-  tagline: 'A collection of privacy-focused tools that process your media locally in your browser.',
-  philosophy: 'Your media stays private - processing happens in your browser. **No uploads, no login, no ads**. Free, secure tools [built by the community](https://github.com/ratheeshkpattambi/safewebtool).',
-  description: 'Free browser-based tools for working with videos, images, and text. No uploads - all processing happens locally in your browser.',
+  tagline: 'Safe, open-source, in-browser tools for everyday tasks.',
+  philosophy: 'Your files stay private - processing happens in your browser. **No uploads, no login, no ads, no paywalls**. Free, open-source tools [built by the community](https://github.com/ratheeshkpattambi/safewebtool).',
+  description: 'SafeWebTool is a free, open-source set of in-browser tools for everyday tasks. Your photos, videos, text, and files stay on your computer.',
   keywords: ['online tools', 'privacy tools', 'browser tools', 'no upload tools', 'local processing', 'ad-free tools', 'no login']
 };
 

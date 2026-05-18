@@ -3,8 +3,8 @@
   "site": {
     "name": "SafeWebTool",
     "url": "https://safewebtool.com",
-    "description": "Free browser-based tools for working with videos, images, and text. No uploads - all processing happens locally in your browser.",
-    "privacy": "Your media stays private - processing happens in your browser. **No uploads, no login, no ads**. Free, secure tools [built by the community](https://github.com/ratheeshkpattambi/safewebtool)."
+    "description": "SafeWebTool is a free, open-source set of in-browser tools for everyday tasks. Your photos, videos, text, and files stay on your computer.",
+    "privacy": "Your files stay private - processing happens in your browser. **No uploads, no login, no ads, no paywalls**. Free, open-source tools [built by the community](https://github.com/ratheeshkpattambi/safewebtool)."
   },
   "agentPolicy": {
     "preferredMode": "browser-automation",

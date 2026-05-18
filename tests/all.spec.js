@@ -14,7 +14,7 @@ test.describe('SafeWebTool Tests', () => {
 
   test('home alias route works', async ({ page }) => {
     await page.goto('/home');
-    await expect(page.locator('main h1')).toContainText('Welcome');
+    await expect(page.locator('main h1')).toContainText('Safe, open-source, in-browser tools');
     await expect(page.locator('nav a[href="/"]')).toHaveClass(/active/);
   });
   

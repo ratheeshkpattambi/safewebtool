@@ -111,9 +111,15 @@ export function renderHomePage() {
     <div class="mx-auto max-w-6xl px-4 py-8">
       <section class="mb-8">
         <div class="max-w-3xl">
-          <p class="text-sm font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400">No uploads. No login. No clutter.</p>
-          <h1 class="mt-3 text-4xl font-black tracking-tight text-slate-950 dark:text-white md:text-5xl">Welcome to private browser tools</h1>
-          <p class="mt-4 text-lg leading-relaxed text-slate-600 dark:text-slate-300">${siteInfo.description}</p>
+          <p class="text-sm font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400">SafeWebTool</p>
+          <h1 class="mt-3 text-4xl font-black tracking-tight text-slate-950 dark:text-white md:text-5xl">Safe, open-source, in-browser tools for everyday tasks.</h1>
+          <p class="mt-4 text-lg leading-relaxed text-slate-600 dark:text-slate-300">Use the tool. Keep your file. Your photos, videos, text, and files stay on your computer.</p>
+          <div class="mt-4 flex flex-wrap gap-2">
+            <span class="rounded-full bg-blue-50 px-3 py-1.5 text-sm font-bold text-blue-700 dark:bg-blue-950/50 dark:text-blue-200">No uploads</span>
+            <span class="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-bold text-slate-700 dark:bg-gray-700 dark:text-slate-200">No ads</span>
+            <span class="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-bold text-slate-700 dark:bg-gray-700 dark:text-slate-200">No login</span>
+            <span class="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-bold text-slate-700 dark:bg-gray-700 dark:text-slate-200">No paywalls</span>
+          </div>
         </div>
         <div class="mt-6">
           <label class="sr-only" for="homeToolSearch">Search tools</label>
