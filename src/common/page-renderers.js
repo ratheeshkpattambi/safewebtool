@@ -112,7 +112,7 @@ export function renderHomePage() {
       <section class="mb-8">
         <div class="max-w-3xl">
           <p class="text-sm font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400">SafeWebTool</p>
-          <h1 class="mt-3 text-4xl font-black tracking-tight text-slate-950 dark:text-white md:text-5xl">Safe, open-source, in-browser tools for everyday tasks.</h1>
+          <h1 class="mt-3 text-4xl font-black tracking-tight text-slate-950 dark:text-white md:text-5xl">A safe, open-source collection of everyday tools that run in your browser.</h1>
           <p class="mt-4 text-lg leading-relaxed text-slate-600 dark:text-slate-300">Use the tool. Keep your file. Your photos, videos, text, and files stay on your computer.</p>
           <div class="mt-4 flex flex-wrap gap-2">
             <span class="rounded-full bg-blue-50 px-3 py-1.5 text-sm font-bold text-blue-700 dark:bg-blue-950/50 dark:text-blue-200">No uploads</span>

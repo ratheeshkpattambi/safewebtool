@@ -6,7 +6,7 @@
 // Site-wide information
 export const siteInfo = {
   name: 'SafeWebTool',
-  tagline: 'Safe, open-source, in-browser tools for everyday tasks.',
+  tagline: 'A safe, open-source collection of everyday tools that run in your browser.',
   philosophy: 'Your files stay private - processing happens in your browser. **No uploads, no login, no ads, no paywalls**. Free, open-source tools [built by the community](https://github.com/ratheeshkpattambi/safewebtool).',
   description: 'SafeWebTool is a free, open-source set of in-browser tools for everyday tasks. Your photos, videos, text, and files stay on your computer.',
   keywords: ['online tools', 'privacy tools', 'browser tools', 'no upload tools', 'local processing', 'ad-free tools', 'no login']
