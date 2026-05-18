@@ -39,21 +39,6 @@
         "replace",
         "remove"
       ]
-    },
-    {
-      "name": "length handling",
-      "type": "radio",
-      "selector": "input[name=\"lengthMode\"]",
-      "values": [
-        "match",
-        "loop",
-        "keep"
-      ]
-    },
-    {
-      "name": "audio delay seconds",
-      "type": "number",
-      "selector": "#audioDelay"
     }
   ],
   "outputs": [
@@ -73,9 +58,6 @@
     "audioFileInput": "#audioFileInput",
     "modeReplace": "#modeReplace",
     "modeRemove": "#modeRemove",
-    "lengthMatch": "#lengthMatch",
-    "lengthLoop": "#lengthLoop",
-    "lengthKeep": "#lengthKeep",
     "commandSummary": "#lastCommandSummary",
     "outputVideo": "#output-video",
     "download": "#downloadContainer a[download]"
@@ -84,7 +66,6 @@
     "Choose the video whose picture you want to keep",
     "Pick Use new audio or Remove audio",
     "For Use new audio, choose a second video or audio file as the sound source",
-    "Choose how to handle audio/video length differences",
     "Click the process button and download the MP4 result"
   ],
   "useCase": "Use when you need to mute a video, add sound to a silent video, or copy audio from one video into another without uploading private media.",

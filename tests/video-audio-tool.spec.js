@@ -147,15 +147,17 @@ test.describe('Add or Remove Audio from Video UI', () => {
     await expect(page.locator('.tool-container[data-tool-ready="true"]')).toBeVisible();
     await expect(page.locator('.tool-page h1').first()).toContainText('Add or Remove Audio from Video');
     await expect(page.locator('#modeReplace')).toBeChecked();
-    await expect(page.locator('#lengthMatch')).toBeChecked();
     await expect(page.locator('#processBtn')).toContainText('Use New Audio');
     await expect(page.locator('#processBtn')).toBeDisabled();
     await expect(page.getByText('Add sound to a silent video, or replace the sound it already has.')).toBeVisible();
+    await expect(page.locator('#modeHelp')).toContainText('long audio is trimmed, short audio ends in silence');
     await expect(page.locator('#modeAdd')).toHaveCount(0);
-    await expect(page.getByText('Trim long audio. Pad short audio with silence.')).toBeVisible();
+    await expect(page.locator('#timingPanel')).toHaveCount(0);
+    await expect(page.locator('#lengthMatch')).toHaveCount(0);
+    await expect(page.locator('#audioDelay')).toHaveCount(0);
   });
 
-  test('requires an audio source for replace mode and enables processing when both files are present', async ({ page }) => {
+  test('use new audio mode requires a second source and enables processing when both files are present', async ({ page }) => {
     await page.goto('/video/audio');
 
     await page.setInputFiles('#fileInput', tinyVideoFile);
@@ -168,9 +170,6 @@ test.describe('Add or Remove Audio from Video UI', () => {
     await expect(page.locator('#audioDropZone')).toBeHidden();
     await expect(page.locator('#audioFileInfo [data-change-file]')).toBeVisible();
     await expect(page.locator('#processBtn')).toBeEnabled();
-
-    await page.locator('#lengthLoop').check();
-    await expect(page.locator('#modeHelp')).toContainText('Short audio repeats until the video ends');
   });
 
   test('remove audio mode only needs the source video', async ({ page }) => {
@@ -178,7 +177,6 @@ test.describe('Add or Remove Audio from Video UI', () => {
 
     await page.locator('#modeRemove').check();
     await expect(page.locator('#audioSourcePanel')).toBeHidden();
-    await expect(page.locator('#timingPanel')).toBeHidden();
     await expect(page.locator('#processBtn')).toContainText('Remove Audio');
     await expect(page.locator('#modeHelp')).toContainText('No second file is needed');
 
@@ -198,7 +196,7 @@ test.describe('Add or Remove Audio from Video UI', () => {
     expect(overflow).toBe(false);
   });
 
-  test('builds safe FFmpeg commands for remove, match, loop, and keep modes', () => {
+  test('builds safe FFmpeg commands for remove and default new-audio modes', () => {
     expect(buildVideoAudioCommand({
       mode: 'remove',
       videoInputName: 'video.webm',
@@ -213,22 +211,6 @@ test.describe('Add or Remove Audio from Video UI', () => {
       audioInputName: 'audio.webm',
       outputFileName: 'out.mp4'
     }).join(' ')).toContain('adelay=500:all=1,apad');
-
-    expect(buildVideoAudioCommand({
-      mode: 'replace',
-      lengthMode: 'loop',
-      videoInputName: 'video.webm',
-      audioInputName: 'audio.webm',
-      outputFileName: 'out.mp4'
-    })).toEqual(expect.arrayContaining(['-stream_loop', '-1', '-shortest']));
-
-    expect(buildVideoAudioCommand({
-      mode: 'replace',
-      lengthMode: 'keep',
-      videoInputName: 'video.webm',
-      audioInputName: 'audio.webm',
-      outputFileName: 'out.mp4'
-    })).not.toContain('-shortest');
   });
 
   test('replaces audio from a second generated video and exports MP4', async ({ page }, testInfo) => {

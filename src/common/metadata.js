@@ -213,7 +213,6 @@ export const tools = {
       'Choose the video whose picture you want to keep',
       'Pick Use new audio or Remove audio',
       'For Use new audio, choose a second video or audio file as the sound source',
-      'Choose how to handle audio/video length differences',
       'Click the process button and download the MP4 result'
     ],
     useCase: 'Use when you need to mute a video, add sound to a silent video, or copy audio from one video into another without uploading private media.',
@@ -221,9 +220,7 @@ export const tools = {
       inputs: [
         { name: 'source video', type: 'file', accept: 'video/*', selector: '#fileInput' },
         { name: 'audio source', type: 'file', accept: 'video/*,audio/*', selector: '#audioFileInput', optionalForModes: ['remove'] },
-        { name: 'mode', type: 'radio', selector: 'input[name="audioMode"]', values: ['replace', 'remove'] },
-        { name: 'length handling', type: 'radio', selector: 'input[name="lengthMode"]', values: ['match', 'loop', 'keep'] },
-        { name: 'audio delay seconds', type: 'number', selector: '#audioDelay' }
+        { name: 'mode', type: 'radio', selector: 'input[name="audioMode"]', values: ['replace', 'remove'] }
       ],
       outputs: [
         { name: 'processed MP4 video', formats: ['video/mp4'], selector: '#downloadContainer a[download]' }
@@ -232,9 +229,6 @@ export const tools = {
         audioFileInput: '#audioFileInput',
         modeReplace: '#modeReplace',
         modeRemove: '#modeRemove',
-        lengthMatch: '#lengthMatch',
-        lengthLoop: '#lengthLoop',
-        lengthKeep: '#lengthKeep',
         commandSummary: '#lastCommandSummary',
         outputVideo: '#output-video',
         download: '#downloadContainer a[download]'
