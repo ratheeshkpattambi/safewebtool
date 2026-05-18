@@ -120,7 +120,7 @@ export const template = `
       <div class="-mt-4 text-center text-xs font-medium leading-5 text-slate-700 dark:text-slate-300">0%</div>
     </div>
 
-    <div id="outputContainer" class="output-container">
+    <div id="outputContainer" class="output-container" style="display: none;">
       <div class="video-wrapper">
         <video id="output-video" controls style="display: none; max-width: 100%; height: auto;"></video>
       </div>
@@ -182,6 +182,7 @@ class VideoAudioTool extends Tool {
       outputVideo: 'output-video',
       processBtn: 'processBtn',
       progress: 'progress',
+      outputContainer: 'outputContainer',
       videoFileInfo: 'videoFileInfo',
       audioFileInfo: 'audioFileInfo',
       audioSourcePanel: 'audioSourcePanel',
@@ -199,16 +200,24 @@ class VideoAudioTool extends Tool {
   async setup() {
     this.initFileUpload({
       acceptTypes: 'video/*',
-      hideDropZoneOnSelect: false,
+      hideDropZoneOnSelect: true,
       onFileSelected: file => this.handleVideoFile(file)
     });
 
     initSharedFileUpload({
       dropZoneId: 'audioDropZone',
       fileInputId: 'audioFileInput',
-      acceptTypes: '*/*',
-      hideDropZoneOnSelect: false,
+      acceptTypes: 'video/*,audio/*',
+      hideDropZoneOnSelect: true,
       onFileSelected: file => this.handleAudioFile(file)
+    });
+
+    this.elements.videoFileInfo.addEventListener('click', event => {
+      if (event.target.closest('[data-change-file]')) this.elements.fileInput.click();
+    });
+
+    this.elements.audioFileInfo.addEventListener('click', event => {
+      if (event.target.closest('[data-change-file]')) this.elements.audioFileInput.click();
     });
 
     document.querySelectorAll('input[name="audioMode"]').forEach(input => {
@@ -245,6 +254,7 @@ class VideoAudioTool extends Tool {
     }
 
     this.videoFile = file;
+    this.clearOutput();
     this.displayPreview(file, 'inputVideo');
     this.setFileInfo(this.elements.videoFileInfo, 'Video', file);
     this.log(`Loaded source video: ${file.name} (${formatFileSize(file.size)})`, 'info');
@@ -258,6 +268,7 @@ class VideoAudioTool extends Tool {
     }
 
     this.audioFile = file;
+    this.clearOutput();
     if (file.type.startsWith('video/')) {
       this.displayPreview(file, 'sourceVideoPreview');
       this.elements.sourceAudioPreview.style.display = 'none';
@@ -273,10 +284,18 @@ class VideoAudioTool extends Tool {
   setFileInfo(element, label, file) {
     element.innerHTML = `
       <strong class="block text-slate-900 dark:text-white">${label}</strong>
-      <span>${file.name}</span>
+      <span class="break-all">${file.name}</span>
       <span class="mt-1 block text-slate-500 dark:text-slate-400">${formatFileSize(file.size)} · ${file.type || 'unknown type'}</span>
+      <button type="button" data-change-file class="mt-3 rounded-md border border-slate-300 px-3 py-1.5 text-xs font-bold text-slate-700 transition-colors hover:border-blue-500 hover:text-blue-700 dark:border-gray-600 dark:text-slate-200 dark:hover:border-blue-400 dark:hover:text-blue-200">Change file</button>
     `;
     element.classList.remove('hidden');
+  }
+
+  clearOutput() {
+    this.elements.downloadContainer.innerHTML = '';
+    this.elements.outputVideo.removeAttribute('src');
+    this.elements.outputVideo.style.display = 'none';
+    this.elements.outputContainer.style.display = 'none';
   }
 
   updateModeUI() {
@@ -347,7 +366,7 @@ class VideoAudioTool extends Tool {
     try {
       this.startProcessing();
       this.updateProcessState();
-      this.elements.downloadContainer.innerHTML = '';
+      this.clearOutput();
       this.updateProgress(10);
 
       this.ffmpeg = await loadFFmpeg();
@@ -363,6 +382,7 @@ class VideoAudioTool extends Tool {
       if (AUDIO_SOURCE_MODES.has(mode)) {
         audioInputName = `audio-source${getExtension(this.audioFile.name)}`;
         await writeInputFile(this.ffmpeg, audioInputName, this.audioFile);
+        await this.ensureAudioSourceContainsAudio(audioInputName);
       }
       this.updateProgress(45);
 
@@ -403,6 +423,9 @@ class VideoAudioTool extends Tool {
       const data = await readOutputFile(this.ffmpeg, outputFileName);
       const blob = new Blob([data], { type: 'video/mp4' });
       this.displayOutputMedia(blob, 'outputVideo', outputFileName, 'downloadContainer');
+      this.elements.outputContainer.style.display = 'block';
+      const downloadLink = this.elements.downloadContainer.querySelector('a[download]');
+      if (downloadLink) downloadLink.textContent = 'Download MP4';
       this.updateProgress(100);
       this.log(`${getModeLabel(mode)} complete. Download your MP4 below.`, 'success');
       this.endProcessing();
@@ -418,6 +441,25 @@ class VideoAudioTool extends Tool {
     this.elements.lastCommandSummary.setAttribute('data-mode', mode);
     this.elements.lastCommandSummary.setAttribute('data-length-mode', lengthMode);
     this.elements.lastCommandSummary.setAttribute('data-delay-seconds', String(delaySeconds));
+  }
+
+  async ensureAudioSourceContainsAudio(audioInputName) {
+    this.log('Checking audio source for an audio track...', 'info');
+    try {
+      const exitCode = await this.ffmpeg.exec([
+        '-i', audioInputName,
+        '-map', '0:a:0',
+        '-t', '0.1',
+        '-f', 'null',
+        '-'
+      ]);
+
+      if (exitCode !== 0) {
+        throw new Error('No audio track found');
+      }
+    } catch {
+      throw new Error('The selected audio source does not contain an audio track. Choose a video with sound or an audio file.');
+    }
   }
 }
 

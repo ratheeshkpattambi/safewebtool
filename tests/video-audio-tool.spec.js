@@ -78,6 +78,56 @@ async function createSyntheticWebMFile(page, { name, frequency = 440, durationMs
   };
 }
 
+async function createSilentWebMFile(page, { name, durationMs = 700 }) {
+  const bytes = await page.evaluate(async ({ durationMs }) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 160;
+    canvas.height = 90;
+    const ctx = canvas.getContext('2d');
+    const stream = canvas.captureStream(12);
+    const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp8')
+      ? 'video/webm;codecs=vp8'
+      : 'video/webm';
+    const recorder = new MediaRecorder(stream, { mimeType });
+    const chunks = [];
+
+    recorder.ondataavailable = event => {
+      if (event.data.size) chunks.push(event.data);
+    };
+
+    const done = new Promise(resolve => {
+      recorder.onstop = async () => {
+        stream.getTracks().forEach(track => track.stop());
+        const blob = new Blob(chunks, { type: 'video/webm' });
+        resolve(Array.from(new Uint8Array(await blob.arrayBuffer())));
+      };
+    });
+
+    recorder.start();
+    const startedAt = performance.now();
+
+    function drawFrame() {
+      const elapsed = performance.now() - startedAt;
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 18px system-ui';
+      ctx.fillText('Silent', 54, 48);
+      if (elapsed < durationMs) requestAnimationFrame(drawFrame);
+    }
+    drawFrame();
+
+    setTimeout(() => recorder.stop(), durationMs);
+    return done;
+  }, { durationMs });
+
+  return {
+    name,
+    mimeType: 'video/webm',
+    buffer: Buffer.from(bytes)
+  };
+}
+
 async function clickProcessButton(page) {
   const button = page.locator('#processBtn');
   await expect(button).toBeVisible();
@@ -111,9 +161,12 @@ test.describe('Add or Remove Audio from Video UI', () => {
     await page.setInputFiles('#fileInput', tinyVideoFile);
     await expect(page.locator('#processBtn')).toBeDisabled();
     await expect(page.locator('#videoFileInfo')).toContainText('source-video.mp4');
+    await expect(page.locator('#dropZone')).toBeHidden();
 
     await page.setInputFiles('#audioFileInput', tinyAudioVideoFile);
     await expect(page.locator('#audioFileInfo')).toContainText('audio-source-video.mp4');
+    await expect(page.locator('#audioDropZone')).toBeHidden();
+    await expect(page.locator('#audioFileInfo [data-change-file]')).toBeVisible();
     await expect(page.locator('#processBtn')).toBeEnabled();
 
     await page.locator('#lengthLoop').check();
@@ -213,5 +266,37 @@ test.describe('Add or Remove Audio from Video UI', () => {
     await expect(page.locator('#lastCommandSummary')).toHaveAttribute('data-mode', 'replace');
     await expect(page.locator('#lastCommandSummary')).toHaveAttribute('data-length-mode', 'match');
     await expect(page.locator('#downloadContainer a[download]')).toHaveAttribute('download', /source-video-new-audio\.mp4/);
+    await expect(page.locator('#downloadContainer a[download]')).toContainText('Download MP4');
+    await expect(page.locator('#outputContainer')).toBeVisible();
+  });
+
+  test('shows a clear error when the selected audio source has no audio track', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name.includes('mobile'), 'Real FFmpeg processing is covered on desktop to keep mobile checks fast.');
+    test.setTimeout(180000);
+
+    await page.goto('/video/audio');
+    const sourceVideo = await createSyntheticWebMFile(page, {
+      name: 'source-video.webm',
+      frequency: 330,
+      durationMs: 700
+    });
+    const silentAudioSource = await createSilentWebMFile(page, {
+      name: 'silent-source.webm',
+      durationMs: 700
+    });
+
+    await page.setInputFiles('#fileInput', sourceVideo);
+    await page.setInputFiles('#audioFileInput', silentAudioSource);
+    await clickProcessButton(page);
+
+    await expect.poll(async () => page.locator('#logContent').inputValue(), {
+      timeout: 120000,
+      intervals: [500, 1000, 2000]
+    }).toContain('The selected audio source does not contain an audio track');
+
+    const logs = await page.locator('#logContent').inputValue();
+    await expect(page.locator('#downloadContainer a[download]')).toHaveCount(0);
+    await expect(page.locator('#outputContainer')).toBeHidden();
+    expect(logs).not.toContain('retrying with browser-compatible MP4');
   });
 });

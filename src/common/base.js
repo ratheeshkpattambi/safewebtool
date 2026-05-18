@@ -194,6 +194,7 @@ export class Tool {
       dropZoneId: dropZone.id,
       fileInputId: fileInput.id,
       acceptTypes: options.acceptTypes || '*/*',
+      hideDropZoneOnSelect: options.hideDropZoneOnSelect,
       onFileSelected: (file) => {
         this.inputFile = file;
         
