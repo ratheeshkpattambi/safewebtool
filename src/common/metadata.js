@@ -202,6 +202,51 @@ export const tools = {
     useCase: 'Perfect for creating shareable animations for social media, forums, or messaging apps from your videos.',
     featured: true
   },
+  'video/audio': {
+    id: 'audio',
+    category: 'video',
+    name: 'Add or Remove Audio from Video',
+    description: 'Remove audio from a video, or replace it with audio copied from another video or audio file. Handles different lengths, outputs MP4, and runs locally in your browser.',
+    icon: '🔊',
+    keywords: ['add audio to video', 'remove audio from video', 'replace video audio', 'copy audio from video', 'mute video', 'video audio tool'],
+    howToUse: [
+      'Choose the video whose picture you want to keep',
+      'Pick Replace, Remove, or Add audio',
+      'For Replace or Add, choose a second video or audio file as the sound source',
+      'Choose how to handle audio/video length differences',
+      'Click the process button and download the MP4 result'
+    ],
+    useCase: 'Use when you need to mute a video, add sound to a silent video, or copy audio from one video into another without uploading private media.',
+    agent: {
+      inputs: [
+        { name: 'source video', type: 'file', accept: 'video/*', selector: '#fileInput' },
+        { name: 'audio source', type: 'file', accept: 'video/*,audio/*', selector: '#audioFileInput', optionalForModes: ['remove'] },
+        { name: 'mode', type: 'radio', selector: 'input[name="audioMode"]', values: ['replace', 'remove', 'add'] },
+        { name: 'length handling', type: 'radio', selector: 'input[name="lengthMode"]', values: ['match', 'loop', 'keep'] },
+        { name: 'audio delay seconds', type: 'number', selector: '#audioDelay' }
+      ],
+      outputs: [
+        { name: 'processed MP4 video', formats: ['video/mp4'], selector: '#downloadContainer a[download]' }
+      ],
+      selectors: {
+        audioFileInput: '#audioFileInput',
+        modeReplace: '#modeReplace',
+        modeRemove: '#modeRemove',
+        modeAdd: '#modeAdd',
+        lengthMatch: '#lengthMatch',
+        lengthLoop: '#lengthLoop',
+        lengthKeep: '#lengthKeep',
+        commandSummary: '#lastCommandSummary',
+        outputVideo: '#output-video',
+        download: '#downloadContainer a[download]'
+      },
+      exampleTasks: [
+        'Copy audio from one video into another video.',
+        'Remove audio from a video and download a silent MP4.',
+        'Add an audio file to a silent video while keeping files in the browser.'
+      ]
+    }
+  },
   'video/mp4': {
     id: 'mp4',
     category: 'video',

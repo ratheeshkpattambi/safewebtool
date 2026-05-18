@@ -8,6 +8,7 @@ const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const srcDir = path.join(rootDir, 'src');
 const ignoredModulePaths = new Set([
   'image/sample-image',
+  'video/audio-command',
   'video/ffmpeg-utils'
 ]);
 

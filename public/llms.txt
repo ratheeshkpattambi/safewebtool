@@ -48,6 +48,8 @@ Sitemap: https://safewebtool.com/sitemap.xml
   - Agent contract: https://safewebtool.com/time/timer/agent.json
 - Time Zone Converter: https://safewebtool.com/time/timezone-converter
   - Agent contract: https://safewebtool.com/time/timezone-converter/agent.json
+- Add or Remove Audio from Video: https://safewebtool.com/video/audio
+  - Agent contract: https://safewebtool.com/video/audio/agent.json
 - Video to GIF: https://safewebtool.com/video/gif
   - Agent contract: https://safewebtool.com/video/gif/agent.json
 - Extract Video Metadata: https://safewebtool.com/video/info

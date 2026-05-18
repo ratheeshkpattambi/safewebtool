@@ -102,6 +102,10 @@ if (tool.category === 'video') {
     videoSpecs.push('tests/reencode-downloaded.spec.js', 'tests/reencode-downloaded-mp4.spec.js');
   }
 
+  if (toolPath === 'video/audio') {
+    videoSpecs.push('tests/video-audio-tool.spec.js');
+  }
+
   run('npx', [
     'playwright',
     'test',
