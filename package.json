@@ -21,12 +21,12 @@
     "verify:netlify": "npm run build:netlify && npm run test:contract",
     "scaffold:tool": "node scripts/scaffold-tool.mjs",
     "copy-src": "mkdir -p dist/src && cp -r src/* dist/src/",
-    "copy-ffmpeg-files": "mkdir -p dist/ffmpeg && curl -L -o dist/ffmpeg/ffmpeg-core.js https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.js && curl -L -o dist/ffmpeg/ffmpeg-core.wasm https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.wasm && curl -L -o dist/ffmpeg/ffmpeg-core.worker.js https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.worker.js"
+    "copy-ffmpeg-files": "node scripts/copy-ffmpeg-files.mjs"
   },
   "dependencies": {
     "@ffmpeg/core": "^0.12.10",
-    "@ffmpeg/ffmpeg": "^0.12.10",
-    "@ffmpeg/util": "^0.12.1",
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
     "@huggingface/transformers": "^3.6.3",
     "compressorjs": "^1.2.1",
     "js-yaml": "^4.1.0"

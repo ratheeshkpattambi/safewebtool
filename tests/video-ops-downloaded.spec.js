@@ -1,7 +1,8 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
+import { fileURLToPath } from 'node:url';
 
-const SAMPLE_FILE = '/tmp/bunny-small.mp4';
+const SAMPLE_FILE = fileURLToPath(new URL('./fixtures/sample.mp4', import.meta.url));
 
 async function clickProcessButton(page, selector = '#processBtn') {
   const button = page.locator(selector);
@@ -71,12 +72,8 @@ async function uploadAndWaitForSuccess(page, {
   await expect(page.locator(downloadSelector)).toBeVisible();
 }
 
-test.describe('Video Ops E2E (Big Buck Bunny small sample)', () => {
+test.describe('Video Ops E2E (sample fixture)', () => {
   test.describe.configure({ mode: 'serial' });
-  test.beforeAll(async () => {
-    // Ensure the Bunny sample exists for these local e2e checks.
-    // Playwright will surface a clear error if missing when setInputFiles runs.
-  });
 
   test('reencode default (MP4)', async ({ page }) => {
     test.setTimeout(180000);

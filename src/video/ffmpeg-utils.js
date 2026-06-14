@@ -1,159 +1,74 @@
 import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { fetchFile } from '@ffmpeg/util';
+import { fetchFile, toBlobURL } from '@ffmpeg/util';
 import { addLog, updateProgress } from '../common/utils.js';
 
 let ffmpeg = null;
+let ffmpegLoadPromise = null;
+
+// Core version must match the @ffmpeg/core version in package.json.
+const CORE_VERSION = '0.12.10';
+
+const CORE_BASE_URLS = [
+  '/ffmpeg',
+  `https://cdn.jsdelivr.net/npm/@ffmpeg/core@${CORE_VERSION}/dist/esm`,
+  `https://unpkg.com/@ffmpeg/core@${CORE_VERSION}/dist/esm`
+];
 
 /**
- * Fetch with timeout to handle slow CDNs
+ * Create and load an FFmpeg instance from the first working base URL.
+ * Each base URL is tried with its own fresh FFmpeg instance so a partially
+ * failed load doesn't leave the worker in a bad state for the next attempt.
  */
-async function fetchWithTimeout(url, options = {}, timeout = 5000) {
-  addLog(`Fetching: ${url}`, 'info');
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
-  try {
-    const response = await fetch(url, {
-      ...options,
-      signal: controller.signal
+async function createFFmpegInstance(baseURLs) {
+  let lastError;
+  for (const baseURL of baseURLs) {
+    const instance = new FFmpeg();
+    instance.on('log', ({ message }) => addLog(message, 'info'));
+    instance.on('progress', ({ progress }) => {
+      updateProgress(Math.round(progress * 100));
     });
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    clearTimeout(id);
-    return response;
-  } catch (error) {
-    clearTimeout(id);
-    if (error.name === 'AbortError') {
-      throw new Error(`Fetch timeout after ${timeout}ms: ${url}`);
-    }
-    throw error;
-  }
-}
 
-/**
- * Try loading FFmpeg from multiple CDNs
- */
-async function tryMultipleCDNs() {
-  // CRITICAL: This specific CDN and version must be maintained
-  const cdns = [
-    'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm',
-    'https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm',
-    '/video/ffmpeg'  // Fallback to local files
-  ];
-
-  for (const baseURL of cdns) {
     try {
-      addLog(`Trying CDN: ${baseURL}`, 'info');
-      
-      // Test if the CDN is responsive
-      await fetchWithTimeout(`${baseURL}/ffmpeg-core.js`);
-      addLog(`✓ CDN ${baseURL} is responsive`, 'success');
+      addLog(`Loading FFmpeg core from ${baseURL}...`, 'info');
+      updateLoadingIndicator(20, 'Loading FFmpeg core...');
 
-      // Create blob URLs for the FFmpeg files
-      const coreURL = await toBlobURL(
-        `${baseURL}/ffmpeg-core.js`,
-        'text/javascript'
-      );
-      addLog('✓ Core JS blob URL created', 'success');
+      const coreURL = await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript');
+      const wasmURL = await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm');
+      await instance.load({ coreURL, wasmURL });
 
-      const wasmURL = await toBlobURL(
-        `${baseURL}/ffmpeg-core.wasm`,
-        'application/wasm'
-      );
-      addLog('✓ WASM blob URL created', 'success');
-
-      const workerURL = await toBlobURL(
-        `${baseURL}/ffmpeg-core.worker.js`,
-        'text/javascript'
-      );
-      addLog('✓ Worker blob URL created', 'success');
-
-      return { coreURL, wasmURL, workerURL };
+      addLog(`FFmpeg core loaded from ${baseURL}`, 'success');
+      updateLoadingIndicator(100, 'FFmpeg loaded successfully!');
+      return instance;
     } catch (error) {
-      addLog(`Failed to load from ${baseURL}: ${error.message}`, 'error');
-      console.error(`CDN ${baseURL} failed:`, error);
-      continue;
+      lastError = error;
+      addLog(`Failed to load FFmpeg core from ${baseURL}: ${error.message}`, 'error');
+      instance.terminate();
     }
   }
-  throw new Error('All CDNs failed to load FFmpeg core files');
+  throw lastError || new Error('All FFmpeg core sources failed to load');
 }
 
 /**
- * Load FFmpeg WASM
+ * Load FFmpeg WASM.
  */
 export async function loadFFmpeg() {
   if (ffmpeg) return ffmpeg;
-  
-  try {
-    addLog('Loading FFmpeg...', 'info');
-    
-    // Update the loading indicator if it exists
+  if (ffmpegLoadPromise) return ffmpegLoadPromise;
+
+  ffmpegLoadPromise = (async () => {
     updateLoadingIndicator(10, 'Initializing FFmpeg...');
-    
-    // Create a new FFmpeg instance
-    ffmpeg = new FFmpeg();
-    
-    ffmpeg.on('log', ({ message }) => {
-      addLog(message, 'info');
-    });
+    return createFFmpegInstance(CORE_BASE_URLS);
+  })();
 
-    ffmpeg.on('progress', ({ progress }) => {
-      const percentage = Math.round(progress * 100);
-      updateProgress(percentage);
-      
-      // Also update the loading indicator if it exists
-      updateLoadingIndicator(10 + percentage * 0.9, 'Loading FFmpeg WASM...');
-    });
-
-    // Notify that we're fetching WASM files
-    updateLoadingIndicator(20, 'Fetching FFmpeg WASM components...');
-    
-    // Try to prefetch FFmpeg files to improve loading performance
-    try {
-      prefetchFFmpegResources();
-    } catch (e) {
-      console.warn('Prefetch failed, continuing with normal loading', e);
-    }
-    
-    // Load from CDN
-    addLog('Loading FFmpeg from unpkg CDN...', 'info');
-    const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm';
-    
-    try {
-      await ffmpeg.load({
-        coreURL: `${baseURL}/ffmpeg-core.js`,
-        wasmURL: `${baseURL}/ffmpeg-core.wasm`,
-        // workerURL: `${baseURL}/ffmpeg-core.worker.js` // Omit initially, FFmpeg might find it or not need it with unpkg
-      });
-      addLog('FFmpeg loaded successfully from unpkg!', 'success');
-    } catch (unpkgError) {
-      addLog(`Failed to load FFmpeg from unpkg: ${unpkgError.message}. Attempting jsDelivr as fallback...`, 'error');
-      console.error('unpkg load failed:', unpkgError);
-      // Fallback to jsDelivr if unpkg fails, but try to find a working worker URL or omit if not strictly needed
-      try {
-        addLog('Attempting to load FFmpeg from jsDelivr (fallback)...', 'info');
-        await ffmpeg.load({
-          coreURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.js',
-          wasmURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.wasm',
-          // workerURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.worker.js' // This was 404ing
-          // If FFmpeg still requires a worker explicitly and jsDelivr's is 404, this will also fail.
-          // We might need to verify if a worker is needed for this version or find an alternative worker URL.
-        });
-        addLog('FFmpeg loaded successfully from jsDelivr (fallback)!', 'success');
-      } catch (jsdelivrError) {
-        addLog(`Failed to load FFmpeg from jsDelivr as well: ${jsdelivrError.message}`, 'error');
-        console.error('jsDelivr fallback load failed:', jsdelivrError);
-        throw new Error(`Failed to load FFmpeg from all sources: unpkg -> ${unpkgError.message}, jsDelivr -> ${jsdelivrError.message}`);
-      }
-    }
-    
-    updateLoadingIndicator(100, 'FFmpeg loaded successfully!');
-    addLog('FFmpeg loaded successfully!', 'success');
+  try {
+    ffmpeg = await ffmpegLoadPromise;
     return ffmpeg;
   } catch (error) {
     addLog(`Failed to load FFmpeg: ${error.message}`, 'error');
     updateLoadingIndicator(100, `Error: ${error.message}`, true);
     throw error;
+  } finally {
+    ffmpegLoadPromise = null;
   }
 }
 
@@ -168,7 +83,7 @@ function updateLoadingIndicator(percent, message, isError = false) {
       progressFill.style.width = `${percent}%`;
       progressFill.style.backgroundColor = isError ? '#e74c3c' : '';
     }
-    
+
     const messageEl = loadingEl.querySelector('p');
     if (messageEl && message) {
       messageEl.textContent = message;
@@ -177,34 +92,6 @@ function updateLoadingIndicator(percent, message, isError = false) {
       }
     }
   }
-}
-
-/**
- * Prefetch FFmpeg resources to improve loading performance
- */
-function prefetchFFmpegResources() {
-  const unpkgBaseURL = 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm';
-  const resourcesToPrefetch = [
-    { url: `${unpkgBaseURL}/ffmpeg-core.js`, as: 'script' },
-    { url: `${unpkgBaseURL}/ffmpeg-core.wasm`, as: 'fetch' },
-    // { url: `${unpkgBaseURL}/ffmpeg-core.worker.js`, as: 'script' } // unpkg doesn't serve this file
-  ];
-  
-  addLog('Prefetching FFmpeg resources from unpkg...', 'info');
-  resourcesToPrefetch.forEach(resource => {
-    try {
-      const link = document.createElement('link');
-      link.rel = 'prefetch';
-      link.href = resource.url;
-      link.as = resource.as;
-      link.crossOrigin = 'anonymous';
-      document.head.appendChild(link);
-      addLog(`Prefetch initiated for: ${resource.url}`, 'info');
-    } catch (error) {
-      // Silently ignore prefetch errors, as this is an optimization
-      console.warn(`Prefetch failed for: ${resource.url}`, error);
-    }
-  });
 }
 
 /**
@@ -332,7 +219,10 @@ export function getFastWebMEncodeArgs({ quality = 'medium', bitrateKbps = 1200, 
   ];
 
   if (audio) {
-    args.push('-c:a', 'libopus', '-b:a', '96k');
+    // libopus crashes @ffmpeg/core@0.12.10 with "memory access out of bounds"
+    // regardless of resolution (https://github.com/ffmpegwasm/ffmpeg.wasm/issues/591).
+    // libvorbis is the stable WebM audio codec for this core version.
+    args.push('-c:a', 'libvorbis', '-b:a', '96k');
   } else {
     args.push('-an');
   }

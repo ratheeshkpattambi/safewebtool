@@ -1,5 +1,8 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
+import { fileURLToPath } from 'node:url';
+
+const SAMPLE_MP4 = fileURLToPath(new URL('./fixtures/sample.mp4', import.meta.url));
 
 async function clickProcessButton(page) {
   const button = page.locator('#processBtn');
@@ -19,7 +22,7 @@ test('re-encodes downloaded sample MP4 to MP4 (default path)', async ({ page }) 
   await page.goto('/video/reencode');
   await expect(page.locator('.tool-page')).toBeVisible();
 
-  await page.setInputFiles('#fileInput', '/tmp/sample-test.mp4');
+  await page.setInputFiles('#fileInput', SAMPLE_MP4);
   await page.fill('#bitrate', '900');
   await page.selectOption('#format', 'mp4');
   await clickProcessButton(page);
