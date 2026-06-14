@@ -15,7 +15,7 @@ You are a contributor, not a reviewer. When asked to add a tool, fix a bug, or r
 ## Cardinal Rules (Never Violate)
 
 1. **No server calls from tool logic.** Tools may use CDN-hosted WASM/ML models, but never POST user files to a remote server.
-2. **Privacy-first.** Never add analytics, tracking, or third-party data collection to tool pages.
+2. **Privacy-first.** Tool processing logic must never send user files or file content to any analytics/tracking/third-party service. The site already loads anonymous, page-view-only Google Analytics (`src/main.js`, gated off localhost) for usage stats — that's intentional and should be preserved, not removed. Don't add new tracking, and don't add any analytics calls inside tool modules.
 3. **No router edits for normal tool additions.** The dynamic import glob in `tool-registry.js` discovers tools automatically. Adding metadata + a module file is enough.
 4. **Minimal code.** Prefer reusing `src/common/*` over copy-pasting. Avoid bloated libraries or excessive comments.
 5. **Mobile-first.** Tools must work and look correct on small screens.
