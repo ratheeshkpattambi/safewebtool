@@ -112,39 +112,35 @@ export function createFFmpegLoadingElement() {
 
 export function renderHomePage() {
   const entries = getToolEntries();
-  const featured = entries.filter(({ tool }) => tool.featured).slice(0, 6);
   const allTools = entries.sort((a, b) => a.tool.name.localeCompare(b.tool.name));
 
   return `
     <div class="mx-auto max-w-6xl px-4 py-8">
       <section class="mb-8">
-        <div class="max-w-3xl">
-          <p class="text-sm font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400">SafeWebTool</p>
-          <h1 class="mt-3 text-4xl font-black tracking-tight text-slate-950 dark:text-white md:text-5xl">A safe, open-source collection of everyday tools that run in your browser.</h1>
-          <p class="mt-4 text-lg leading-relaxed text-slate-600 dark:text-slate-300">Use the tool. Keep your file. Your photos, videos, text, and files stay on your computer.</p>
+        <div class="max-w-2xl">
+          <p class="text-xs font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">Free · Open Source · ${allTools.length} Tools</p>
+          <h1 class="mt-2 text-4xl font-black leading-tight tracking-tight text-slate-950 dark:text-white md:text-5xl">Free browser tools. Zero uploads.</h1>
+          <p class="mt-4 text-lg leading-relaxed text-slate-600 dark:text-slate-300">Edit video, compress images, transcribe audio, format code — everything runs in your browser. Your files never leave your device.</p>
           <div class="mt-4 flex flex-wrap gap-2">
-            <span class="rounded-full bg-blue-50 px-3 py-1.5 text-sm font-bold text-blue-700 dark:bg-blue-950/50 dark:text-blue-200">No uploads</span>
+            <span class="rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-bold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-200">No account</span>
             <span class="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-bold text-slate-700 dark:bg-gray-700 dark:text-slate-200">No ads</span>
-            <span class="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-bold text-slate-700 dark:bg-gray-700 dark:text-slate-200">No login</span>
-            <span class="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-bold text-slate-700 dark:bg-gray-700 dark:text-slate-200">No paywalls</span>
+            <span class="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-bold text-slate-700 dark:bg-gray-700 dark:text-slate-200">No paywall</span>
+            <span class="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-bold text-slate-700 dark:bg-gray-700 dark:text-slate-200">Open source</span>
           </div>
         </div>
-        <div class="mt-6">
+        <div class="mt-6 max-w-[540px]">
           <label class="sr-only" for="homeToolSearch">Search tools</label>
-          <input id="homeToolSearch" data-tool-filter type="search" placeholder="Search tools by task, format, or keyword..." class="w-full rounded-md border border-slate-300 bg-white px-4 py-4 text-lg text-slate-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:ring-blue-950">
+          <input id="homeToolSearch" data-tool-filter type="search" placeholder="Search tools — resize video, compress image, OCR…" class="w-full rounded-md border border-slate-300 bg-white px-4 py-4 text-lg text-slate-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:ring-blue-950">
         </div>
       </section>
 
-      <section class="mb-8">
-        <h2 class="mb-3 text-sm font-black uppercase tracking-wide text-slate-500 dark:text-slate-400">Popular</h2>
-        <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-          ${featured.map(({ path, tool }, index) => renderToolCard(path, tool, index)).join('')}
+      <section class="mb-6">
+        <div class="flex gap-2 overflow-x-auto pb-1" data-category-filters role="group" aria-label="Filter by category">
+          <button type="button" data-category-filter class="shrink-0 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors border-blue-600 bg-blue-600 text-white" aria-pressed="true">All</button>
+          ${Object.values(categories).map(category => `
+            <button type="button" data-category-filter="${category.id}" class="shrink-0 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors border-slate-200 text-slate-600 hover:border-blue-300 hover:text-blue-700 dark:border-gray-700 dark:text-slate-300" aria-pressed="false">${category.icon} ${category.name.replace(' Tools', '')}</button>
+          `).join('')}
         </div>
-      </section>
-
-      <section class="mb-8">
-        <h2 class="mb-3 text-sm font-black uppercase tracking-wide text-slate-500 dark:text-slate-400">Categories</h2>
-        ${renderCategoryPills('')}
       </section>
 
       <section>

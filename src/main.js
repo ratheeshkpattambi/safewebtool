@@ -111,29 +111,62 @@ function initGlobalToolSearch() {
   });
 }
 
+function applyToolFilters(scope) {
+  const filterInput = scope.querySelector('[data-tool-filter]');
+  const query = filterInput ? filterInput.value.trim().toLowerCase() : '';
+  const activeButton = scope.querySelector('[data-category-filter][aria-pressed="true"]');
+  const category = activeButton ? activeButton.getAttribute('data-category-filter') : '';
+
+  const cards = Array.from(scope.querySelectorAll('[data-tool-card]'));
+  let visible = 0;
+
+  cards.forEach(card => {
+    const path = card.getAttribute('data-tool-path');
+    const tool = path ? getToolEntries().find(entry => entry.path === path)?.tool : null;
+    const text = path && tool ? getToolSearchText(path, tool) : card.textContent.toLowerCase();
+    const matchesQuery = !query || text.includes(query);
+    const matchesCategory = !category || card.getAttribute('data-tool-category') === category;
+    const match = matchesQuery && matchesCategory;
+    card.style.display = match ? '' : 'none';
+    if (match) visible += 1;
+  });
+
+  const count = scope.querySelector('[data-tool-count]');
+  if (count) {
+    count.textContent = query || category ? `${visible} matches` : '';
+  }
+}
+
 function initInlineToolFilters() {
   document.addEventListener('input', event => {
     const filter = event.target.closest('[data-tool-filter]');
     if (!filter) return;
 
-    const query = filter.value.trim().toLowerCase();
     const scope = filter.closest('main') || document;
-    const cards = Array.from(scope.querySelectorAll('[data-tool-card]'));
-    let visible = 0;
+    applyToolFilters(scope);
+  });
 
-    cards.forEach(card => {
-      const path = card.getAttribute('data-tool-path');
-      const tool = path ? getToolEntries().find(entry => entry.path === path)?.tool : null;
-      const text = path && tool ? getToolSearchText(path, tool) : card.textContent.toLowerCase();
-      const match = !query || text.includes(query);
-      card.style.display = match ? '' : 'none';
-      if (match) visible += 1;
+  document.addEventListener('click', event => {
+    const button = event.target.closest('[data-category-filter]');
+    if (!button) return;
+
+    const group = button.closest('[data-category-filters]');
+    if (!group) return;
+
+    group.querySelectorAll('[data-category-filter]').forEach(btn => {
+      const isActive = btn === button;
+      btn.setAttribute('aria-pressed', String(isActive));
+      btn.classList.toggle('border-blue-600', isActive);
+      btn.classList.toggle('bg-blue-600', isActive);
+      btn.classList.toggle('text-white', isActive);
+      btn.classList.toggle('border-slate-200', !isActive);
+      btn.classList.toggle('text-slate-600', !isActive);
+      btn.classList.toggle('dark:border-gray-700', !isActive);
+      btn.classList.toggle('dark:text-slate-300', !isActive);
     });
 
-    const count = scope.querySelector('[data-tool-count]');
-    if (count) {
-      count.textContent = query ? `${visible} matches` : '';
-    }
+    const scope = group.closest('main') || document;
+    applyToolFilters(scope);
   });
 }
 
