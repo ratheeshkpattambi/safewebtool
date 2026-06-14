@@ -21,8 +21,9 @@ export default defineConfig({
         // Preserve source directory structure for tool files
         entryFileNames: (chunkInfo) => {
           const id = chunkInfo.facadeModuleId || '';
-          // Match tool paths and preserve their structure
-          if (id.match(/\/src\/(video|image|text)\/[a-z-]+\.js$/)) {
+          // Preserve the structure of any category tool module (not shared/common).
+          // Matches any src/<category>/<toolId>.js, including digit-containing ids like ml/image2text.
+          if (id.match(/\/src\/(?!common\/)[a-z0-9-]+\/[a-z0-9-]+\.js$/)) {
             // Preserve the full path including src
             const path = id.includes('/src/') ? id.split('/src/')[1] : id;
             return `src/${path}`;

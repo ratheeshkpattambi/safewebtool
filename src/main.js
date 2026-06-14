@@ -1,5 +1,6 @@
 import { handleRoute } from './router.js';
 import { categories, getToolEntries, getToolSearchText } from './common/metadata.js';
+import { loadToolModule, resolveAppRoute } from './common/tool-registry.js';
 import './styles/main.css';
 import './index.css';
 
@@ -157,6 +158,31 @@ function initToolShareButtons() {
   });
 }
 
+// Warm the tool chunk before the click so navigation feels instant.
+function initToolPrefetch() {
+  const prefetched = new Set();
+
+  const prefetch = (link) => {
+    const href = link?.getAttribute('href');
+    if (!href || !href.startsWith('/') || link.hostname !== window.location.hostname) return;
+
+    const route = resolveAppRoute(href);
+    if (route.kind !== 'tool' || prefetched.has(route.toolPath)) return;
+
+    prefetched.add(route.toolPath);
+    loadToolModule(route.categoryId, route.toolId).catch(() => prefetched.delete(route.toolPath));
+  };
+
+  const onHover = (event) => {
+    const link = event.target.closest?.('a');
+    if (link) prefetch(link);
+  };
+
+  document.addEventListener('mouseover', onHover);
+  document.addEventListener('focusin', onHover);
+  document.addEventListener('touchstart', onHover, { passive: true });
+}
+
 // Router functionality
 function initRouter() {
   // Handle initial page load
@@ -262,6 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   renderNavigation();
   initRouter();
+  initToolPrefetch();
   initGlobalToolSearch();
   initInlineToolFilters();
   initToolShareButtons();
