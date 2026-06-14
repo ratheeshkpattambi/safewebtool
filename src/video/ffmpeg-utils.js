@@ -36,8 +36,8 @@ async function fetchWithTimeout(url, options = {}, timeout = 5000) {
 async function tryMultipleCDNs() {
   // CRITICAL: This specific CDN and version must be maintained
   const cdns = [
-    'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm',
-    'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm',
+    'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm',
+    'https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm',
     '/video/ffmpeg'  // Fallback to local files
   ];
 
@@ -117,7 +117,7 @@ export async function loadFFmpeg() {
     
     // Load from CDN
     addLog('Loading FFmpeg from unpkg CDN...', 'info');
-    const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm';
+    const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm';
     
     try {
       await ffmpeg.load({
@@ -133,10 +133,10 @@ export async function loadFFmpeg() {
       try {
         addLog('Attempting to load FFmpeg from jsDelivr (fallback)...', 'info');
         await ffmpeg.load({
-          coreURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js',
-          wasmURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm',
-          // workerURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.worker.js' // This was 404ing
-          // If FFmpeg 0.12.6 still requires a worker explicitly and jsDelivr's is 404, this will also fail.
+          coreURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.js',
+          wasmURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.wasm',
+          // workerURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.worker.js' // This was 404ing
+          // If FFmpeg still requires a worker explicitly and jsDelivr's is 404, this will also fail.
           // We might need to verify if a worker is needed for this version or find an alternative worker URL.
         });
         addLog('FFmpeg loaded successfully from jsDelivr (fallback)!', 'success');
@@ -183,11 +183,11 @@ function updateLoadingIndicator(percent, message, isError = false) {
  * Prefetch FFmpeg resources to improve loading performance
  */
 function prefetchFFmpegResources() {
-  const unpkgBaseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm';
+  const unpkgBaseURL = 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm';
   const resourcesToPrefetch = [
     { url: `${unpkgBaseURL}/ffmpeg-core.js`, as: 'script' },
     { url: `${unpkgBaseURL}/ffmpeg-core.wasm`, as: 'fetch' },
-    // { url: `${unpkgBaseURL}/ffmpeg-core.worker.js`, as: 'script' } // unpkg might not have/need this explicitly for v0.12.6
+    // { url: `${unpkgBaseURL}/ffmpeg-core.worker.js`, as: 'script' } // unpkg doesn't serve this file
   ];
   
   addLog('Prefetching FFmpeg resources from unpkg...', 'info');
