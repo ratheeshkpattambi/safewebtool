@@ -21,7 +21,7 @@
     "verify:netlify": "npm run build:netlify && npm run test:contract",
     "scaffold:tool": "node scripts/scaffold-tool.mjs",
     "copy-src": "mkdir -p dist/src && cp -r src/* dist/src/",
-    "copy-ffmpeg-files": "mkdir -p dist/ffmpeg && curl -L -o dist/ffmpeg/ffmpeg-core.js https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js && curl -L -o dist/ffmpeg/ffmpeg-core.wasm https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm && curl -L -o dist/ffmpeg/ffmpeg-core.worker.js https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.worker.js"
+    "copy-ffmpeg-files": "mkdir -p dist/ffmpeg && curl -L -o dist/ffmpeg/ffmpeg-core.js https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.js && curl -L -o dist/ffmpeg/ffmpeg-core.wasm https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.wasm && curl -L -o dist/ffmpeg/ffmpeg-core.worker.js https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.worker.js"
   },
   "dependencies": {
     "@ffmpeg/core": "^0.12.10",
