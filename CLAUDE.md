@@ -99,12 +99,31 @@ npm run verify:full
 
 Run `npm run verify:full` when touching: routing, shared base/upload utilities, FFmpeg helpers, or multiple tools at once.
 
+### Test Media Fixtures
+
+`tests/fixtures/` contains small, checked-in sample files for FFmpeg-based tool tests:
+`sample.mp4` (320x240 H.264), `sample.webm` (VP8/Opus, MediaRecorder-generated),
+`sample.mp3`, `sample.wav`, `sample.gif`. Tests like `video-ops-downloaded.spec.js`,
+`reencode-downloaded.spec.js`, and `reencode-downloaded-mp4.spec.js` use these directly —
+no manual download step required.
+
+To regenerate them (e.g. after an FFmpeg core upgrade), run the dev server and:
+
+```bash
+npm run dev &
+node scripts/generate-test-fixtures.mjs
+```
+
 ## Video Tools — Extra Care
 
 - FFmpeg WASM is slower than desktop — use fast presets: H.264 `ultrafast`-ish, VP8 (`libvpx`) over VP9.
 - Normalize FFmpeg failures early; don't let empty output silently look like success.
 - All video tool pages need: log panel, progress bar, output preview, download link.
 - Validate against `tests/video-ui-consistency.spec.js` after video tool changes.
+- **WebM audio**: use `libvorbis`, not `libopus`, for `-c:a` with `@ffmpeg/core@0.12.10` —
+  `libopus` crashes with "memory access out of bounds" regardless of resolution
+  ([ffmpegwasm/ffmpeg.wasm#591](https://github.com/ffmpegwasm/ffmpeg.wasm/issues/591)).
+  See `getFastWebMEncodeArgs` in `src/video/ffmpeg-utils.js`.
 
 ## Common Bugs to Avoid
 
@@ -112,6 +131,7 @@ Run `npm run verify:full` when touching: routing, shared base/upload utilities, 
 - **FFmpeg failed but UI looks OK**: Always check exit code in `ffmpeg-utils.js`, not just log output.
 - **Empty output file**: Downstream symptom of a decode/encode error — fix root cause, not symptoms.
 - **Mobile test click interception**: Use `scrollIntoViewIfNeeded()` + `click({ force: true })` in Playwright tests.
+- **FFmpeg core version drift**: `@ffmpeg/core` in `package.json`, the CDN URLs in `ffmpeg-utils.js`, and `scripts/copy-ffmpeg-files.mjs` must all reference the same `CORE_VERSION` — keep them in sync when upgrading.
 
 ## Generated Files — Do Not Hand-Edit
 
