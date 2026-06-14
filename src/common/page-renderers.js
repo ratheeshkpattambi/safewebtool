@@ -79,7 +79,15 @@ export function renderToolPageShell(toolInfo) {
           </div>
         </div>
         <div class="px-4 py-5 sm:p-6">
-          <div class="tool-content-area" data-agent-region="tool-ui"></div>
+          <div class="tool-content-area" data-agent-region="tool-ui">
+            <div data-tool-loading class="flex flex-col items-center justify-center gap-3 py-20 text-slate-400 dark:text-slate-500">
+              <svg class="h-8 w-8 animate-spin text-blue-500" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4z"></path>
+              </svg>
+              <span class="text-sm font-medium">Loading tool…</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

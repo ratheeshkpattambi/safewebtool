@@ -11,10 +11,6 @@ import { loadToolModule, resolveAppRoute } from './common/tool-registry.js';
 
 let navigationToken = 0;
 
-function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 function isHomePath(path) {
   return path === '/' || path === '/home';
 }
@@ -96,14 +92,16 @@ function injectToolTemplate(moduleImport) {
 async function initializeToolRoute(route, main, tokenAtStart) {
   if (route.kind !== 'tool') return;
 
-  await delay(50);
-  if (tokenAtStart !== navigationToken) return;
-
   try {
     await import('./common/utils.js');
+    if (tokenAtStart !== navigationToken) return;
 
     if (route.categoryId === 'video') {
-      document.querySelector('.tool-content-area')?.appendChild(createFFmpegLoadingElement());
+      const area = document.querySelector('.tool-content-area');
+      if (area) {
+        area.innerHTML = '';
+        area.appendChild(createFFmpegLoadingElement());
+      }
     }
 
     let moduleImport;
