@@ -56,6 +56,18 @@
     Content-Type = "text/javascript"
     Cache-Control = "public, max-age=86400"
 
+[[headers]]
+  for = "/ml/*.js"
+  [headers.values]
+    Content-Type = "text/javascript"
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/time/*.js"
+  [headers.values]
+    Content-Type = "text/javascript"
+    Cache-Control = "public, max-age=86400"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
