@@ -99,7 +99,8 @@ function initGlobalToolSearch() {
       const isTyping = ['INPUT', 'TEXTAREA', 'SELECT'].includes(target?.tagName) || target?.isContentEditable;
       if (!isTyping) {
         event.preventDefault();
-        input.focus();
+        const homeSearch = document.getElementById('homeToolSearch');
+        (homeSearch || input).focus();
       }
     }
   });
@@ -135,6 +136,23 @@ function applyToolFilters(scope) {
   if (count) {
     count.textContent = query || category ? `${visible} matches` : '';
   }
+}
+
+function initSearchSync() {
+  document.addEventListener('input', event => {
+    const target = event.target;
+    if (target.id !== 'homeToolSearch' && target.id !== 'globalToolSearch') return;
+    if (target.dataset.syncing) return;
+
+    const otherId = target.id === 'homeToolSearch' ? 'globalToolSearch' : 'homeToolSearch';
+    const other = document.getElementById(otherId);
+    if (!other || other.value === target.value) return;
+
+    other.value = target.value;
+    other.dataset.syncing = 'true';
+    other.dispatchEvent(new Event('input', { bubbles: true }));
+    delete other.dataset.syncing;
+  });
 }
 
 function initInlineToolFilters() {
@@ -323,6 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initRouter();
   initToolPrefetch();
   initGlobalToolSearch();
+  initSearchSync();
   initInlineToolFilters();
   initToolShareButtons();
   initThemeToggle();

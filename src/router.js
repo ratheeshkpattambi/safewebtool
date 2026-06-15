@@ -199,6 +199,11 @@ export async function handleRoute(path) {
   footerManager.restoreOriginalFooter();
   updateActiveNavigation(route.path);
 
+  const navSearch = document.querySelector('[data-nav-search]');
+  if (navSearch) {
+    navSearch.classList.toggle('hidden', route.kind === 'home');
+  }
+
   if (route.kind === 'sitemap') {
     renderSitemap();
     return;
