@@ -48,9 +48,7 @@ function headFor(url) {
     .replace(/<meta /g, '<meta data-static-seo="true" ')
     .replace(/<link /g, '<link data-static-seo="true" ');
 
-  const parts = url.split('/').filter(Boolean);
-  const toolKey = parts.length === 2 ? (routeAliases[url] || parts.join('/')) : null;
-  return meta + (toolKey ? generateStructuredData(toolKey) : '');
+  return meta + generateStructuredData(url);
 }
 
 // Minimal crawlable body so the page isn't a thin/empty shell pre-JS.

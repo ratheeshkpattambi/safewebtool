@@ -157,7 +157,7 @@ export const tools = {
     id: 'reverse',
     category: 'video',
     name: 'Video Reverse',
-    description: 'Free online video reverser. Reverse videos to play backwards with custom start and end points. Option to remove audio for better results, all processed in your browser.',
+    description: 'Free online video reverser. Play videos backwards with custom start and end points, optionally remove audio — all processed privately in your browser.',
     icon: '⏪',
     keywords: ['video reverse', 'reverse video', 'backwards video', 'video editor', 'reverse playback', 'remove audio'],
     howToUse: [
@@ -308,7 +308,7 @@ export const tools = {
     id: 'passport-photo',
     category: 'image',
     name: 'Passport Photo Maker',
-    description: 'Free private passport, visa, and ID photo maker. Auto-align faces in your browser, crop to official sizes, export digital JPEGs, and create print sheets with no uploads.',
+    description: 'Free private passport, visa, and ID photo maker. Auto-align faces, crop to official sizes, and export JPEGs or print sheets — no uploads.',
     icon: '🪪',
     keywords: ['passport photo maker', 'visa photo', 'id photo', '2x2 photo', '35x45 photo', 'passport photo online', 'private photo tool'],
     howToUse: [
@@ -521,7 +521,7 @@ export const tools = {
     id: 'image2text',
     category: 'ml',
     name: 'Image to Text (OCR)',
-    description: 'Convert images to text with 100% privacy. This offline OCR tool runs entirely in your browser using Tesseract.js. No uploads, no servers — just fast and secure image-to-text conversion.',
+    description: 'Convert images to text with 100% privacy. This offline OCR tool runs in your browser using Tesseract.js — no uploads, fast and secure image-to-text.',
     icon: '📷',
     keywords: ['ocr', 'image to text', 'text recognition', 'optical character recognition', 'tesseract', 'ml', 'ai', 'local ml'],
     howToUse: [
@@ -537,7 +537,7 @@ export const tools = {
     id: 'transcribe',
     category: 'ml',
     name: 'Audio/Video Transcription',
-    description: 'Convert speech to text with 100% privacy using Whisper. This offline transcription tool runs entirely in your browser. Supports audio and video files with automatic audio extraction.',
+    description: 'Convert speech to text with 100% privacy using Whisper. This offline transcription tool runs in your browser, with audio and video support.',
     icon: '🎤',
     keywords: ['transcription', 'speech to text', 'whisper', 'audio transcription', 'video transcription', 'asr', 'ml', 'ai', 'local ml'],
     howToUse: [
@@ -634,37 +634,46 @@ export function generateMetaTags(path) {
 }
 
 /**
- * Generate structured data for tools (JSON-LD)
- * @param {string} path - Tool path (category/id)
- * @returns {string} JSON-LD structured data
+ * Generate JSON-LD for a category or tool page: a BreadcrumbList plus, for
+ * tools, a SoftwareApplication. Accepts any path (category, tool, or alias).
+ * @param {string} path - e.g. "video", "video/reencode", "/image/passport"
+ * @returns {string} One or more <script type="application/ld+json"> blocks
  */
 export function generateStructuredData(path) {
-  const tool = getToolMetadata(path);
-  if (!tool) return '';
-  
-  const category = getCategoryMetadata(tool.category);
+  const parts = resolveMetadataPath(path).split('/').filter(Boolean);
+  const category = parts.length > 0 ? getCategoryMetadata(parts[0]) : null;
   if (!category) return '';
-  
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": `${tool.name} | ${siteInfo.name}`,
-    "description": tool.description,
-    "applicationCategory": "WebApplication",
-    "operatingSystem": "Any",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    },
-    "url": getCanonicalUrlForToolPath(path)
-  };
-  
-  return `
+
+  const crumbs = [
+    { "@type": "ListItem", "position": 1, "name": siteInfo.name, "item": `${baseUrl}/` },
+    { "@type": "ListItem", "position": 2, "name": category.name, "item": `${baseUrl}/${parts[0]}` }
+  ];
+
+  const blocks = [];
+  const tool = parts.length === 2 ? getToolMetadata(`${parts[0]}/${parts[1]}`) : null;
+  if (parts.length === 2 && !tool) return '';
+
+  if (tool) {
+    const url = getCanonicalUrlForToolPath(`${parts[0]}/${parts[1]}`);
+    crumbs.push({ "@type": "ListItem", "position": 3, "name": tool.name, "item": url });
+    blocks.push({
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": `${tool.name} | ${siteInfo.name}`,
+      "description": tool.description,
+      "applicationCategory": "WebApplication",
+      "operatingSystem": "Any",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "url": url
+    });
+  }
+
+  blocks.unshift({ "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": crumbs });
+
+  return blocks.map(data => `
     <script type="application/ld+json">
-      ${JSON.stringify(structuredData, null, 2)}
-    </script>
-  `;
+      ${JSON.stringify(data, null, 2)}
+    </script>`).join('');
 }
 
 /**

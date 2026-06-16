@@ -171,9 +171,9 @@ function updateMetadata(path) {
   });
 
   const route = resolveAppRoute(path);
-  if (route.kind === 'tool') {
+  if (route.kind === 'tool' || route.kind === 'category') {
     const structuredDataContainer = document.createElement('div');
-    structuredDataContainer.innerHTML = generateStructuredData(route.toolPath);
+    structuredDataContainer.innerHTML = generateStructuredData(path);
     Array.from(structuredDataContainer.children).forEach(node => {
       head.appendChild(node);
     });
