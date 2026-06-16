@@ -5,7 +5,6 @@ import { Tool } from '../common/base.js';
 
 export const template = `
     <div class="tool-container">
-      <h1 class="text-2xl font-bold mb-6">Audio/Video Transcription</h1>
       
       <!-- Settings Section -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">

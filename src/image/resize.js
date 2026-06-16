@@ -8,7 +8,6 @@ import { createSampleImageFile } from './sample-image.js';
 // Image resize tool template
 export const template = `
     <div class="tool-container">
-      <h1>Image Resize</h1>
       <div id="dropZone" class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-slate-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 hover:bg-slate-50 dark:hover:bg-gray-700 transition-colors">
         <div class="text-5xl text-slate-400 dark:text-gray-500 mb-3">🖼️</div>
         <p class="text-slate-600 dark:text-slate-300 text-lg mb-1">Drop your image here or click to select</p>

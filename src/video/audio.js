@@ -16,7 +16,6 @@ const AUDIO_SOURCE_MODES = new Set(['replace']);
 export const template = `
   <div class="tool-container">
     <div class="mb-5">
-      <h1 class="text-2xl font-black text-slate-950 dark:text-white">Add or Remove Audio from Video</h1>
       <p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">Choose a video. Add audio from another file, or make the video silent. Everything runs in your browser.</p>
     </div>
 
