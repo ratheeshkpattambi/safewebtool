@@ -127,6 +127,7 @@ node scripts/generate-test-fixtures.mjs
 
 ## Common Bugs to Avoid
 
+- **Always run `npm run test:contract` BEFORE committing any change to shared infrastructure** (`page-renderers.js`, `router.js`, `tool-registry.js`, `base.js`, `metadata.js`). These files affect every tool. A break here shows as "'text/html' is not a valid JavaScript MIME type" in the browser — a broken module import caused by a bad export, syntax error, or mis-resolved dynamic `import()`. The contract check is fast (<5 s) and catches most of these.
 - **Upload button breaks after re-render**: `fileUpload.js` uses delegated events — don't re-initialize in a way that creates duplicate listeners.
 - **FFmpeg failed but UI looks OK**: Always check exit code in `ffmpeg-utils.js`, not just log output.
 - **Empty output file**: Downstream symptom of a decode/encode error — fix root cause, not symptoms.
