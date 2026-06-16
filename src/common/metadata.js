@@ -602,8 +602,10 @@ export function generateMetaTags(path) {
         const tool = getToolMetadata(toolPath);
         
         if (tool) {
-          title = `${tool.name} | ${siteInfo.name}`;
-          description = tool.description;
+          const categoryShortName = (category?.name || categoryId).replace(/ Tools$/i, '');
+          title = `${tool.name} — Free Online ${categoryShortName} Tool | ${siteInfo.name}`;
+          const combined = tool.useCase ? `${tool.description} ${tool.useCase}` : tool.description;
+          description = combined.length <= 155 ? combined : (tool.description.length <= 155 ? tool.description : `${tool.description.substring(0, 152)}...`);
           keywords = tool.keywords;
         }
       }
@@ -640,6 +642,42 @@ export function generateMetaTags(path) {
  * @returns {string} One or more <script type="application/ld+json"> blocks
  */
 export function generateStructuredData(path) {
+  const normalizedPath = normalizeMetadataPath(path);
+  if (normalizedPath === '/' || normalizedPath === '/home') {
+    const faq = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Are these tools free?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes, all tools on SafeWebTool are completely free to use. No subscription, no credits, no paywalls — ever." }
+        },
+        {
+          "@type": "Question",
+          "name": "Do you upload my files to a server?",
+          "acceptedAnswer": { "@type": "Answer", "text": "No. All processing happens entirely in your browser using WebAssembly and JavaScript. Your files never leave your device." }
+        },
+        {
+          "@type": "Question",
+          "name": "Do I need to create an account?",
+          "acceptedAnswer": { "@type": "Answer", "text": "No account required. Open any tool and start using it immediately — no sign-up, no email, no login." }
+        },
+        {
+          "@type": "Question",
+          "name": "Is SafeWebTool open source?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes. SafeWebTool is open source and available on GitHub. You can inspect the code to verify that no data is sent to any server." }
+        },
+        {
+          "@type": "Question",
+          "name": "Which browsers are supported?",
+          "acceptedAnswer": { "@type": "Answer", "text": "SafeWebTool works on all modern browsers including Chrome, Firefox, Safari, and Edge. Some tools require SharedArrayBuffer support — Chrome or Firefox is recommended for video and ML tools." }
+        }
+      ]
+    };
+    return `\n    <script type="application/ld+json">\n      ${JSON.stringify(faq, null, 2)}\n    </script>`;
+  }
+
   const parts = resolveMetadataPath(path).split('/').filter(Boolean);
   const category = parts.length > 0 ? getCategoryMetadata(parts[0]) : null;
   if (!category) return '';
