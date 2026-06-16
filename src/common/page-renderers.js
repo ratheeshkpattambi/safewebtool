@@ -118,39 +118,24 @@ export function renderHomePage() {
     <div class="mx-auto max-w-6xl px-4 py-8">
       <section class="mb-8">
         <div class="max-w-2xl">
-          <p class="text-xs font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">Free · Open Source · ${allTools.length} Tools</p>
-          <h1 class="mt-2 text-4xl font-black leading-tight tracking-tight text-slate-950 dark:text-white md:text-5xl">Free browser tools. Zero uploads.</h1>
-          <p class="mt-4 text-lg leading-relaxed text-slate-600 dark:text-slate-300">Edit video, compress images, transcribe audio, format code — everything runs in your browser. Your files never leave your device.</p>
+          <h1 class="text-3xl font-black leading-tight tracking-tight text-slate-950 dark:text-white md:text-4xl">Free, safe browser tools</h1>
+          <p class="mt-3 text-lg text-slate-600 dark:text-slate-300">Files never leave your browser.</p>
           <div class="mt-4 flex flex-wrap gap-2">
-            <span class="rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-bold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-200">No account</span>
-            <span class="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-bold text-slate-700 dark:bg-gray-700 dark:text-slate-200">No ads</span>
-            <span class="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-bold text-slate-700 dark:bg-gray-700 dark:text-slate-200">No paywall</span>
-            <span class="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-bold text-slate-700 dark:bg-gray-700 dark:text-slate-200">Open source</span>
+            <span class="rounded-full bg-blue-50 px-3 py-1.5 text-sm font-semibold text-blue-700 dark:bg-blue-950/50 dark:text-blue-200">No ads</span>
+            <span class="rounded-full bg-blue-50 px-3 py-1.5 text-sm font-semibold text-blue-700 dark:bg-blue-950/50 dark:text-blue-200">No login</span>
+            <span class="rounded-full bg-blue-50 px-3 py-1.5 text-sm font-semibold text-blue-700 dark:bg-blue-950/50 dark:text-blue-200">No uploads</span>
+            <span class="rounded-full bg-blue-50 px-3 py-1.5 text-sm font-semibold text-blue-700 dark:bg-blue-950/50 dark:text-blue-200">No paywall</span>
+            <a href="https://github.com/ratheeshkpattambi/safewebtool" target="_blank" rel="noopener" class="rounded-full bg-blue-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-blue-700">Open source ↗</a>
           </div>
         </div>
-        <div class="mt-6 max-w-[540px]">
+        <div class="relative mt-6 max-w-[540px]">
+          <svg class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
           <label class="sr-only" for="homeToolSearch">Search tools</label>
-          <input id="homeToolSearch" data-tool-filter type="search" placeholder="Search tools — resize video, compress image, OCR…" class="w-full rounded-md border border-slate-300 bg-white px-4 py-4 text-lg text-slate-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:ring-blue-950">
-        </div>
-      </section>
-
-      <section class="mb-6">
-        <div class="flex gap-2 overflow-x-auto pb-1" data-category-filters role="group" aria-label="Filter by category">
-          <button type="button" data-category-filter class="shrink-0 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors border-blue-600 bg-blue-600 text-white" aria-pressed="true">All</button>
-          ${Object.values(categories).map(category => `
-            <button type="button" data-category-filter="${category.id}" class="shrink-0 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors border-slate-200 text-slate-600 hover:border-blue-300 hover:text-blue-700 dark:border-gray-700 dark:text-slate-300" aria-pressed="false">${category.icon} ${category.name.replace(' Tools', '')}</button>
-          `).join('')}
+          <input id="homeToolSearch" data-tool-filter type="search" placeholder="Search tools — resize video, compress image, OCR…" class="w-full rounded-xl border-2 border-blue-500 bg-white py-4 pl-12 pr-4 text-lg text-slate-900 shadow-[0_0_0_4px_rgba(37,99,235,0.10)] focus:border-blue-600 focus:outline-none focus:shadow-[0_0_0_4px_rgba(37,99,235,0.18)] dark:bg-gray-800 dark:text-white">
         </div>
       </section>
 
       <section>
-        <div class="mb-3 flex items-end justify-between gap-3">
-          <div>
-            <h2 class="text-2xl font-black text-slate-950 dark:text-white">All tools</h2>
-            <p class="text-sm text-slate-500 dark:text-slate-400">${allTools.length} browser-local tools</p>
-          </div>
-          <p data-tool-count class="text-sm font-medium text-slate-500 dark:text-slate-400"></p>
-        </div>
         <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3" data-tool-grid>
           ${allTools.map(({ path, tool }, index) => renderToolCard(path, tool, index)).join('')}
         </div>
