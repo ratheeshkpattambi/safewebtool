@@ -1,120 +1,37 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import zlib from 'node:zlib';
+import sharp from 'sharp';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '..');
-const width = 1200;
-const height = 630;
 
-function crc32(buffer) {
-  let crc = 0xffffffff;
-  for (const byte of buffer) {
-    crc ^= byte;
-    for (let i = 0; i < 8; i += 1) {
-      crc = (crc >>> 1) ^ (0xedb88320 & -(crc & 1));
-    }
-  }
-  return (crc ^ 0xffffffff) >>> 0;
-}
+// Branded 1200x630 Open Graph card (Slack / WhatsApp / Twitter / Facebook).
+// Same image is reused for every page; per-page title + description come from
+// the OG meta tags, so this just needs to read as a clean SafeWebTool card.
+const svg = `<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4F46E5"/>
+      <stop offset="1" stop-color="#2563EB"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
 
-function chunk(type, data) {
-  const typeBuffer = Buffer.from(type);
-  const length = Buffer.alloc(4);
-  length.writeUInt32BE(data.length);
-  const crc = Buffer.alloc(4);
-  crc.writeUInt32BE(crc32(Buffer.concat([typeBuffer, data])));
-  return Buffer.concat([length, typeBuffer, data, crc]);
-}
+  <!-- Logo: white shield + blue check, scaled from the 32px source -->
+  <g transform="translate(530,70) scale(4.375)">
+    <path d="M16 2C12.5 5.5 6.5 8 3 9.5V17C3 23.5 8.5 28.5 16 30C23.5 28.5 29 23.5 29 17V9.5C25.5 8 19.5 5.5 16 2Z" fill="#ffffff"/>
+    <path d="M10 16L14 20L22 12" stroke="#2563EB" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </g>
 
-function blend(a, b, t) {
-  return Math.round(a + (b - a) * t);
-}
-
-function setPixel(data, x, y, r, g, b, a = 255) {
-  if (x < 0 || x >= width || y < 0 || y >= height) return;
-  const offset = (y * width + x) * 4;
-  data[offset] = r;
-  data[offset + 1] = g;
-  data[offset + 2] = b;
-  data[offset + 3] = a;
-}
-
-function fillRect(data, x, y, w, h, color) {
-  for (let yy = y; yy < y + h; yy += 1) {
-    for (let xx = x; xx < x + w; xx += 1) {
-      setPixel(data, xx, yy, ...color);
-    }
-  }
-}
-
-function drawCircle(data, cx, cy, radius, color) {
-  const radiusSq = radius * radius;
-  for (let y = cy - radius; y <= cy + radius; y += 1) {
-    for (let x = cx - radius; x <= cx + radius; x += 1) {
-      const dx = x - cx;
-      const dy = y - cy;
-      if (dx * dx + dy * dy <= radiusSq) {
-        setPixel(data, x, y, ...color);
-      }
-    }
-  }
-}
-
-function makePng() {
-  const pixels = Buffer.alloc(width * height * 4);
-  for (let y = 0; y < height; y += 1) {
-    const vertical = y / height;
-    for (let x = 0; x < width; x += 1) {
-      const horizontal = x / width;
-      const t = Math.min(1, vertical * 0.62 + horizontal * 0.38);
-      setPixel(
-        pixels,
-        x,
-        y,
-        blend(14, 29, t),
-        blend(94, 78, t),
-        blend(179, 216, t)
-      );
-    }
-  }
-
-  fillRect(pixels, 110, 115, 980, 400, [255, 255, 255]);
-  fillRect(pixels, 110, 115, 980, 18, [37, 99, 235]);
-  drawCircle(pixels, 210, 255, 56, [37, 99, 235]);
-  drawCircle(pixels, 210, 255, 31, [255, 255, 255]);
-  fillRect(pixels, 305, 215, 520, 34, [15, 23, 42]);
-  fillRect(pixels, 305, 275, 695, 22, [71, 85, 105]);
-  fillRect(pixels, 305, 315, 590, 22, [100, 116, 139]);
-  fillRect(pixels, 305, 390, 145, 28, [37, 99, 235]);
-  fillRect(pixels, 475, 390, 100, 28, [16, 185, 129]);
-  fillRect(pixels, 600, 390, 115, 28, [148, 163, 184]);
-
-  const scanlines = [];
-  for (let y = 0; y < height; y += 1) {
-    scanlines.push(Buffer.from([0]));
-    scanlines.push(pixels.subarray(y * width * 4, (y + 1) * width * 4));
-  }
-
-  const ihdr = Buffer.alloc(13);
-  ihdr.writeUInt32BE(width, 0);
-  ihdr.writeUInt32BE(height, 4);
-  ihdr[8] = 8;
-  ihdr[9] = 6;
-  ihdr[10] = 0;
-  ihdr[11] = 0;
-  ihdr[12] = 0;
-
-  return Buffer.concat([
-    Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
-    chunk('IHDR', ihdr),
-    chunk('IDAT', zlib.deflateSync(Buffer.concat(scanlines), { level: 9 })),
-    chunk('IEND', Buffer.alloc(0))
-  ]);
-}
+  <g font-family="Helvetica, Arial, sans-serif" text-anchor="middle">
+    <text x="600" y="420" font-size="92" font-weight="700" fill="#ffffff" letter-spacing="-1">SafeWebTool</text>
+    <text x="600" y="482" font-size="38" font-weight="400" fill="#DBEAFE">Free, safe browser tools</text>
+    <text x="600" y="552" font-size="26" font-weight="600" fill="#BFDBFE">No ads · No login · No uploads · No paywall · Open source</text>
+  </g>
+</svg>`;
 
 const outputPath = path.join(repoRoot, 'public', 'og', 'safewebtool.png');
 await mkdir(path.dirname(outputPath), { recursive: true });
-await writeFile(outputPath, makePng());
+await sharp(Buffer.from(svg)).png({ compressionLevel: 9 }).toFile(outputPath);
 console.log('Generated public/og/safewebtool.png');

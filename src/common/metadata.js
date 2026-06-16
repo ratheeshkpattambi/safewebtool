@@ -615,17 +615,21 @@ export function generateMetaTags(path) {
     <meta name="description" content="${description}">
     <meta name="keywords" content="${keywords.join(', ')}">
     <link rel="canonical" href="${baseUrl}${canonicalPath}">
+    <meta property="og:site_name" content="${siteInfo.name}">
     <meta property="og:title" content="${title}">
     <meta property="og:description" content="${description}">
     <meta property="og:type" content="website">
     <meta property="og:url" content="${baseUrl}${canonicalPath}">
     <meta property="og:image" content="${baseUrl}/og/safewebtool.png">
+    <meta property="og:image:type" content="image/png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="${siteInfo.name} — free, safe browser tools">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${title}">
     <meta name="twitter:description" content="${description}">
     <meta name="twitter:image" content="${baseUrl}/og/safewebtool.png">
+    <meta name="twitter:image:alt" content="${siteInfo.name} — free, safe browser tools">
   `;
 }
 
