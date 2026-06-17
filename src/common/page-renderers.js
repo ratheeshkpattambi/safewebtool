@@ -1,4 +1,4 @@
-import { categories, getCanonicalPathForToolPath, getToolEntries, siteInfo } from './metadata.js';
+import { categories, getCanonicalPathForToolPath, getToolEntries, getToolMetadata, siteInfo } from './metadata.js';
 import { listToolsForCategory } from './tool-registry.js';
 
 function renderToolCard(path, tool, index = 0) {
@@ -49,6 +49,24 @@ export function renderCategoryPage(categoryConfig, categoryId) {
   `;
 }
 
+function renderRelatedTools(toolInfo) {
+  const related = toolInfo.related;
+  if (!related || related.length === 0) return '';
+  const cards = related.map(path => {
+    const t = getToolMetadata(path);
+    if (!t) return '';
+    return `<a href="${getCanonicalPathForToolPath(path)}" class="flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 hover:border-blue-300 hover:text-blue-700 transition-colors dark:border-gray-700 dark:bg-gray-800 dark:text-slate-300 dark:hover:border-blue-500 dark:hover:text-blue-400">
+      <span aria-hidden="true">${t.icon}</span>
+      <span class="font-medium">${t.name}</span>
+    </a>`;
+  }).join('');
+  return `
+    <div class="mt-4 px-4 pb-5 sm:px-6">
+      <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Related tools</p>
+      <div class="flex flex-wrap gap-2">${cards}</div>
+    </div>`;
+}
+
 export function renderToolPageShell(toolInfo) {
   const toolPath = `${toolInfo.category}/${toolInfo.id}`;
   const canonicalPath = getCanonicalPathForToolPath(toolPath);
@@ -89,6 +107,7 @@ export function renderToolPageShell(toolInfo) {
             </div>
           </div>
         </div>
+        ${renderRelatedTools(toolInfo)}
       </div>
     </div>
   `;

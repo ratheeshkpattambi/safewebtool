@@ -120,7 +120,8 @@ export const tools = {
       'The tool will automatically extract and display all metadata',
       'View detailed information about video resolution, codec, framerate, and audio properties'
     ],
-    useCase: 'Find out technical details about your videos before uploading, sharing, or editing them.'
+    useCase: 'Find out technical details about your videos before uploading, sharing, or editing them.',
+    related: ['video/trim', 'video/resize', 'video/reencode']
   },
   'video/resize': {
     id: 'resize',
@@ -135,7 +136,8 @@ export const tools = {
       'Click "Resize Video" to process',
       'Download the resized video when complete'
     ],
-    useCase: 'Perfect for reducing video size for sharing on social media or adjusting dimensions for specific platforms.'
+    useCase: 'Perfect for reducing video size for sharing on social media or adjusting dimensions for specific platforms.',
+    related: ['video/trim', 'video/reencode', 'video/mp4']
   },
   'video/trim': {
     id: 'trim',
@@ -151,7 +153,13 @@ export const tools = {
       'Click "Trim Video" to process',
       'Download the trimmed video when complete'
     ],
-    useCase: 'Perfect for removing unwanted parts from videos or creating short clips for sharing.'
+    useCase: 'Perfect for removing unwanted parts from videos or creating short clips for sharing.',
+    related: ['video/resize', 'video/gif', 'video/reencode'],
+    faq: [
+      { q: 'Does this video trimmer upload my video to a server?', a: 'No. All trimming is done using FFmpeg WebAssembly running entirely in your browser. Your video never leaves your device.' },
+      { q: 'What video formats does the trimmer support?', a: 'MP4, WebM, MOV, and most common video formats are supported.' },
+      { q: 'Is there a file size limit?', a: 'There is no server-side limit. Very large files may be slower depending on your device memory, but no data is uploaded.' }
+    ]
   },
   'video/reverse': {
     id: 'reverse',
@@ -167,7 +175,8 @@ export const tools = {
       'Click "Reverse Video" to process',
       'Download the reversed video when complete'
     ],
-    useCase: 'Perfect for creating creative effects, reversing action sequences, or making videos play backwards for entertainment. Audio removal option ensures better results.'
+    useCase: 'Perfect for creating creative effects, reversing action sequences, or making videos play backwards for entertainment. Audio removal option ensures better results.',
+    related: ['video/trim', 'video/reencode', 'video/gif']
   },
   'video/reencode': {
     id: 'reencode',
@@ -183,7 +192,8 @@ export const tools = {
       'Click "Re-encode Video" to start processing',
       'Download the converted video once complete'
     ],
-    useCase: 'Use when you need to convert videos to a specific format for compatibility with different devices or platforms.'
+    useCase: 'Use when you need to convert videos to a specific format for compatibility with different devices or platforms.',
+    related: ['video/mp4', 'video/trim', 'video/resize']
   },
   'video/gif': {
     id: 'gif',
@@ -200,7 +210,8 @@ export const tools = {
       'Download your new GIF animation'
     ],
     useCase: 'Perfect for creating shareable animations for social media, forums, or messaging apps from your videos.',
-    featured: true
+    featured: true,
+    related: ['video/trim', 'video/resize', 'video/reverse']
   },
   'video/audio': {
     id: 'audio',
@@ -216,6 +227,7 @@ export const tools = {
       'Click the process button and download the MP4 result'
     ],
     useCase: 'Use when you need to mute a video, add sound to a silent video, or copy audio from one video into another without uploading private media.',
+    related: ['video/trim', 'video/reencode', 'ml/transcribe'],
     agent: {
       inputs: [
         { name: 'source video', type: 'file', accept: 'video/*', selector: '#fileInput' },
@@ -253,7 +265,8 @@ export const tools = {
       'Pick a quality level and target bitrate.',
       'Click "Convert to MP4" and download the result.'
     ],
-    useCase: 'Create universally compatible MP4 files for web and mobile. Inspired by CloudConvert\'s MP4 converter, implemented fully client-side for privacy.'
+    useCase: 'Create universally compatible MP4 files for web and mobile. Inspired by CloudConvert\'s MP4 converter, implemented fully client-side for privacy.',
+    related: ['video/reencode', 'video/trim', 'video/resize']
   },
   'image/resize': {
     id: 'resize',
@@ -268,7 +281,8 @@ export const tools = {
       'Click "Resize Image" to process',
       'Download the resized image when complete'
     ],
-    useCase: 'Perfect for reducing image size for websites, social media, or email attachments.'
+    useCase: 'Perfect for reducing image size for websites, social media, or email attachments.',
+    related: ['image/compressor', 'image/crop', 'image/passport-photo']
   },
   'image/compressor': {
     id: 'compressor',
@@ -287,7 +301,13 @@ export const tools = {
       'Download the compressed image'
     ],
     useCase: 'Perfect for reducing image file sizes for web use, email attachments, or storage optimization while maintaining good visual quality.',
-    featured: true
+    featured: true,
+    related: ['image/resize', 'image/crop', 'image/passport-photo'],
+    faq: [
+      { q: 'Does the image compressor upload my photos to a server?', a: 'No. Compression runs entirely in your browser using JavaScript. Your images are never sent anywhere.' },
+      { q: 'Which image formats are supported?', a: 'JPEG, PNG, and WebP. You can also choose a different output format from your source.' },
+      { q: 'How much can it compress an image?', a: 'Typically 40–90% size reduction depending on the image and quality setting, with minimal visible difference at higher quality levels.' }
+    ]
   },
   'image/crop': {
     id: 'crop',
@@ -302,7 +322,8 @@ export const tools = {
       'Use quick actions to center or reset the crop area',
       'Click "Crop Image" to process and download the result'
     ],
-    useCase: 'Perfect for removing unwanted edges, extracting a subject, or preparing exact image dimensions for websites and social media.'
+    useCase: 'Perfect for removing unwanted edges, extracting a subject, or preparing exact image dimensions for websites and social media.',
+    related: ['image/resize', 'image/compressor', 'image/passport-photo']
   },
   'image/passport-photo': {
     id: 'passport-photo',
@@ -319,6 +340,12 @@ export const tools = {
     ],
     useCase: 'Make correctly sized passport, visa, and ID photos without uploading your face photo to a server or paying for a simple digital export.',
     featured: true,
+    related: ['image/resize', 'image/compressor', 'ml/face_detect'],
+    faq: [
+      { q: 'Does the passport photo maker upload my photo?', a: 'No. All cropping, resizing, and face alignment happens in your browser. Your photo never leaves your device.' },
+      { q: 'Which passport photo sizes are supported?', a: 'US 2×2 inch, UK 35×45mm, EU 35×45mm, Indian 35×35mm, and many other standard formats. Custom dimensions are also supported.' },
+      { q: 'Does the face detection upload my image?', a: 'No. Face alignment uses MediaPipe running entirely in your browser — your photo is not uploaded even for the face-detection step.' }
+    ],
     agent: {
       canonicalPath: '/image/passport',
       privacy: {
@@ -378,7 +405,8 @@ export const tools = {
       'Edit and format as needed',
       'Download your text when complete'
     ],
-    useCase: 'Use for quickly writing and saving text content without needing to install an app.'
+    useCase: 'Use for quickly writing and saving text content without needing to install an app.',
+    related: ['text/json-formatter', 'text/yaml', 'text/remove-extra-spaces']
   },
   'text/yaml': {
     id: 'yaml',
@@ -393,7 +421,8 @@ export const tools = {
       'View the parsed data in the tree view',
       'Convert to JSON format with a click'
     ],
-    useCase: 'Useful for developers working with YAML configuration files or data structures.'
+    useCase: 'Useful for developers working with YAML configuration files or data structures.',
+    related: ['text/json-formatter', 'text/editor', 'text/remove-extra-spaces']
   },
   'text/remove-extra-spaces': {
     id: 'remove-extra-spaces',
@@ -408,7 +437,8 @@ export const tools = {
       'The cleaned text will appear in the output area',
       'Copy the cleaned text to your clipboard'
     ],
-    useCase: 'Clean up text by removing unnecessary spaces, making it ready for use in documents, code, or other applications.'
+    useCase: 'Clean up text by removing unnecessary spaces, making it ready for use in documents, code, or other applications.',
+    related: ['text/editor', 'text/json-formatter', 'text/yaml']
   },
   'text/json-formatter': {
     id: 'json-formatter',
@@ -425,7 +455,8 @@ export const tools = {
       'Choose a target format (XML, CSV, YAML) and click "Convert".',
       'Click "Download" to save the output.'
     ],
-    useCase: 'Ideal for developers and data analysts to quickly inspect, clean up, or transform JSON data for various applications without server-side processing.'
+    useCase: 'Ideal for developers and data analysts to quickly inspect, clean up, or transform JSON data for various applications without server-side processing.',
+    related: ['text/yaml', 'text/editor', 'text/remove-extra-spaces']
   },
   'time/timer': {
     id: 'timer',
@@ -441,7 +472,8 @@ export const tools = {
       'On iOS Safari, use Share then Add to Home Screen for standalone mode'
     ],
     useCase: 'Use as a lightweight browser-local timer for focus sessions, cooking, workouts, breaks, or reminders without installing a native app.',
-    featured: true
+    featured: true,
+    related: ['time/meeting-planner', 'time/business-days', 'time/date-difference']
   },
   'time/meeting-planner': {
     id: 'meeting-planner',
@@ -456,7 +488,8 @@ export const tools = {
       'Click Find Meeting Times to see overlap-friendly options',
       'Use the local times shown for each participant when creating the calendar invite'
     ],
-    useCase: 'Useful for PMs, founders, and remote teams coordinating standups, reviews, interviews, and client calls across regions.'
+    useCase: 'Useful for PMs, founders, and remote teams coordinating standups, reviews, interviews, and client calls across regions.',
+    related: ['time/timezone-converter', 'time/timer', 'time/business-days']
   },
   'time/timezone-converter': {
     id: 'timezone-converter',
@@ -471,7 +504,8 @@ export const tools = {
       'Select the time zones you want to compare',
       'Click Convert Time to see every local time side by side'
     ],
-    useCase: 'Quickly check release windows, demo times, interview slots, and cross-region handoffs before sending an invite.'
+    useCase: 'Quickly check release windows, demo times, interview slots, and cross-region handoffs before sending an invite.',
+    related: ['time/meeting-planner', 'time/business-days', 'time/date-difference']
   },
   'time/business-days': {
     id: 'business-days',
@@ -486,7 +520,8 @@ export const tools = {
       'Choose whether to add or subtract',
       'Click Calculate Date to get the resulting deadline'
     ],
-    useCase: 'Estimate sprint deadlines, review windows, launch lead times, procurement dates, and contract response periods.'
+    useCase: 'Estimate sprint deadlines, review windows, launch lead times, procurement dates, and contract response periods.',
+    related: ['time/date-difference', 'time/meeting-planner', 'time/timezone-converter']
   },
   'time/date-difference': {
     id: 'date-difference',
@@ -501,7 +536,8 @@ export const tools = {
       'Click Calculate Duration',
       'Review total days, weeks and days, and weekday count'
     ],
-    useCase: 'Quickly size project phases, campaign windows, hiring timelines, trial periods, and delivery estimates.'
+    useCase: 'Quickly size project phases, campaign windows, hiring timelines, trial periods, and delivery estimates.',
+    related: ['time/business-days', 'time/meeting-planner', 'time/timezone-converter']
   },
   'ml/face_detect': {
     id: 'face_detect',
@@ -515,7 +551,8 @@ export const tools = {
       'The tool will highlight detected faces on the image.',
       'No data leaves your browser.'
     ],
-    useCase: 'Quickly detect faces in images for privacy, fun, or research.'
+    useCase: 'Quickly detect faces in images for privacy, fun, or research.',
+    related: ['image/passport-photo', 'ml/image2text', 'image/crop']
   },
   'ml/image2text': {
     id: 'image2text',
@@ -531,7 +568,8 @@ export const tools = {
       'View the extracted text with confidence score',
       'Copy or download the text as needed'
     ],
-    useCase: 'Extract text from screenshots, scanned documents, photos of signs, receipts, or any image containing text. Perfect for digitizing printed content while maintaining complete privacy.'
+    useCase: 'Extract text from screenshots, scanned documents, photos of signs, receipts, or any image containing text. Perfect for digitizing printed content while maintaining complete privacy.',
+    related: ['ml/transcribe', 'ml/face_detect', 'image/crop']
   },
   'ml/transcribe': {
     id: 'transcribe',
@@ -547,7 +585,8 @@ export const tools = {
       'View the transcript with timestamps',
       'Copy or download in TXT, SRT, or VTT format'
     ],
-    useCase: 'Transcribe podcasts, meetings, interviews, lectures, or any audio/video content. Perfect for creating captions, notes, or text records while maintaining complete privacy.'
+    useCase: 'Transcribe podcasts, meetings, interviews, lectures, or any audio/video content. Perfect for creating captions, notes, or text records while maintaining complete privacy.',
+    related: ['ml/image2text', 'video/trim', 'video/audio']
   }
 };
 
@@ -704,6 +743,17 @@ export function generateStructuredData(path) {
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
       "url": url
     });
+    if (tool.faq && tool.faq.length > 0) {
+      blocks.push({
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": tool.faq.map(({ q, a }) => ({
+          "@type": "Question",
+          "name": q,
+          "acceptedAnswer": { "@type": "Answer", "text": a }
+        }))
+      });
+    }
   }
 
   blocks.unshift({ "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": crumbs });
