@@ -44,6 +44,19 @@
     <!-- COOP and COEP headers for SharedArrayBuffer support (needed for WASM) -->
     <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
     <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp">
+    <!-- Google tag (gtag.js) — gated off localhost and Netlify preview deploys -->
+    <script>
+      (function() {
+        var h = window.location.hostname;
+        if (h === 'localhost' || h === '127.0.0.1' || h === '::1' || h.endsWith('.netlify.app')) return;
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        window.gtag = gtag;
+        gtag('js', new Date());
+        gtag('config', 'G-SK7DDP7ND6', { send_page_view: false });
+      })();
+    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-SK7DDP7ND6"></script>
 </head>
 <body>
     <div id="app" class="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900 text-slate-800 dark:text-slate-200 transition-colors">

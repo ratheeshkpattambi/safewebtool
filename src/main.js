@@ -7,7 +7,7 @@ import './index.css';
 const GA_MEASUREMENT_ID = 'G-SK7DDP7ND6';
 
 function isLocalHost(hostname) {
-  return ['localhost', '127.0.0.1', '::1'].includes(hostname);
+  return ['localhost', '127.0.0.1', '::1'].includes(hostname) || hostname.endsWith('.netlify.app');
 }
 
 function renderNavigation() {
@@ -303,21 +303,7 @@ function setTheme(theme) {
 }
 
 function loadAnalytics() {
-  if (isLocalHost(window.location.hostname) || document.getElementById('ga-script')) return;
-
-  window.dataLayer = window.dataLayer || [];
-  window.gtag = window.gtag || function gtag() {
-    window.dataLayer.push(arguments);
-  };
-
-  const script = document.createElement('script');
-  script.id = 'ga-script';
-  script.async = true;
-  script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
-  document.head.appendChild(script);
-
-  window.gtag('js', new Date());
-  window.gtag('config', GA_MEASUREMENT_ID, { send_page_view: false });
+  if (isLocalHost(window.location.hostname) || typeof window.gtag !== 'function') return;
   window.gtag('event', 'page_view', {
     page_title: document.title,
     page_location: window.location.href
