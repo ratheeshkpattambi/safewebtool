@@ -9,7 +9,7 @@
     "name": "Video Tools"
   },
   "name": "Video Reverse",
-  "description": "Free online video reverser. Reverse videos to play backwards with custom start and end points. Option to remove audio for better results, all processed in your browser.",
+  "description": "Free online video reverser. Play videos backwards with custom start and end points, optionally remove audio — all processed privately in your browser.",
   "privacy": {
     "mode": "browser-local",
     "fileUpload": false,

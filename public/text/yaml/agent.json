@@ -45,7 +45,9 @@
     "yaml validator",
     "yaml to json",
     "validate yaml",
-    "yaml converter"
+    "yaml converter",
+    "yaml syntax checker",
+    "yaml lint online"
   ],
   "externalDownloads": [],
   "exampleTasks": [

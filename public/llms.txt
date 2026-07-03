@@ -17,6 +17,8 @@ Sitemap: https://safewebtool.com/sitemap.xml
 
 - Image Compressor: https://safewebtool.com/image/compressor
   - Agent contract: https://safewebtool.com/image/compressor/agent.json
+- Image Format Converter: https://safewebtool.com/image/convert
+  - Agent contract: https://safewebtool.com/image/convert/agent.json
 - Image Crop: https://safewebtool.com/image/crop
   - Agent contract: https://safewebtool.com/image/crop/agent.json
 - Passport Photo Maker: https://safewebtool.com/image/passport
@@ -24,18 +26,26 @@ Sitemap: https://safewebtool.com/sitemap.xml
   - Legacy URL: https://safewebtool.com/image/passport-photo
 - Image Resize: https://safewebtool.com/image/resize
   - Agent contract: https://safewebtool.com/image/resize/agent.json
+- Image Rotator: https://safewebtool.com/image/rotate
+  - Agent contract: https://safewebtool.com/image/rotate/agent.json
 - Face Detection: https://safewebtool.com/ml/face_detect
   - Agent contract: https://safewebtool.com/ml/face_detect/agent.json
 - Image to Text (OCR): https://safewebtool.com/ml/image2text
   - Agent contract: https://safewebtool.com/ml/image2text/agent.json
 - Audio/Video Transcription: https://safewebtool.com/ml/transcribe
   - Agent contract: https://safewebtool.com/ml/transcribe/agent.json
+- Base64 Encode & Decode: https://safewebtool.com/text/base64
+  - Agent contract: https://safewebtool.com/text/base64/agent.json
 - Text Editor: https://safewebtool.com/text/editor
   - Agent contract: https://safewebtool.com/text/editor/agent.json
 - JSON Formatter & Converter: https://safewebtool.com/text/json-formatter
   - Agent contract: https://safewebtool.com/text/json-formatter/agent.json
 - Remove Extra Spaces: https://safewebtool.com/text/remove-extra-spaces
   - Agent contract: https://safewebtool.com/text/remove-extra-spaces/agent.json
+- URL Encode & Decode: https://safewebtool.com/text/url-encode
+  - Agent contract: https://safewebtool.com/text/url-encode/agent.json
+- Word & Character Counter: https://safewebtool.com/text/word-count
+  - Agent contract: https://safewebtool.com/text/word-count/agent.json
 - YAML Validator: https://safewebtool.com/text/yaml
   - Agent contract: https://safewebtool.com/text/yaml/agent.json
 - Business Days Calculator: https://safewebtool.com/time/business-days

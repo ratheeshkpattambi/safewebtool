@@ -114,7 +114,7 @@ export const tools = {
     name: 'Extract Video Metadata',
     description: 'Extract metadata (codec, resolution, duration, bitrate) from MP4 and other video files. All in your browser, no uploads.',
     icon: '📊',
-    keywords: ['video info', 'video metadata', 'video properties', 'video analyzer'],
+    keywords: ['video info', 'video metadata', 'video properties', 'video analyzer', 'check video codec', 'video resolution checker'],
     howToUse: [
       'Drop your video file into the upload area or click to select a file',
       'The tool will automatically extract and display all metadata',
@@ -129,7 +129,7 @@ export const tools = {
     name: 'Video Resize',
     description: 'Free online video resizer. Change video dimensions and resolution while maintaining quality, all processed locally in your browser.',
     icon: '🔄',
-    keywords: ['video resize', 'resize video', 'change video resolution', 'video dimensions'],
+    keywords: ['video resize', 'resize video', 'change video resolution', 'video dimensions', 'scale video online', 'reduce video size'],
     howToUse: [
       'Upload your video by dropping it or selecting from your device',
       'Set the desired width and height (maintains aspect ratio by default)',
@@ -184,7 +184,7 @@ export const tools = {
     name: 'Video Re-encode',
     description: 'Free online video converter. Convert videos between MP4, WebM, and MOV formats with adjustable quality settings, processed entirely in your browser.',
     icon: '🔄',
-    keywords: ['video converter', 'video format converter', 'mp4 converter', 'webm converter'],
+    keywords: ['video converter', 'video format converter', 'mp4 converter', 'webm converter', 'change video format', 'video quality settings'],
     howToUse: [
       'Upload your video using the drop area or file selector',
       'Choose your desired output format (MP4, WebM, or MOV)',
@@ -201,7 +201,7 @@ export const tools = {
     name: 'Video to GIF',
     description: 'Free online video to GIF converter. Create optimized GIF animations from video files with custom settings, all processed locally in your browser.',
     icon: '🎞️',
-    keywords: ['video to gif', 'gif maker', 'convert video to gif', 'create gif from video'],
+    keywords: ['video to gif', 'gif maker', 'convert video to gif', 'create gif from video', 'gif converter', 'animated gif creator'],
     howToUse: [
       'Upload your video file',
       'Set the dimensions, framerate, and duration for your GIF',
@@ -274,7 +274,7 @@ export const tools = {
     name: 'Image Resize',
     description: 'Free online image resizer. Change image dimensions and resolution while maintaining quality, all processed locally in your browser.',
     icon: '🖼️',
-    keywords: ['image resize', 'resize image', 'image dimensions', 'optimize images'],
+    keywords: ['image resize', 'resize image', 'image dimensions', 'optimize images', 'scale photo', 'change image size'],
     howToUse: [
       'Upload your image by dropping it or selecting from your device',
       'Set the desired width and height (maintains aspect ratio by default)',
@@ -324,6 +324,38 @@ export const tools = {
     ],
     useCase: 'Perfect for removing unwanted edges, extracting a subject, or preparing exact image dimensions for websites and social media.',
     related: ['image/resize', 'image/compressor', 'image/passport-photo']
+  },
+  'image/convert': {
+    id: 'convert',
+    category: 'image',
+    name: 'Image Format Converter',
+    description: 'Convert images between JPG, PNG, and WebP with adjustable quality. All conversion happens locally in your browser — your photos are never uploaded.',
+    icon: '🔁',
+    keywords: ['image converter', 'convert image format', 'png to jpg', 'jpg to webp', 'webp to png', 'change image format online', 'image format converter', 'private image tool'],
+    howToUse: [
+      'Upload your image by dropping it or selecting from your device',
+      'Choose the output format (JPG, PNG, or WebP)',
+      'Adjust the quality slider for JPG or WebP output',
+      'Click "Convert Image" and download the result'
+    ],
+    useCase: 'Convert screenshots, photos, and graphics into the format a website, form, or app requires — without uploading your images to a conversion server.',
+    related: ['image/compressor', 'image/resize', 'image/rotate']
+  },
+  'image/rotate': {
+    id: 'rotate',
+    category: 'image',
+    name: 'Image Rotator',
+    description: 'Rotate images by 90 or 180 degrees, or flip them horizontally and vertically, with a live preview. All processing happens locally in your browser — no uploads.',
+    icon: '🔄',
+    keywords: ['rotate image', 'image rotator', 'rotate photo online', 'flip image horizontally', 'flip image vertically', 'fix sideways photo', 'mirror image', 'private image tool'],
+    howToUse: [
+      'Upload your image by dropping it or selecting from your device',
+      'Click 90° CW, 90° CCW, 180°, Flip Horizontal, or Flip Vertical — combine as needed',
+      'Check the live preview after each step (use Reset to start over)',
+      'Click "Download Rotated Image" to save the result'
+    ],
+    useCase: 'Fix sideways phone photos, mirror selfies, or straighten scanned documents without sending your pictures to a server.',
+    related: ['image/convert', 'image/resize', 'image/crop']
   },
   'image/passport-photo': {
     id: 'passport-photo',
@@ -399,7 +431,7 @@ export const tools = {
     name: 'Text Editor',
     description: 'Free online text editor for writing and formatting text content. All processing happens locally in your browser.',
     icon: '📝',
-    keywords: ['text editor', 'online editor', 'write text', 'edit text'],
+    keywords: ['text editor', 'online editor', 'write text', 'edit text', 'plain text editor', 'notepad online'],
     howToUse: [
       'Type or paste your text in the editor',
       'Edit and format as needed',
@@ -414,7 +446,7 @@ export const tools = {
     name: 'YAML Validator',
     description: 'Free online YAML validator and converter. Check YAML syntax and convert to JSON with visual tree display, all processed in your browser.',
     icon: '🔍',
-    keywords: ['yaml validator', 'yaml to json', 'validate yaml', 'yaml converter'],
+    keywords: ['yaml validator', 'yaml to json', 'validate yaml', 'yaml converter', 'yaml syntax checker', 'yaml lint online'],
     howToUse: [
       'Paste your YAML content in the editor',
       'The tool automatically validates the syntax',
@@ -430,7 +462,7 @@ export const tools = {
     name: 'Remove Extra Spaces',
     description: 'Remove extra spaces from text, such as leading/trailing spaces and multiple spaces between words. All processing happens in your browser.',
     icon: '✂️',
-    keywords: ['text tools', 'remove spaces', 'trim text', 'text cleanup'],
+    keywords: ['text tools', 'remove spaces', 'trim text', 'text cleanup', 'remove double spaces', 'whitespace remover'],
     howToUse: [
       'Paste your text into the input area',
       'Click the "Remove Extra Spaces" button',
@@ -445,7 +477,7 @@ export const tools = {
     category: 'text',
     name: 'JSON Formatter & Converter',
     description: 'Validate, format, minify, and convert JSON to XML, CSV, or YAML. All processing happens in your browser, no uploads required.',
-    icon: '⚙️', // Using a gear icon, can be changed
+    icon: '⚙️',
     keywords: ['json formatter', 'json validator', 'json beautifier', 'json minifier', 'json to xml', 'json to csv', 'json to yaml', 'text tools', 'developer tools'],
     howToUse: [
       'Paste your JSON data into the input area or click "Upload Data" to load from a file.',
@@ -457,6 +489,54 @@ export const tools = {
     ],
     useCase: 'Ideal for developers and data analysts to quickly inspect, clean up, or transform JSON data for various applications without server-side processing.',
     related: ['text/yaml', 'text/editor', 'text/remove-extra-spaces']
+  },
+  'text/base64': {
+    id: 'base64',
+    category: 'text',
+    name: 'Base64 Encode & Decode',
+    description: 'Encode text to Base64 or decode Base64 back to text with full Unicode support. All processing happens locally in your browser — no uploads.',
+    icon: '🔐',
+    keywords: ['base64 encode', 'base64 decode', 'base64 converter', 'base64 online', 'encode text to base64', 'decode base64 string', 'base64 unicode', 'developer tools'],
+    howToUse: [
+      'Paste or type your text (or Base64 string) into the input area',
+      'Click "Encode to Base64" to convert text into Base64',
+      'Click "Decode from Base64" to convert Base64 back into text',
+      'Copy the result from the output area with the Copy button'
+    ],
+    useCase: 'Encode API tokens, data URIs, email attachments, or config values — and decode Base64 payloads during debugging — without pasting sensitive data into an online service.',
+    related: ['text/url-encode', 'text/json-formatter', 'text/word-count']
+  },
+  'text/word-count': {
+    id: 'word-count',
+    category: 'text',
+    name: 'Word & Character Counter',
+    description: 'Count words, characters, sentences, paragraphs, and estimated reading time as you type. Live stats, all computed locally in your browser.',
+    icon: '🔢',
+    keywords: ['word counter', 'character counter', 'count words online', 'sentence counter', 'paragraph counter', 'reading time calculator', 'text statistics', 'word count tool'],
+    howToUse: [
+      'Type or paste your text into the input area',
+      'Stats update live on every keystroke — no button needed',
+      'Review characters, words, sentences, paragraphs, and reading time in the grid',
+      'Edit your text until it hits the target length'
+    ],
+    useCase: 'Check essay, tweet, meta description, or article length against word and character limits without sending your draft to a server.',
+    related: ['text/editor', 'text/remove-extra-spaces', 'text/base64']
+  },
+  'text/url-encode': {
+    id: 'url-encode',
+    category: 'text',
+    name: 'URL Encode & Decode',
+    description: 'Percent-encode text for safe use in URLs or decode encoded URLs back to readable text. All processing happens locally in your browser.',
+    icon: '🔗',
+    keywords: ['url encode', 'url decode', 'percent encoding', 'encodeURIComponent online', 'url encoder decoder', 'query string encoder', 'escape url characters', 'developer tools'],
+    howToUse: [
+      'Paste your text or URL-encoded string into the input area',
+      'Click "Encode" to percent-encode it for safe use in URLs',
+      'Click "Decode" to turn %-sequences back into readable text',
+      'Copy the result from the output area'
+    ],
+    useCase: 'Build query strings, debug redirect URLs, or decode tracking links without pasting them into a third-party website.',
+    related: ['text/base64', 'text/json-formatter', 'text/remove-extra-spaces']
   },
   'time/timer': {
     id: 'timer',
@@ -497,7 +577,7 @@ export const tools = {
     name: 'Time Zone Converter',
     description: 'Convert one date and time into several common team time zones with DST-aware browser-local calculations.',
     icon: '🕘',
-    keywords: ['time zone converter', 'timezone converter', 'world time converter', 'DST aware time conversion'],
+    keywords: ['time zone converter', 'timezone converter', 'world time converter', 'DST aware time conversion', 'UTC converter', 'compare time zones'],
     howToUse: [
       'Enter the source date and time',
       'Choose the source time zone',
@@ -511,9 +591,9 @@ export const tools = {
     id: 'business-days',
     category: 'time',
     name: 'Business Days Calculator',
-    description: 'Add or subtract business days from a start date while skipping weekends for deadline planning.',
+    description: 'Add or subtract business days from a start date while skipping weekends for deadline planning. Runs entirely in your browser — no data sent anywhere.',
     icon: '📅',
-    keywords: ['business days calculator', 'deadline calculator', 'working days', 'project date calculator'],
+    keywords: ['business days calculator', 'deadline calculator', 'working days', 'project date calculator', 'add business days', 'skip weekends calculator'],
     howToUse: [
       'Choose a start date',
       'Enter the number of business days',
@@ -527,7 +607,7 @@ export const tools = {
     id: 'date-difference',
     category: 'time',
     name: 'Date Duration Calculator',
-    description: 'Calculate days, weeks, and weekdays between two dates for planning timelines and project phases.',
+    description: 'Calculate days, weeks, and weekdays between two dates for planning timelines and project phases. All calculations happen locally in your browser.',
     icon: '📆',
     keywords: ['date duration calculator', 'date difference', 'days between dates', 'timeline calculator', 'weekday count'],
     howToUse: [

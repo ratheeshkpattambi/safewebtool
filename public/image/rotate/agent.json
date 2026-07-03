@@ -1,15 +1,15 @@
 {
   "schemaVersion": "1.0",
-  "id": "resize",
-  "path": "image/resize",
-  "canonicalPath": "/image/resize",
-  "canonicalUrl": "https://safewebtool.com/image/resize",
+  "id": "rotate",
+  "path": "image/rotate",
+  "canonicalPath": "/image/rotate",
+  "canonicalUrl": "https://safewebtool.com/image/rotate",
   "category": {
     "id": "image",
     "name": "Image Tools"
   },
-  "name": "Image Resize",
-  "description": "Free online image resizer. Change image dimensions and resolution while maintaining quality, all processed locally in your browser.",
+  "name": "Image Rotator",
+  "description": "Rotate images by 90 or 180 degrees, or flip them horizontally and vertically, with a live preview. All processing happens locally in your browser — no uploads.",
   "privacy": {
     "mode": "browser-local",
     "fileUpload": false,
@@ -38,22 +38,24 @@
   },
   "howToUse": [
     "Upload your image by dropping it or selecting from your device",
-    "Set the desired width and height (maintains aspect ratio by default)",
-    "Click \"Resize Image\" to process",
-    "Download the resized image when complete"
+    "Click 90° CW, 90° CCW, 180°, Flip Horizontal, or Flip Vertical — combine as needed",
+    "Check the live preview after each step (use Reset to start over)",
+    "Click \"Download Rotated Image\" to save the result"
   ],
-  "useCase": "Perfect for reducing image size for websites, social media, or email attachments.",
+  "useCase": "Fix sideways phone photos, mirror selfies, or straighten scanned documents without sending your pictures to a server.",
   "keywords": [
-    "image resize",
-    "resize image",
-    "image dimensions",
-    "optimize images",
-    "scale photo",
-    "change image size"
+    "rotate image",
+    "image rotator",
+    "rotate photo online",
+    "flip image horizontally",
+    "flip image vertically",
+    "fix sideways photo",
+    "mirror image",
+    "private image tool"
   ],
   "externalDownloads": [],
   "exampleTasks": [
-    "Open https://safewebtool.com/image/resize and use Image Resize."
+    "Open https://safewebtool.com/image/rotate and use Image Rotator."
   ],
   "automationNotes": [
     "Prefer the stable selectors in this contract over visible text where possible.",

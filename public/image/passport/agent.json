@@ -10,7 +10,7 @@
     "name": "Image Tools"
   },
   "name": "Passport Photo Maker",
-  "description": "Free private passport, visa, and ID photo maker. Auto-align faces in your browser, crop to official sizes, export digital JPEGs, and create print sheets with no uploads.",
+  "description": "Free private passport, visa, and ID photo maker. Auto-align faces, crop to official sizes, and export JPEGs or print sheets — no uploads.",
   "privacy": {
     "mode": "browser-local",
     "fileUpload": false,

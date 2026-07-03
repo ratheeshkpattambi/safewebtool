@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { categories } from '../src/common/metadata.js';
@@ -388,19 +389,38 @@ ${elementChecks}
 // Metadata insertion
 // ---------------------------------------------------------------------------
 function metadataEntry() {
+  const safeName = name.replace(/'/g, "\\'");
+  const lowerName = name.toLowerCase().replace(/'/g, "\\'");
+  // Ensure the description mentions browser-local processing without repeating itself.
+  const fullDescription = /browser|locally|local|no upload|device/i.test(description)
+    ? description
+    : `${description} All processing happens locally in your browser — no uploads.`;
+  const keywords = [...new Set([
+    toolId.replace(/-/g, ' '),
+    lowerName,
+    `${lowerName} online`,
+    `free ${lowerName}`,
+    `private ${categoryId} tool`,
+    `browser ${categoryId} tool`
+  ])];
   return `  '${toolPath}': {
     id: '${toolId}',
     category: '${categoryId}',
     name: '${name}',
-    description: '${description.replace(/'/g, "\\'")}',
+    // FILL IN: one or two sentences; say what the tool does AND that it runs in the browser (no uploads).
+    description: '${fullDescription.replace(/'/g, "\\'")}',
     icon: '${icon}',
-    keywords: ['${toolId}', '${name.toLowerCase().replace(/'/g, "\\'")}', '${categoryId} tool'],
+    // FILL IN: at least 5 search phrases people would actually type.
+    keywords: [${keywords.map(k => `'${k.replace(/'/g, "\\'")}'`).join(', ')}],
+    // FILL IN: 3-5 concrete steps matching the real UI (button names, options).
     howToUse: [
-      'Open the tool in your browser',
+      'Open the ${safeName} tool in your browser',
       'Provide your input and choose any options',
-      'Get the result instantly — nothing is uploaded'
+      'Click the process button to run everything locally',
+      'Copy or download the result — nothing is uploaded'
     ],
-    useCase: 'Use ${name.replace(/'/g, "\\'")} when you need a private, browser-local ${categoryId} workflow.'
+    // FILL IN: one sentence on who needs this and when; mention privacy/browser-local.
+    useCase: 'Use ${safeName} when you need a fast, private, browser-local ${categoryId} workflow without uploading files to a server.'
   },`;
 }
 
@@ -453,16 +473,20 @@ writeFileSync(modulePath, moduleBuilders[kind]());
 console.log(`Created ${path.relative(rootDir, modulePath)} (kind: ${kind})`);
 
 // Metadata
+let metadataInserted = false;
 if (skipMetadata) {
   console.log('\nSkipped metadata insertion (--no-metadata). Add this entry to src/common/metadata.js under tools:\n');
   console.log(metadataEntry());
+  console.log('\nWARNING: test:contract will FAIL until this metadata entry exists.');
 } else {
   const result = insertMetadata();
   if (result.inserted) {
+    metadataInserted = true;
     console.log('Inserted metadata entry into src/common/metadata.js');
   } else {
     console.log(`\nCould not auto-insert metadata (${result.reason}). Add this entry to src/common/metadata.js under tools:\n`);
     console.log(metadataEntry());
+    console.log('\nWARNING: test:contract will FAIL until this metadata entry exists.');
   }
 }
 
@@ -477,7 +501,34 @@ if (!skipTest) {
   }
 }
 
-console.log(`\nNext:`);
-console.log(`  1. Implement the TODO in src/${toolPath}.js`);
-console.log(`  2. Refine the metadata (keywords, howToUse, useCase) in src/common/metadata.js`);
+// Verify the scaffold immediately so a broken state never goes unnoticed.
+let contractPassed = null;
+if (metadataInserted) {
+  const check = spawnSync(process.execPath, [path.join(rootDir, 'scripts', 'validate-tool-contract.mjs')], {
+    cwd: rootDir,
+    stdio: 'pipe',
+    encoding: 'utf8'
+  });
+  contractPassed = check.status === 0;
+  if (!contractPassed) {
+    console.error('\ntest:contract FAILED after scaffolding — this should not happen. Output:');
+    console.error((check.stdout || '') + (check.stderr || ''));
+  }
+}
+
+console.log('\n--- Scaffold complete ---');
+console.log(`  [x] Module created:        src/${toolPath}.js (kind: ${kind})`);
+console.log(`  [${metadataInserted ? 'x' : ' '}] Metadata entry:        src/common/metadata.js ('${toolPath}')`);
+console.log(`  [${skipTest ? ' ' : 'x'}] Smoke test:            tests/${categoryId}-${toolId}.spec.js`);
+if (contractPassed !== null) {
+  console.log(`  [${contractPassed ? 'x' : ' '}] Contract check:        npm run test:contract ${contractPassed ? 'passed' : 'FAILED (see above)'}`);
+}
+console.log('\nNext steps:');
+console.log(`  1. Implement the TODO in src/${toolPath}.js (browser-local logic only — no server calls)`);
+console.log(`  2. Replace the FILL IN placeholders (description, keywords, howToUse, useCase) in src/common/metadata.js`);
 console.log(`  3. Run: npm run test:tool -- ${toolPath}`);
+console.log(`  4. Regenerate manifests: npm run generate:agent-manifest && npm run generate:share-image`);
+
+if (contractPassed === false) {
+  process.exit(1);
+}

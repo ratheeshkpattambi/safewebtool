@@ -9,7 +9,7 @@
     "name": "ML Tools"
   },
   "name": "Image to Text (OCR)",
-  "description": "Convert images to text with 100% privacy. This offline OCR tool runs entirely in your browser using Tesseract.js. No uploads, no servers — just fast and secure image-to-text conversion.",
+  "description": "Convert images to text with 100% privacy. This offline OCR tool runs in your browser using Tesseract.js — no uploads, fast and secure image-to-text.",
   "privacy": {
     "mode": "browser-local",
     "fileUpload": false,

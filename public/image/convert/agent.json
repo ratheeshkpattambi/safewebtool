@@ -1,15 +1,15 @@
 {
   "schemaVersion": "1.0",
-  "id": "resize",
-  "path": "image/resize",
-  "canonicalPath": "/image/resize",
-  "canonicalUrl": "https://safewebtool.com/image/resize",
+  "id": "convert",
+  "path": "image/convert",
+  "canonicalPath": "/image/convert",
+  "canonicalUrl": "https://safewebtool.com/image/convert",
   "category": {
     "id": "image",
     "name": "Image Tools"
   },
-  "name": "Image Resize",
-  "description": "Free online image resizer. Change image dimensions and resolution while maintaining quality, all processed locally in your browser.",
+  "name": "Image Format Converter",
+  "description": "Convert images between JPG, PNG, and WebP with adjustable quality. All conversion happens locally in your browser — your photos are never uploaded.",
   "privacy": {
     "mode": "browser-local",
     "fileUpload": false,
@@ -38,22 +38,24 @@
   },
   "howToUse": [
     "Upload your image by dropping it or selecting from your device",
-    "Set the desired width and height (maintains aspect ratio by default)",
-    "Click \"Resize Image\" to process",
-    "Download the resized image when complete"
+    "Choose the output format (JPG, PNG, or WebP)",
+    "Adjust the quality slider for JPG or WebP output",
+    "Click \"Convert Image\" and download the result"
   ],
-  "useCase": "Perfect for reducing image size for websites, social media, or email attachments.",
+  "useCase": "Convert screenshots, photos, and graphics into the format a website, form, or app requires — without uploading your images to a conversion server.",
   "keywords": [
-    "image resize",
-    "resize image",
-    "image dimensions",
-    "optimize images",
-    "scale photo",
-    "change image size"
+    "image converter",
+    "convert image format",
+    "png to jpg",
+    "jpg to webp",
+    "webp to png",
+    "change image format online",
+    "image format converter",
+    "private image tool"
   ],
   "externalDownloads": [],
   "exampleTasks": [
-    "Open https://safewebtool.com/image/resize and use Image Resize."
+    "Open https://safewebtool.com/image/convert and use Image Format Converter."
   ],
   "automationNotes": [
     "Prefer the stable selectors in this contract over visible text where possible.",

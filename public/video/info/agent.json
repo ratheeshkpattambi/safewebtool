@@ -46,7 +46,9 @@
     "video info",
     "video metadata",
     "video properties",
-    "video analyzer"
+    "video analyzer",
+    "check video codec",
+    "video resolution checker"
   ],
   "externalDownloads": [],
   "exampleTasks": [

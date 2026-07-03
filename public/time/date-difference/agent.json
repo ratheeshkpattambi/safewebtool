@@ -9,7 +9,7 @@
     "name": "Time Tools"
   },
   "name": "Date Duration Calculator",
-  "description": "Calculate days, weeks, and weekdays between two dates for planning timelines and project phases.",
+  "description": "Calculate days, weeks, and weekdays between two dates for planning timelines and project phases. All calculations happen locally in your browser.",
   "privacy": {
     "mode": "browser-local",
     "fileUpload": false,

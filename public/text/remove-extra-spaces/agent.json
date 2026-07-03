@@ -45,7 +45,9 @@
     "text tools",
     "remove spaces",
     "trim text",
-    "text cleanup"
+    "text cleanup",
+    "remove double spaces",
+    "whitespace remover"
   ],
   "externalDownloads": [],
   "exampleTasks": [

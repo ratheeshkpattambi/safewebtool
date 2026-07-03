@@ -9,7 +9,7 @@
     "name": "ML Tools"
   },
   "name": "Audio/Video Transcription",
-  "description": "Convert speech to text with 100% privacy using Whisper. This offline transcription tool runs entirely in your browser. Supports audio and video files with automatic audio extraction.",
+  "description": "Convert speech to text with 100% privacy using Whisper. This offline transcription tool runs in your browser, with audio and video support.",
   "privacy": {
     "mode": "browser-local",
     "fileUpload": false,

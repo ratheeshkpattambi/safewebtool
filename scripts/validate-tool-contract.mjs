@@ -87,6 +87,18 @@ for (const [toolPath, tool] of Object.entries(tools)) {
     }
   }
 
+  // SEO quality checks (warnings — improve these, they affect search ranking and tool cards).
+  if (Array.isArray(tool.keywords) && tool.keywords.length > 0 && tool.keywords.length < 5) {
+    reportWarning(`Tool "${toolPath}" has only ${tool.keywords.length} keywords; aim for at least 5 search phrases.`);
+  }
+  if (typeof tool.description === 'string' && tool.description.length > 0 &&
+      !/browser|locally|local|no upload|device/i.test(tool.description)) {
+    reportWarning(`Tool "${toolPath}" description does not mention browser-local processing (e.g. "in your browser", "no uploads").`);
+  }
+  if (typeof tool.description === 'string' && tool.description.includes('FILL IN')) {
+    reportWarning(`Tool "${toolPath}" still contains scaffold "FILL IN" placeholder text in its description.`);
+  }
+
   const ids = seenIdsByCategory.get(categoryId) || new Set();
   if (ids.has(toolId)) {
     reportError(`Duplicate tool id "${toolId}" in category "${categoryId}".`);

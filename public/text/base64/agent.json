@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "1.0",
+  "id": "base64",
+  "path": "text/base64",
+  "canonicalPath": "/text/base64",
+  "canonicalUrl": "https://safewebtool.com/text/base64",
+  "category": {
+    "id": "text",
+    "name": "Text Tools"
+  },
+  "name": "Base64 Encode & Decode",
+  "description": "Encode text to Base64 or decode Base64 back to text with full Unicode support. All processing happens locally in your browser — no uploads.",
+  "privacy": {
+    "mode": "browser-local",
+    "fileUpload": false,
+    "note": "SafeWebTool tools are designed to process user data locally in the browser."
+  },
+  "inputs": [
+    {
+      "name": "text",
+      "type": "text"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "browser result",
+      "formats": [
+        "text/html"
+      ]
+    }
+  ],
+  "selectors": {
+    "ready": ".tool-container[data-tool-ready=\"true\"]",
+    "process": "#processBtn",
+    "log": "#logContent"
+  },
+  "howToUse": [
+    "Paste or type your text (or Base64 string) into the input area",
+    "Click \"Encode to Base64\" to convert text into Base64",
+    "Click \"Decode from Base64\" to convert Base64 back into text",
+    "Copy the result from the output area with the Copy button"
+  ],
+  "useCase": "Encode API tokens, data URIs, email attachments, or config values — and decode Base64 payloads during debugging — without pasting sensitive data into an online service.",
+  "keywords": [
+    "base64 encode",
+    "base64 decode",
+    "base64 converter",
+    "base64 online",
+    "encode text to base64",
+    "decode base64 string",
+    "base64 unicode",
+    "developer tools"
+  ],
+  "externalDownloads": [],
+  "exampleTasks": [
+    "Open https://safewebtool.com/text/base64 and use Base64 Encode & Decode."
+  ],
+  "automationNotes": [
+    "Prefer the stable selectors in this contract over visible text where possible.",
+    "Wait for selectors.ready before interacting with the tool UI.",
+    "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+  ]
+}

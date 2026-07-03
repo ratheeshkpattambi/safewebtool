@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "1.0",
+  "id": "word-count",
+  "path": "text/word-count",
+  "canonicalPath": "/text/word-count",
+  "canonicalUrl": "https://safewebtool.com/text/word-count",
+  "category": {
+    "id": "text",
+    "name": "Text Tools"
+  },
+  "name": "Word & Character Counter",
+  "description": "Count words, characters, sentences, paragraphs, and estimated reading time as you type. Live stats, all computed locally in your browser.",
+  "privacy": {
+    "mode": "browser-local",
+    "fileUpload": false,
+    "note": "SafeWebTool tools are designed to process user data locally in the browser."
+  },
+  "inputs": [
+    {
+      "name": "text",
+      "type": "text"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "browser result",
+      "formats": [
+        "text/html"
+      ]
+    }
+  ],
+  "selectors": {
+    "ready": ".tool-container[data-tool-ready=\"true\"]",
+    "process": "#processBtn",
+    "log": "#logContent"
+  },
+  "howToUse": [
+    "Type or paste your text into the input area",
+    "Stats update live on every keystroke — no button needed",
+    "Review characters, words, sentences, paragraphs, and reading time in the grid",
+    "Edit your text until it hits the target length"
+  ],
+  "useCase": "Check essay, tweet, meta description, or article length against word and character limits without sending your draft to a server.",
+  "keywords": [
+    "word counter",
+    "character counter",
+    "count words online",
+    "sentence counter",
+    "paragraph counter",
+    "reading time calculator",
+    "text statistics",
+    "word count tool"
+  ],
+  "externalDownloads": [],
+  "exampleTasks": [
+    "Open https://safewebtool.com/text/word-count and use Word & Character Counter."
+  ],
+  "automationNotes": [
+    "Prefer the stable selectors in this contract over visible text where possible.",
+    "Wait for selectors.ready before interacting with the tool UI.",
+    "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+  ]
+}

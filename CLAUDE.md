@@ -1,166 +1,242 @@
 # CLAUDE.md — SafeWebTool
 
-Claude-specific context for working in this repo. Start here, then read `AGENTS.md` for the full agent guide and `documentation/tool-architecture-playbook.md` for the scaling workflow.
+Privacy-first browser-local tools at safewebtool.com. **Everything runs in the user's browser. No uploads, no server, no login, no ads.** Stack: Vite + Tailwind + vanilla JS ES modules. Tests: Playwright.
 
-## Project Identity
+## Adding a new tool — follow these 5 steps exactly
 
-SafeWebTool is a privacy-first, open-source collection of browser-local tools at [safewebtool.com](https://safewebtool.com). **All processing happens in the user's browser. No file uploads, no server, no login, no ads.**
+1. **Scaffold** (creates module + metadata entry + smoke test, then runs the contract check for you):
+   ```bash
+   npm run scaffold:tool -- <category>/<tool-id> --name="Tool Name" --icon="🧰" --kind=file
+   ```
+   `--kind` is one of: `file` (upload + process button), `text` (input→output textareas), `generator` (options→output). Category must be one of: `video`, `image`, `text`, `ml`, `time`.
+2. **Implement** the `TODO` inside `src/<category>/<tool-id>.js`. Browser-local logic only.
+3. **Fill in SEO** in `src/common/metadata.js`: replace every `FILL IN` placeholder in your tool's entry (description, keywords, howToUse, useCase). See the template below.
+4. **Test**:
+   ```bash
+   npm run test:contract && npm run test:tool -- <category>/<tool-id>
+   ```
+5. **Regenerate manifests** (required after any metadata change):
+   ```bash
+   npm run generate:agent-manifest && npm run generate:share-image
+   ```
 
-Stack: Vite + Tailwind CSS + vanilla JS ES modules. Deployed on Netlify. Tests use Playwright.
+That's it. Do not edit the router or registry — tools are discovered automatically from `src/<category>/<tool-id>.js` + the metadata entry.
 
-## Claude's Role in This Repo
+## Cardinal Rules
 
-You are a contributor, not a reviewer. When asked to add a tool, fix a bug, or refactor shared code, **do the work** — scaffold, implement, run contract checks, and verify tests pass. Don't just describe what to do.
+1. **Never send user files/content to any server.** CDN-hosted WASM/ML models are OK; POSTing user data is not.
+2. **No new tracking.** The existing page-view Google Analytics in `src/main.js` stays; never add analytics inside tool modules.
+3. **Never edit `tool-registry.js` or `router.js` to add a tool.**
+4. **Reuse `src/common/*`.** No copy-paste, no heavy libraries.
+5. **Must work on mobile** (small screens).
 
-## Cardinal Rules (Never Violate)
+## DO NOT
 
-1. **No server calls from tool logic.** Tools may use CDN-hosted WASM/ML models, but never POST user files to a remote server.
-2. **Privacy-first.** Tool processing logic must never send user files or file content to any analytics/tracking/third-party service. The site already loads anonymous, page-view-only Google Analytics (`src/main.js`, gated off localhost) for usage stats — that's intentional and should be preserved, not removed. Don't add new tracking, and don't add any analytics calls inside tool modules.
-3. **No router edits for normal tool additions.** The dynamic import glob in `tool-registry.js` discovers tools automatically. Adding metadata + a module file is enough.
-4. **Minimal code.** Prefer reusing `src/common/*` over copy-pasting. Avoid bloated libraries or excessive comments.
-5. **Mobile-first.** Tools must work and look correct on small screens.
+- DO NOT edit `src/common/tool-registry.js`, `src/router.js`, or `src/common/page-renderers.js` when adding a tool.
+- DO NOT import one tool module from another tool module.
+- DO NOT rename these DOM IDs (tests depend on them): `dropZone`, `fileInput`, `processBtn`, `progress`, `logHeader`, `logContent`, `downloadContainer`, `input-video`, `output-video`.
+- DO NOT hand-edit generated files: `public/llms.txt`, `public/tools.json`, `public/**/agent.json`, `public/og/safewebtool.png`.
+- DO NOT leave `FILL IN` placeholders or empty strings in metadata.
+- DO NOT use `libopus` for WebM audio in FFmpeg args — use `libvorbis` (libopus crashes ffmpeg.wasm).
+- DO NOT commit changes to shared files (`base.js`, `metadata.js`, `page-renderers.js`, `tool-registry.js`) without running `npm run test:contract` first.
 
-## Architecture at a Glance
+## Copy-paste metadata template
+
+Every tool needs an entry in the `tools` object in `src/common/metadata.js`. The key is `"<category>/<tool-id>"` and MUST match the file path, `id`, and `category` fields:
+
+```js
+'image/photo-rotator': {
+  id: 'photo-rotator',                       // must equal the part after the slash
+  category: 'image',                         // must equal the part before the slash
+  name: 'Photo Rotator',
+  description: 'Rotate JPEG, PNG, and WebP photos by 90, 180, or 270 degrees. All processing happens locally in your browser — no uploads.',
+  icon: '🔄',
+  keywords: ['rotate photo', 'photo rotator', 'rotate image online', 'fix sideways photo', 'free image rotation', 'private image tool'],  // at least 5
+  howToUse: [
+    'Upload your photo by dropping it or selecting from your device',
+    'Choose the rotation angle (90, 180, or 270 degrees)',
+    'Click "Rotate Photo" to process',
+    'Download the rotated image'
+  ],
+  useCase: 'Fix sideways phone photos or prepare images for documents without uploading them to a server.',
+  related: ['image/resize', 'image/crop']    // optional
+},
+```
+
+## Copy-paste tool module templates
+
+Every module in `src/<category>/<tool-id>.js` MUST export `template` (HTML string) and `initTool()`. Prefer the scaffold — it generates these for you. Minimal hand-written versions:
+
+### kind: file (upload + process)
+
+```js
+import { Tool } from '../common/base.js';
+
+export const template = `
+  <div class="tool-container space-y-6">
+    <div id="dropZone" class="drop-zone border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-8 text-center cursor-pointer">
+      <input type="file" id="fileInput" class="hidden">
+      <button type="button" class="file-select-btn px-4 py-2 bg-blue-600 text-white rounded-md">Select File</button>
+      <p class="mt-3 text-sm text-slate-500">or drag and drop a file here</p>
+    </div>
+    <button id="processBtn" class="w-full bg-blue-600 text-white py-2.5 px-5 rounded-md disabled:opacity-50" disabled>Process</button>
+    <div id="progress" class="progress hidden"><div class="progress-fill"></div><span class="progress-text">0%</span></div>
+    <div class="log-section">
+      <button id="logHeader" class="log-header" type="button">Logs</button>
+      <textarea id="logContent" class="log-content" readonly></textarea>
+    </div>
+  </div>
+`;
+
+class MyTool extends Tool {
+  constructor() {
+    super({ id: 'my-tool', name: 'My Tool', category: 'image',
+      needsFileUpload: true, needsProcessButton: true, hasOutput: false, template });
+  }
+  getElementsMap() {
+    return { dropZone: 'dropZone', fileInput: 'fileInput', processBtn: 'processBtn',
+      progress: 'progress', logHeader: 'logHeader', logContent: 'logContent' };
+  }
+  async setup() {
+    this.initFileUpload({ acceptTypes: 'image/*',
+      onFileSelected: (file) => this.log(`Loaded ${file.name}`, 'success') });
+  }
+  async processFile(file) {
+    this.startProcessing();
+    try {
+      // browser-local processing here
+      this.endProcessing(true);
+    } catch (err) {
+      this.log(`Error: ${err.message}`, 'error');
+      this.endProcessing(false);
+    }
+  }
+}
+
+export function initTool() { return new MyTool().init(); }
+```
+
+### kind: text (input → output)
+
+```js
+import { Tool } from '../common/base.js';
+
+export const template = `
+  <div class="tool-container space-y-4">
+    <textarea id="inputText" rows="8" class="w-full p-3 border rounded-md" placeholder="Paste your text here..."></textarea>
+    <div class="text-center"><button id="processBtn" class="px-6 py-2 bg-blue-600 text-white rounded-md">Convert</button></div>
+    <textarea id="outputText" rows="8" class="w-full p-3 border rounded-md" readonly placeholder="Result..."></textarea>
+    <div class="log-section">
+      <button id="logHeader" class="log-header" type="button">Logs</button>
+      <textarea id="logContent" class="log-content" readonly></textarea>
+    </div>
+  </div>
+`;
+
+class MyTextTool extends Tool {
+  constructor() {
+    super({ id: 'my-text-tool', name: 'My Text Tool', category: 'text',
+      needsFileUpload: false, needsProcessButton: false, hasOutput: true, template });
+  }
+  getElementsMap() {
+    return { inputText: 'inputText', outputText: 'outputText', processBtn: 'processBtn',
+      logHeader: 'logHeader', logContent: 'logContent' };
+  }
+  async setup() {
+    this.elements.processBtn?.addEventListener('click', () => {
+      this.elements.outputText.value = this.transform(this.elements.inputText.value);
+      this.log('Done.', 'success');
+    });
+  }
+  transform(input) { return input; /* your logic */ }
+}
+
+export function initTool() { return new MyTextTool().init(); }
+```
+
+### kind: generator (options → output)
+
+```js
+import { Tool } from '../common/base.js';
+
+export const template = `
+  <div class="tool-container space-y-4">
+    <div id="options"><!-- option inputs --></div>
+    <div class="text-center"><button id="generateBtn" class="px-6 py-2 bg-blue-600 text-white rounded-md">Generate</button></div>
+    <textarea id="output" rows="4" class="w-full p-3 border rounded-md font-mono" readonly></textarea>
+    <div class="log-section">
+      <button id="logHeader" class="log-header" type="button">Logs</button>
+      <textarea id="logContent" class="log-content" readonly></textarea>
+    </div>
+  </div>
+`;
+
+class MyGenerator extends Tool {
+  constructor() {
+    super({ id: 'my-generator', name: 'My Generator', category: 'text',
+      needsFileUpload: false, needsProcessButton: false, hasOutput: true, template });
+  }
+  getElementsMap() {
+    return { output: 'output', generateBtn: 'generateBtn', logHeader: 'logHeader', logContent: 'logContent' };
+  }
+  async setup() {
+    this.elements.generateBtn?.addEventListener('click', () => {
+      this.elements.output.value = crypto.randomUUID(); // your logic; use crypto for randomness
+      this.log('Generated.', 'success');
+    });
+  }
+}
+
+export function initTool() { return new MyGenerator().init(); }
+```
+
+## Architecture (read only if you need context)
 
 ```
 src/
   common/
     metadata.js        ← source of truth: categories + tool metadata (SEO, cards, discovery)
-    tool-registry.js   ← route parsing + dynamic module loading (do not add tool-specific cases here)
-    page-renderers.js  ← renders category pages + tool shell
-    base.js            ← Tool base class (logs, progress, process button, file upload wiring)
-    fileUpload.js      ← shared drag/drop + file input (delegated events — safe after re-renders)
-    utils.js           ← addLog, updateProgress, formatFileSize, etc.
-    footer-manager.js  ← custom per-tool footers
-  <category>/
-    <toolId>.js        ← tool module: export template + initTool()
-  video/
-    ffmpeg-utils.js    ← FFmpeg WASM wrapper, presets, error handling
+    tool-registry.js   ← route parsing + dynamic import glob (never add tool-specific cases)
+    page-renderers.js  ← category pages + tool page shell
+    base.js            ← Tool base class (logs, progress, process button, upload, data-tool-ready)
+    fileUpload.js      ← shared drag/drop (delegated events — survives innerHTML re-renders)
+    utils.js           ← addLog, updateProgress, formatFileSize
+    footer-manager.js  ← per-tool footers
+  <category>/<toolId>.js  ← tool module: export template + initTool()
+  video/ffmpeg-utils.js   ← FFmpeg WASM wrapper, presets, error handling
 ```
 
-## Adding a Tool (Fast Path)
+Routing: `tool-registry.js` uses `import.meta.glob(['../*/*.js', '!../common/*.js'])` — any `src/<category>/<toolId>.js` with a metadata entry is automatically routable at `/<category>/<toolId>`. New categories: add to `categories` in `metadata.js` first (`id`, `name`, `description`, `icon`, `keywords`).
+
+## Test commands (in this order)
 
 ```bash
-npm run scaffold:tool -- image/my-tool --name="My Tool" --icon="🧰" [--kind=file|text|generator]
+npm run test:contract                              # fast (<5s), run first, always
+npm run test:tool -- <category>/<toolId>           # smoke test one tool
+npm run test:tool -- <category>/<toolId> --mobile --real   # mobile + real file
+npm run verify:full                                # before PR / cross-cutting changes
 ```
 
-The scaffold creates the module, **auto-inserts the metadata entry** into `src/common/metadata.js`, and writes a smoke test at `tests/<category>-<toolId>.spec.js`. Pick `--kind`:
+Run `verify:full` when touching routing, `base.js`, `fileUpload.js`, FFmpeg helpers, or multiple tools. Test fixtures live in `tests/fixtures/` (`sample.mp4`, `sample.webm`, `sample.mp3`, `sample.wav`, `sample.gif`); regenerate via `npm run dev & node scripts/generate-test-fixtures.mjs`.
 
-- `file` (default) — drop zone + process button (image/video/ml tools)
-- `text` — input → output textareas with copy/download (text utilities)
-- `generator` — options → generated output (password/uuid/hash)
+## Video tools — extra rules
 
-Then:
-1. Implement the scaffolded `processFile()` / `processText()` / `generate()` with real browser-local logic.
-2. Refine the auto-inserted metadata (keywords, `howToUse`, `useCase`) in `src/common/metadata.js`.
-3. Run `npm run test:tool -- image/my-tool` to verify.
+- FFmpeg WASM is slow: prefer fast presets (H.264 `ultrafast`, VP8/`libvpx` over VP9).
+- WebM audio: `libvorbis`, never `libopus` (crashes `@ffmpeg/core@0.12.10`). See `getFastWebMEncodeArgs` in `src/video/ffmpeg-utils.js`.
+- Check FFmpeg exit codes in `ffmpeg-utils.js` — empty output means a decode/encode error, not success.
+- Every video tool page needs: log panel, progress bar, output preview, download link. Validate with `tests/video-ui-consistency.spec.js`.
+- Keep `@ffmpeg/core` version in sync across `package.json`, CDN URLs in `ffmpeg-utils.js`, and `scripts/copy-ffmpeg-files.mjs`.
 
-Flags: `--no-metadata` (print the entry instead of inserting), `--no-test` (skip the test stub).
+## Debugging quick reference
 
-### Required metadata fields
+- Browser error "'text/html' is not a valid JavaScript MIME type" = broken module import (bad export / syntax error in a shared file). Run `npm run test:contract` to locate it.
+- Upload button dead after re-render: duplicate `fileUpload.js` initialization — it uses delegated events; initialize once.
+- Playwright mobile clicks intercepted: use `scrollIntoViewIfNeeded()` + `click({ force: true })`.
 
-`id`, `category`, `name`, `description`, `icon`, `keywords`, `howToUse`, `useCase`
-
-Key format in `tools` object: `"<category>/<toolId>"` — must match the file path and `tool.id` / `tool.category` values.
-
-### Tool module contract
-
-- Export `template` — HTML string with the tool UI
-- Export `initTool()` — called by the router after the shell renders
-- Extend `Tool` from `src/common/base.js` for consistent behavior (logs, progress, process button, file upload, `data-tool-ready` marker)
-
-### DOM IDs to preserve (tests depend on these)
-
-| ID | Purpose |
-|----|---------|
-| `dropZone` | File drop area |
-| `fileInput` | Hidden file input |
-| `processBtn` | Process trigger button |
-| `progress` / `videoProgress` | Progress bar |
-| `logHeader` / `logContent` | Collapsible log panel |
-| `input-video` / `output-video` | Video preview elements (video tools) |
-| `downloadContainer` | Output download link area |
-
-## Test Commands (Use These, In This Order)
-
-```bash
-# 1. Fast contract check (always run first)
-npm run test:contract
-
-# 2. Smoke test one tool
-npm run test:tool -- <category/toolId>
-
-# 3. With mobile + real file
-npm run test:tool -- <category/toolId> --mobile --real
-
-# 4. Full regression (before PR or cross-cutting changes)
-npm run verify:full
-```
-
-Run `npm run verify:full` when touching: routing, shared base/upload utilities, FFmpeg helpers, or multiple tools at once.
-
-### Test Media Fixtures
-
-`tests/fixtures/` contains small, checked-in sample files for FFmpeg-based tool tests:
-`sample.mp4` (320x240 H.264), `sample.webm` (VP8/Opus, MediaRecorder-generated),
-`sample.mp3`, `sample.wav`, `sample.gif`. Tests like `video-ops-downloaded.spec.js`,
-`reencode-downloaded.spec.js`, and `reencode-downloaded-mp4.spec.js` use these directly —
-no manual download step required.
-
-To regenerate them (e.g. after an FFmpeg core upgrade), run the dev server and:
-
-```bash
-npm run dev &
-node scripts/generate-test-fixtures.mjs
-```
-
-## Video Tools — Extra Care
-
-- FFmpeg WASM is slower than desktop — use fast presets: H.264 `ultrafast`-ish, VP8 (`libvpx`) over VP9.
-- Normalize FFmpeg failures early; don't let empty output silently look like success.
-- All video tool pages need: log panel, progress bar, output preview, download link.
-- Validate against `tests/video-ui-consistency.spec.js` after video tool changes.
-- **WebM audio**: use `libvorbis`, not `libopus`, for `-c:a` with `@ffmpeg/core@0.12.10` —
-  `libopus` crashes with "memory access out of bounds" regardless of resolution
-  ([ffmpegwasm/ffmpeg.wasm#591](https://github.com/ffmpegwasm/ffmpeg.wasm/issues/591)).
-  See `getFastWebMEncodeArgs` in `src/video/ffmpeg-utils.js`.
-
-## Common Bugs to Avoid
-
-- **Always run `npm run test:contract` BEFORE committing any change to shared infrastructure** (`page-renderers.js`, `router.js`, `tool-registry.js`, `base.js`, `metadata.js`). These files affect every tool. A break here shows as "'text/html' is not a valid JavaScript MIME type" in the browser — a broken module import caused by a bad export, syntax error, or mis-resolved dynamic `import()`. The contract check is fast (<5 s) and catches most of these.
-- **Upload button breaks after re-render**: `fileUpload.js` uses delegated events — don't re-initialize in a way that creates duplicate listeners.
-- **FFmpeg failed but UI looks OK**: Always check exit code in `ffmpeg-utils.js`, not just log output.
-- **Empty output file**: Downstream symptom of a decode/encode error — fix root cause, not symptoms.
-- **Mobile test click interception**: Use `scrollIntoViewIfNeeded()` + `click({ force: true })` in Playwright tests.
-- **FFmpeg core version drift**: `@ffmpeg/core` in `package.json`, the CDN URLs in `ffmpeg-utils.js`, and `scripts/copy-ffmpeg-files.mjs` must all reference the same `CORE_VERSION` — keep them in sync when upgrading.
-
-## Generated Files — Do Not Hand-Edit
-
-These are regenerated from `src/common/metadata.js` and build scripts:
-- `public/llms.txt`
-- `public/tools.json`
-- `public/**/agent.json`
-- `public/og/safewebtool.png`
-
-After metadata changes: `npm run generate:agent-manifest && npm run generate:share-image`
-
-## Scaffold for a New Category
-
-Add the category to `src/common/metadata.js` under `categories` first (with `id`, `name`, `description`, `icon`, `keywords`). The registry discovers it automatically — no router edit needed.
-
-## Before Every PR
+## Before every PR
 
 - [ ] `npm run test:contract` passes
-- [ ] `npm run test:tool -- <category/toolId>` passes for changed tools
+- [ ] `npm run test:tool -- <category>/<toolId>` passes for changed tools
 - [ ] `npm run verify:full` passes for cross-cutting changes
-- [ ] No router edits unless route semantics changed
-- [ ] No server calls added to tool logic
-- [ ] Generated files regenerated if metadata changed
-
-## Key Conventions Claude Should Follow
-
-- Keep tool modules thin — processing logic goes in the module, structural/shared patterns in `src/common/*`.
-- Don't import one tool module from another.
-- Don't add global side effects in shared utilities.
-- Commit messages: specific to user-facing or architectural impact; include what was tested.
-- Prefer `Tool` base class over hand-rolling logs/progress/button wiring.
+- [ ] No router/registry edits, no server calls in tool logic
+- [ ] Manifests regenerated if metadata changed (`npm run generate:agent-manifest && npm run generate:share-image`)

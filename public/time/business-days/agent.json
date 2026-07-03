@@ -9,7 +9,7 @@
     "name": "Time Tools"
   },
   "name": "Business Days Calculator",
-  "description": "Add or subtract business days from a start date while skipping weekends for deadline planning.",
+  "description": "Add or subtract business days from a start date while skipping weekends for deadline planning. Runs entirely in your browser — no data sent anywhere.",
   "privacy": {
     "mode": "browser-local",
     "fileUpload": false,
@@ -45,7 +45,9 @@
     "business days calculator",
     "deadline calculator",
     "working days",
-    "project date calculator"
+    "project date calculator",
+    "add business days",
+    "skip weekends calculator"
   ],
   "externalDownloads": [],
   "exampleTasks": [

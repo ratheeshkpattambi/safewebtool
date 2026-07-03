@@ -148,6 +148,71 @@
         "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
       ]
     },
+    "image/convert": {
+      "schemaVersion": "1.0",
+      "id": "convert",
+      "path": "image/convert",
+      "canonicalPath": "/image/convert",
+      "canonicalUrl": "https://safewebtool.com/image/convert",
+      "category": {
+        "id": "image",
+        "name": "Image Tools"
+      },
+      "name": "Image Format Converter",
+      "description": "Convert images between JPG, PNG, and WebP with adjustable quality. All conversion happens locally in your browser — your photos are never uploaded.",
+      "privacy": {
+        "mode": "browser-local",
+        "fileUpload": false,
+        "note": "SafeWebTool tools are designed to process user data locally in the browser."
+      },
+      "inputs": [
+        {
+          "name": "file",
+          "type": "file",
+          "accept": "image/*"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "download or browser result",
+          "formats": [
+            "varies by tool"
+          ]
+        }
+      ],
+      "selectors": {
+        "ready": ".tool-container[data-tool-ready=\"true\"]",
+        "fileInput": "#fileInput",
+        "process": "#processBtn",
+        "log": "#logContent"
+      },
+      "howToUse": [
+        "Upload your image by dropping it or selecting from your device",
+        "Choose the output format (JPG, PNG, or WebP)",
+        "Adjust the quality slider for JPG or WebP output",
+        "Click \"Convert Image\" and download the result"
+      ],
+      "useCase": "Convert screenshots, photos, and graphics into the format a website, form, or app requires — without uploading your images to a conversion server.",
+      "keywords": [
+        "image converter",
+        "convert image format",
+        "png to jpg",
+        "jpg to webp",
+        "webp to png",
+        "change image format online",
+        "image format converter",
+        "private image tool"
+      ],
+      "externalDownloads": [],
+      "exampleTasks": [
+        "Open https://safewebtool.com/image/convert and use Image Format Converter."
+      ],
+      "automationNotes": [
+        "Prefer the stable selectors in this contract over visible text where possible.",
+        "Wait for selectors.ready before interacting with the tool UI.",
+        "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+      ]
+    },
     "image/crop": {
       "schemaVersion": "1.0",
       "id": "crop",
@@ -222,7 +287,7 @@
         "name": "Image Tools"
       },
       "name": "Passport Photo Maker",
-      "description": "Free private passport, visa, and ID photo maker. Auto-align faces in your browser, crop to official sizes, export digital JPEGs, and create print sheets with no uploads.",
+      "description": "Free private passport, visa, and ID photo maker. Auto-align faces, crop to official sizes, and export JPEGs or print sheets — no uploads.",
       "privacy": {
         "mode": "browser-local",
         "fileUpload": false,
@@ -346,11 +411,78 @@
         "image resize",
         "resize image",
         "image dimensions",
-        "optimize images"
+        "optimize images",
+        "scale photo",
+        "change image size"
       ],
       "externalDownloads": [],
       "exampleTasks": [
         "Open https://safewebtool.com/image/resize and use Image Resize."
+      ],
+      "automationNotes": [
+        "Prefer the stable selectors in this contract over visible text where possible.",
+        "Wait for selectors.ready before interacting with the tool UI.",
+        "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+      ]
+    },
+    "image/rotate": {
+      "schemaVersion": "1.0",
+      "id": "rotate",
+      "path": "image/rotate",
+      "canonicalPath": "/image/rotate",
+      "canonicalUrl": "https://safewebtool.com/image/rotate",
+      "category": {
+        "id": "image",
+        "name": "Image Tools"
+      },
+      "name": "Image Rotator",
+      "description": "Rotate images by 90 or 180 degrees, or flip them horizontally and vertically, with a live preview. All processing happens locally in your browser — no uploads.",
+      "privacy": {
+        "mode": "browser-local",
+        "fileUpload": false,
+        "note": "SafeWebTool tools are designed to process user data locally in the browser."
+      },
+      "inputs": [
+        {
+          "name": "file",
+          "type": "file",
+          "accept": "image/*"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "download or browser result",
+          "formats": [
+            "varies by tool"
+          ]
+        }
+      ],
+      "selectors": {
+        "ready": ".tool-container[data-tool-ready=\"true\"]",
+        "fileInput": "#fileInput",
+        "process": "#processBtn",
+        "log": "#logContent"
+      },
+      "howToUse": [
+        "Upload your image by dropping it or selecting from your device",
+        "Click 90° CW, 90° CCW, 180°, Flip Horizontal, or Flip Vertical — combine as needed",
+        "Check the live preview after each step (use Reset to start over)",
+        "Click \"Download Rotated Image\" to save the result"
+      ],
+      "useCase": "Fix sideways phone photos, mirror selfies, or straighten scanned documents without sending your pictures to a server.",
+      "keywords": [
+        "rotate image",
+        "image rotator",
+        "rotate photo online",
+        "flip image horizontally",
+        "flip image vertically",
+        "fix sideways photo",
+        "mirror image",
+        "private image tool"
+      ],
+      "externalDownloads": [],
+      "exampleTasks": [
+        "Open https://safewebtool.com/image/rotate and use Image Rotator."
       ],
       "automationNotes": [
         "Prefer the stable selectors in this contract over visible text where possible.",
@@ -430,7 +562,7 @@
         "name": "ML Tools"
       },
       "name": "Image to Text (OCR)",
-      "description": "Convert images to text with 100% privacy. This offline OCR tool runs entirely in your browser using Tesseract.js. No uploads, no servers — just fast and secure image-to-text conversion.",
+      "description": "Convert images to text with 100% privacy. This offline OCR tool runs in your browser using Tesseract.js — no uploads, fast and secure image-to-text.",
       "privacy": {
         "mode": "browser-local",
         "fileUpload": false,
@@ -496,7 +628,7 @@
         "name": "ML Tools"
       },
       "name": "Audio/Video Transcription",
-      "description": "Convert speech to text with 100% privacy using Whisper. This offline transcription tool runs entirely in your browser. Supports audio and video files with automatic audio extraction.",
+      "description": "Convert speech to text with 100% privacy using Whisper. This offline transcription tool runs in your browser, with audio and video support.",
       "privacy": {
         "mode": "browser-local",
         "fileUpload": false,
@@ -552,6 +684,69 @@
         "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
       ]
     },
+    "text/base64": {
+      "schemaVersion": "1.0",
+      "id": "base64",
+      "path": "text/base64",
+      "canonicalPath": "/text/base64",
+      "canonicalUrl": "https://safewebtool.com/text/base64",
+      "category": {
+        "id": "text",
+        "name": "Text Tools"
+      },
+      "name": "Base64 Encode & Decode",
+      "description": "Encode text to Base64 or decode Base64 back to text with full Unicode support. All processing happens locally in your browser — no uploads.",
+      "privacy": {
+        "mode": "browser-local",
+        "fileUpload": false,
+        "note": "SafeWebTool tools are designed to process user data locally in the browser."
+      },
+      "inputs": [
+        {
+          "name": "text",
+          "type": "text"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "browser result",
+          "formats": [
+            "text/html"
+          ]
+        }
+      ],
+      "selectors": {
+        "ready": ".tool-container[data-tool-ready=\"true\"]",
+        "process": "#processBtn",
+        "log": "#logContent"
+      },
+      "howToUse": [
+        "Paste or type your text (or Base64 string) into the input area",
+        "Click \"Encode to Base64\" to convert text into Base64",
+        "Click \"Decode from Base64\" to convert Base64 back into text",
+        "Copy the result from the output area with the Copy button"
+      ],
+      "useCase": "Encode API tokens, data URIs, email attachments, or config values — and decode Base64 payloads during debugging — without pasting sensitive data into an online service.",
+      "keywords": [
+        "base64 encode",
+        "base64 decode",
+        "base64 converter",
+        "base64 online",
+        "encode text to base64",
+        "decode base64 string",
+        "base64 unicode",
+        "developer tools"
+      ],
+      "externalDownloads": [],
+      "exampleTasks": [
+        "Open https://safewebtool.com/text/base64 and use Base64 Encode & Decode."
+      ],
+      "automationNotes": [
+        "Prefer the stable selectors in this contract over visible text where possible.",
+        "Wait for selectors.ready before interacting with the tool UI.",
+        "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+      ]
+    },
     "text/editor": {
       "schemaVersion": "1.0",
       "id": "editor",
@@ -598,7 +793,9 @@
         "text editor",
         "online editor",
         "write text",
-        "edit text"
+        "edit text",
+        "plain text editor",
+        "notepad online"
       ],
       "externalDownloads": [],
       "exampleTasks": [
@@ -723,11 +920,139 @@
         "text tools",
         "remove spaces",
         "trim text",
-        "text cleanup"
+        "text cleanup",
+        "remove double spaces",
+        "whitespace remover"
       ],
       "externalDownloads": [],
       "exampleTasks": [
         "Open https://safewebtool.com/text/remove-extra-spaces and use Remove Extra Spaces."
+      ],
+      "automationNotes": [
+        "Prefer the stable selectors in this contract over visible text where possible.",
+        "Wait for selectors.ready before interacting with the tool UI.",
+        "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+      ]
+    },
+    "text/url-encode": {
+      "schemaVersion": "1.0",
+      "id": "url-encode",
+      "path": "text/url-encode",
+      "canonicalPath": "/text/url-encode",
+      "canonicalUrl": "https://safewebtool.com/text/url-encode",
+      "category": {
+        "id": "text",
+        "name": "Text Tools"
+      },
+      "name": "URL Encode & Decode",
+      "description": "Percent-encode text for safe use in URLs or decode encoded URLs back to readable text. All processing happens locally in your browser.",
+      "privacy": {
+        "mode": "browser-local",
+        "fileUpload": false,
+        "note": "SafeWebTool tools are designed to process user data locally in the browser."
+      },
+      "inputs": [
+        {
+          "name": "text",
+          "type": "text"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "browser result",
+          "formats": [
+            "text/html"
+          ]
+        }
+      ],
+      "selectors": {
+        "ready": ".tool-container[data-tool-ready=\"true\"]",
+        "process": "#processBtn",
+        "log": "#logContent"
+      },
+      "howToUse": [
+        "Paste your text or URL-encoded string into the input area",
+        "Click \"Encode\" to percent-encode it for safe use in URLs",
+        "Click \"Decode\" to turn %-sequences back into readable text",
+        "Copy the result from the output area"
+      ],
+      "useCase": "Build query strings, debug redirect URLs, or decode tracking links without pasting them into a third-party website.",
+      "keywords": [
+        "url encode",
+        "url decode",
+        "percent encoding",
+        "encodeURIComponent online",
+        "url encoder decoder",
+        "query string encoder",
+        "escape url characters",
+        "developer tools"
+      ],
+      "externalDownloads": [],
+      "exampleTasks": [
+        "Open https://safewebtool.com/text/url-encode and use URL Encode & Decode."
+      ],
+      "automationNotes": [
+        "Prefer the stable selectors in this contract over visible text where possible.",
+        "Wait for selectors.ready before interacting with the tool UI.",
+        "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+      ]
+    },
+    "text/word-count": {
+      "schemaVersion": "1.0",
+      "id": "word-count",
+      "path": "text/word-count",
+      "canonicalPath": "/text/word-count",
+      "canonicalUrl": "https://safewebtool.com/text/word-count",
+      "category": {
+        "id": "text",
+        "name": "Text Tools"
+      },
+      "name": "Word & Character Counter",
+      "description": "Count words, characters, sentences, paragraphs, and estimated reading time as you type. Live stats, all computed locally in your browser.",
+      "privacy": {
+        "mode": "browser-local",
+        "fileUpload": false,
+        "note": "SafeWebTool tools are designed to process user data locally in the browser."
+      },
+      "inputs": [
+        {
+          "name": "text",
+          "type": "text"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "browser result",
+          "formats": [
+            "text/html"
+          ]
+        }
+      ],
+      "selectors": {
+        "ready": ".tool-container[data-tool-ready=\"true\"]",
+        "process": "#processBtn",
+        "log": "#logContent"
+      },
+      "howToUse": [
+        "Type or paste your text into the input area",
+        "Stats update live on every keystroke — no button needed",
+        "Review characters, words, sentences, paragraphs, and reading time in the grid",
+        "Edit your text until it hits the target length"
+      ],
+      "useCase": "Check essay, tweet, meta description, or article length against word and character limits without sending your draft to a server.",
+      "keywords": [
+        "word counter",
+        "character counter",
+        "count words online",
+        "sentence counter",
+        "paragraph counter",
+        "reading time calculator",
+        "text statistics",
+        "word count tool"
+      ],
+      "externalDownloads": [],
+      "exampleTasks": [
+        "Open https://safewebtool.com/text/word-count and use Word & Character Counter."
       ],
       "automationNotes": [
         "Prefer the stable selectors in this contract over visible text where possible.",
@@ -782,7 +1107,9 @@
         "yaml validator",
         "yaml to json",
         "validate yaml",
-        "yaml converter"
+        "yaml converter",
+        "yaml syntax checker",
+        "yaml lint online"
       ],
       "externalDownloads": [],
       "exampleTasks": [
@@ -805,7 +1132,7 @@
         "name": "Time Tools"
       },
       "name": "Business Days Calculator",
-      "description": "Add or subtract business days from a start date while skipping weekends for deadline planning.",
+      "description": "Add or subtract business days from a start date while skipping weekends for deadline planning. Runs entirely in your browser — no data sent anywhere.",
       "privacy": {
         "mode": "browser-local",
         "fileUpload": false,
@@ -841,7 +1168,9 @@
         "business days calculator",
         "deadline calculator",
         "working days",
-        "project date calculator"
+        "project date calculator",
+        "add business days",
+        "skip weekends calculator"
       ],
       "externalDownloads": [],
       "exampleTasks": [
@@ -864,7 +1193,7 @@
         "name": "Time Tools"
       },
       "name": "Date Duration Calculator",
-      "description": "Calculate days, weeks, and weekdays between two dates for planning timelines and project phases.",
+      "description": "Calculate days, weeks, and weekdays between two dates for planning timelines and project phases. All calculations happen locally in your browser.",
       "privacy": {
         "mode": "browser-local",
         "fileUpload": false,
@@ -1082,7 +1411,9 @@
         "time zone converter",
         "timezone converter",
         "world time converter",
-        "DST aware time conversion"
+        "DST aware time conversion",
+        "UTC converter",
+        "compare time zones"
       ],
       "externalDownloads": [],
       "exampleTasks": [
@@ -1235,7 +1566,9 @@
         "video to gif",
         "gif maker",
         "convert video to gif",
-        "create gif from video"
+        "create gif from video",
+        "gif converter",
+        "animated gif creator"
       ],
       "externalDownloads": [],
       "exampleTasks": [
@@ -1295,7 +1628,9 @@
         "video info",
         "video metadata",
         "video properties",
-        "video analyzer"
+        "video analyzer",
+        "check video codec",
+        "video resolution checker"
       ],
       "externalDownloads": [],
       "exampleTasks": [
@@ -1420,7 +1755,9 @@
         "video converter",
         "video format converter",
         "mp4 converter",
-        "webm converter"
+        "webm converter",
+        "change video format",
+        "video quality settings"
       ],
       "externalDownloads": [],
       "exampleTasks": [
@@ -1481,7 +1818,9 @@
         "video resize",
         "resize video",
         "change video resolution",
-        "video dimensions"
+        "video dimensions",
+        "scale video online",
+        "reduce video size"
       ],
       "externalDownloads": [],
       "exampleTasks": [
@@ -1504,7 +1843,7 @@
         "name": "Video Tools"
       },
       "name": "Video Reverse",
-      "description": "Free online video reverser. Reverse videos to play backwards with custom start and end points. Option to remove audio for better results, all processed in your browser.",
+      "description": "Free online video reverser. Play videos backwards with custom start and end points, optionally remove audio — all processed privately in your browser.",
       "privacy": {
         "mode": "browser-local",
         "fileUpload": false,
