@@ -208,16 +208,33 @@ src/
 
 Routing: `tool-registry.js` uses `import.meta.glob(['../*/*.js', '!../common/*.js'])` — any `src/<category>/<toolId>.js` with a metadata entry is automatically routable at `/<category>/<toolId>`. New categories: add to `categories` in `metadata.js` first (`id`, `name`, `description`, `icon`, `keywords`).
 
-## Test commands (in this order)
+## Test commands — run in this order
 
 ```bash
 npm run test:contract                              # fast (<5s), run first, always
 npm run test:tool -- <category>/<toolId>           # smoke test one tool
 npm run test:tool -- <category>/<toolId> --mobile --real   # mobile + real file
+npm run test:ffmpeg                                # FFmpeg CDN load + MT detection (add after ffmpeg-utils.js changes)
+npm run test:video-fast                            # all 8 video tools, actual FFmpeg processing (add after FFmpeg/infra changes)
 npm run verify:full                                # before PR / cross-cutting changes
 ```
 
-Run `verify:full` when touching routing, `base.js`, `fileUpload.js`, FFmpeg helpers, or multiple tools. Test fixtures live in `tests/fixtures/` (`sample.mp4`, `sample.webm`, `sample.mp3`, `sample.wav`, `sample.gif`); regenerate via `npm run dev & node scripts/generate-test-fixtures.mjs`.
+### When to run which test
+
+| Changed file(s) | Run |
+|---|---|
+| Any single tool | `test:contract` then `test:tool -- <id>` |
+| `ffmpeg-utils.js`, CDN URLs, WASM version | `test:contract` then `test:ffmpeg` then `test:video-fast` |
+| `base.js`, `fileUpload.js`, routing, or 3+ tools | `verify:full` |
+| Before any PR | `verify:full` |
+
+### Test fixtures
+
+Live in `tests/fixtures/` — `sample.mp4` (11KB), `sample.webm` (4KB), `sample.mp3` (16KB), `sample.wav` (172KB), `sample.gif` (19KB). The tiny MP4 and WebM are used by the fast video processing tests to keep FFmpeg tests under 3 minutes total. Regenerate all fixtures via `npm run dev & node scripts/generate-test-fixtures.mjs`.
+
+### Adding a new video tool
+
+After implementation run `npm run test:video-fast` to verify it processes the tiny fixture correctly. If the tool needs a special input format, add a one-off fixture to `tests/fixtures/` and extend `tests/video-processing.spec.js`.
 
 ## Video tools — extra rules
 
