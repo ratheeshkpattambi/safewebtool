@@ -5,47 +5,28 @@ import { addLog, updateProgress } from '../common/utils.js';
 let ffmpeg = null;
 let ffmpegLoadPromise = null;
 
-// Core version must match the @ffmpeg/core version in package.json.
+// Core version must match @ffmpeg/core and @ffmpeg/core-mt in package.json.
 const CORE_VERSION = '0.12.10';
 
-const CORE_BASE_URLS = [
-  '/ffmpeg',
-  `https://cdn.jsdelivr.net/npm/@ffmpeg/core@${CORE_VERSION}/dist/esm`,
-  `https://unpkg.com/@ffmpeg/core@${CORE_VERSION}/dist/esm`
+// Detect multi-thread support. MT requires SharedArrayBuffer + cross-origin
+// isolation (COOP/COEP headers). It's 4-8× faster on desktop but unavailable
+// on iOS Safari < 15.2 and some older Android browsers. ST works everywhere.
+const MT_SUPPORTED = typeof SharedArrayBuffer !== 'undefined' &&
+  (typeof crossOriginIsolated !== 'undefined' ? crossOriginIsolated : false);
+
+const CORE_PKG = MT_SUPPORTED ? `@ffmpeg/core-mt@${CORE_VERSION}` : `@ffmpeg/core@${CORE_VERSION}`;
+
+// Two CDN mirrors — jsDelivr primary (fast, long-lived cache), unpkg fallback.
+// No local /ffmpeg path: it adds complexity and breaks silently when files
+// aren't deployed. The browser caches CDN blobs after the first load.
+const CDN_SOURCES = [
+  `https://cdn.jsdelivr.net/npm/${CORE_PKG}/dist/esm`,
+  `https://unpkg.com/${CORE_PKG}/dist/esm`,
 ];
 
-/**
- * Create and load an FFmpeg instance from the first working base URL.
- * Each base URL is tried with its own fresh FFmpeg instance so a partially
- * failed load doesn't leave the worker in a bad state for the next attempt.
- */
-// Fetch a URL to a blob with an optional timeout. Used so the local /ffmpeg
-// fallback fails fast when the files aren't present, rather than hanging for
-// minutes waiting for a fetch that never resolves.
-async function fetchToBlobURL(url, mimeType, timeoutMs) {
-  if (!timeoutMs) return toBlobURL(url, mimeType);
-
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const response = await fetch(url, { signal: controller.signal });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const blob = new Blob([await response.arrayBuffer()], { type: mimeType });
-    return URL.createObjectURL(blob);
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
-async function createFFmpegInstance(baseURLs) {
+async function createFFmpegInstance() {
   let lastError;
-  for (let i = 0; i < baseURLs.length; i++) {
-    const baseURL = baseURLs[i];
-    const isLocal = baseURL.startsWith('/');
-    // Give local paths 8 s to respond — if the files aren't deployed they 404
-    // or hang immediately and we want to reach the CDN quickly.
-    const timeout = isLocal ? 8000 : undefined;
-
+  for (const baseURL of CDN_SOURCES) {
     const instance = new FFmpeg();
     instance.on('log', ({ message }) => addLog(message, 'info'));
     instance.on('progress', ({ progress }) => {
@@ -53,26 +34,29 @@ async function createFFmpegInstance(baseURLs) {
     });
 
     try {
-      addLog(`Loading FFmpeg core from ${baseURL}...`, 'info');
+      const mode = MT_SUPPORTED ? 'multi-thread' : 'single-thread';
+      const cdn = baseURL.includes('jsdelivr') ? 'jsDelivr' : 'unpkg';
+      addLog(`Loading FFmpeg (${mode}) from ${cdn}...`, 'info');
       updateLoadingIndicator(20, 'Loading FFmpeg core...');
 
-      const coreURL = await fetchToBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript', timeout);
-      const wasmURL = await fetchToBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm', timeout);
-      await instance.load({ coreURL, wasmURL });
+      const coreURL = await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript');
+      const wasmURL = await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm');
+      const loadOpts = { coreURL, wasmURL };
+      if (MT_SUPPORTED) {
+        loadOpts.workerURL = await toBlobURL(`${baseURL}/ffmpeg-core.worker.js`, 'text/javascript');
+      }
 
-      addLog(`FFmpeg core loaded from ${baseURL}`, 'success');
+      await instance.load(loadOpts);
+      addLog(`FFmpeg loaded (${mode})`, 'success');
       updateLoadingIndicator(100, 'FFmpeg loaded successfully!');
       return instance;
     } catch (error) {
       lastError = error;
-      // Local path failing is expected when files aren't deployed — log as
-      // info rather than error so users aren't alarmed by a normal fallback.
-      const level = isLocal ? 'info' : 'error';
-      addLog(`FFmpeg core not available at ${baseURL} — trying next source`, level);
+      addLog(`CDN source unavailable — trying next: ${error.message}`, 'info');
       instance.terminate();
     }
   }
-  throw lastError || new Error('All FFmpeg core sources failed to load');
+  throw lastError || new Error('All FFmpeg CDN sources failed to load');
 }
 
 /**
@@ -84,7 +68,7 @@ export async function loadFFmpeg() {
 
   ffmpegLoadPromise = (async () => {
     updateLoadingIndicator(10, 'Initializing FFmpeg...');
-    return createFFmpegInstance(CORE_BASE_URLS);
+    return createFFmpegInstance();
   })();
 
   try {
