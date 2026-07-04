@@ -32,10 +32,11 @@ export const template = `
       <button id="downloadBtn" class="px-4 py-2 bg-green-600 dark:bg-green-500 hover:bg-green-700 dark:hover:bg-green-600 text-white rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors" disabled>Download</button>
     </div>
 
-    <div class="log-section">
-      <button id="logHeader" class="log-header" type="button">Logs</button>
-      <textarea id="logContent" class="log-content" readonly></textarea>
+    <div id="logHeader" class="mt-6 bg-slate-100 dark:bg-gray-700 p-2.5 rounded-md cursor-pointer flex justify-between items-center transition-colors hover:bg-slate-200 dark:hover:bg-gray-600">
+      <span class="font-medium text-slate-700 dark:text-slate-300">Logs</span>
+      <span class="text-slate-500 dark:text-slate-400 transform transition-transform">▼</span>
     </div>
+    <textarea id="logContent" class="w-full h-48 p-4 rounded-b-md mt-px font-mono text-xs resize-none bg-slate-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300 border-0 focus:outline-none transition-colors" readonly placeholder="Logs will appear here..."></textarea>
   </div>
 `;
 
