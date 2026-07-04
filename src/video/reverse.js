@@ -58,12 +58,12 @@ export const template = `
       }
     </style>
     <div class="tool-container">
-      <div id="dropZone" class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-slate-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 hover:bg-slate-50 dark:hover:bg-gray-700 transition-colors">
+      <div id="dropZone" class="flex flex-col items-center justify-center p-10 text-center border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
         <div class="text-5xl text-slate-400 dark:text-gray-500 mb-3">🎬</div>
         <p class="text-slate-600 dark:text-slate-300 text-lg mb-1">Drop your video here or click to select</p>
         <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Supports MP4, WebM, MOV, and other common video formats</p>
         <input type="file" id="fileInput" class="hidden" accept="video/*">
-        <button class="file-select-btn px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm font-medium">Select File</button>
+        <button class="file-select-btn min-h-[44px] px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">Select File</button>
       </div>
       <div class="video-wrapper">
         <video id="input-video" controls style="display: none; max-width: 100%; height: auto;"></video>
@@ -80,11 +80,11 @@ export const template = `
         <div class="grid grid-cols-2 gap-4">
           <div class="flex flex-col gap-1">
             <label for="startTime" class="text-sm font-medium text-slate-700 dark:text-slate-300">Start Time:</label>
-            <input type="text" id="startTime" placeholder="0:00" class="p-2 border border-slate-300 dark:border-gray-600 rounded-md text-base bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
+            <input type="text" id="startTime" placeholder="0:00" class="px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-base bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
           </div>
           <div class="flex flex-col gap-1">
             <label for="endTime" class="text-sm font-medium text-slate-700 dark:text-slate-300">End Time:</label>
-            <input type="text" id="endTime" placeholder="0:00" class="p-2 border border-slate-300 dark:border-gray-600 rounded-md text-base bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
+            <input type="text" id="endTime" placeholder="0:00" class="px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-base bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
           </div>
         </div>
         <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-gray-700 rounded-lg">
@@ -94,7 +94,7 @@ export const template = `
           </label>
         </div>
         <div class="flex gap-4">
-          <button id="processBtn" class="flex-1 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white font-medium py-2.5 px-5 rounded-md shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors">Reverse Video</button>
+          <button id="processBtn" class="flex-1 py-3 px-6 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Reverse Video</button>
         </div>
       </div>
 
@@ -223,15 +223,6 @@ class VideoReverseTool extends Tool {
       });
     }
 
-    if (this.elements.dropZone) {
-      this.elements.dropZone.innerHTML = `
-        <div class="text-5xl text-slate-400 dark:text-gray-500 mb-3">🎬</div>
-        <p class="text-slate-600 dark:text-slate-300 text-lg mb-1">Drop your video here or click to select</p>
-        <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Supports MP4, WebM, MOV, and other common video formats</p>
-        <input type="file" id="fileInput" class="hidden" accept="video/*">
-        <button class="file-select-btn px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm font-medium">Select File</button>
-      `;
-    }
   }
 
   initSlider() {

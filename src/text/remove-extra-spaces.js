@@ -9,7 +9,7 @@ export const template = `
     </div>
 
     <div class="text-center">
-      <button type="button" id="removeSpacesBtn" class="px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm font-medium">Remove Extra Spaces</button>
+      <button type="button" id="removeSpacesBtn" class="min-h-[44px] px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">Remove Extra Spaces</button>
     </div>
 
     <div class="my-4">
@@ -18,8 +18,8 @@ export const template = `
     </div>
 
     <div class="text-center mt-4 space-x-2">
-      <button id="copyToClipboardBtn" class="px-4 py-2 bg-slate-600 dark:bg-slate-500 hover:bg-slate-700 dark:hover:bg-slate-600 text-white rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors" disabled>Copy To Clipboard</button>
-      <button id="downloadBtn" class="px-6 py-2 bg-green-600 dark:bg-green-500 hover:bg-green-700 dark:hover:bg-green-600 text-white rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors" disabled>Download Text</button>
+      <button id="copyToClipboardBtn" class="min-h-[44px] px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors" disabled>Copy To Clipboard</button>
+      <button id="downloadBtn" class="min-h-[44px] px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors" disabled>Download Text</button>
     </div>
 
     <div id="logHeader" class="mt-6 bg-slate-100 dark:bg-gray-700 p-2.5 rounded-md cursor-pointer flex justify-between items-center transition-colors">

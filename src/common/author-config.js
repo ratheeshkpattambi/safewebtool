@@ -9,7 +9,6 @@
 export const JAMSHEED_FOOTER = {
   author: 'Jamsheed Avaran Kutty',
   version: '1.0.0',
-  icon: '/src/assets/logo.svg',
   links: [
     {
       text: 'GitHub',
@@ -34,7 +33,6 @@ export const JAMSHEED_FOOTER = {
 export const ANOTHER_AUTHOR_FOOTER = {
   author: 'Another Developer',
   version: '1.0.0',
-  icon: '/src/assets/logo.svg',
   links: [
     {
       text: 'GitHub',

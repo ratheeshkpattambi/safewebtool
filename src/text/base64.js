@@ -13,9 +13,9 @@ export const template = `
       <textarea id="inputText" rows="8" class="w-full p-3 border border-slate-300 dark:border-gray-600 rounded-md font-mono text-sm bg-white dark:bg-gray-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors" placeholder="Enter text to encode, or Base64 to decode..."></textarea>
     </div>
     <div class="flex gap-3 justify-center flex-wrap">
-      <button id="encodeBtn" class="px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm font-medium">Encode to Base64</button>
-      <button id="decodeBtn" class="px-6 py-2 bg-slate-600 dark:bg-slate-500 text-white rounded-md hover:bg-slate-700 dark:hover:bg-slate-600 transition-colors text-sm font-medium">Decode from Base64</button>
-      <button id="copyBtn" class="px-6 py-2 bg-green-600 dark:bg-green-500 text-white rounded-md hover:bg-green-700 dark:hover:bg-green-600 transition-colors text-sm font-medium">Copy Output</button>
+      <button id="encodeBtn" class="min-h-[44px] px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">Encode to Base64</button>
+      <button id="decodeBtn" class="min-h-[44px] px-6 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg transition-colors text-sm font-medium">Decode from Base64</button>
+      <button id="copyBtn" class="min-h-[44px] px-6 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg transition-colors text-sm font-medium">Copy Output</button>
     </div>
     <div>
       <label for="outputText" class="block mb-1 font-medium text-slate-700 dark:text-slate-300">Output</label>

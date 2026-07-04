@@ -276,8 +276,8 @@ export class Tool {
       const downloadLink = document.createElement('a');
       downloadLink.href = url;
       downloadLink.download = filename;
-      downloadLink.className = 'mt-3 inline-block px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm font-medium'; // Green for download actions
-      downloadLink.textContent = `Download ${this.name} Result`;
+      downloadLink.className = 'mt-3 inline-flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors'; // Green for download actions
+      downloadLink.textContent = `⬇️ Download ${this.name} Result`;
       
       container.innerHTML = ''; // Clear previous content
       container.appendChild(fileInfoDiv);

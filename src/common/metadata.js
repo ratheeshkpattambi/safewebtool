@@ -313,14 +313,14 @@ export const tools = {
     id: 'crop',
     category: 'image',
     name: 'Image Crop',
-    description: 'Free online image crop tool. Crop images by exact pixel dimensions and position, all processed locally in your browser.',
+    description: 'Free online image crop tool. Drag a crop box directly on your photo — works with mouse and touch, all processed locally in your browser.',
     icon: '✂️',
-    keywords: ['image crop', 'crop image', 'trim image', 'image editor', 'crop by pixels'],
+    keywords: ['image crop', 'crop image', 'trim image', 'image editor', 'visual crop tool'],
     howToUse: [
       'Open the page and start with the built-in sample image or upload your own image',
-      'Set X/Y position and crop width/height in pixels',
-      'Use quick actions to center or reset the crop area',
-      'Click "Crop Image" to process and download the result'
+      'Drag the highlighted box on the image to choose the crop area',
+      'Resize from the corners or edges — the pixel size updates live',
+      'Click "Crop & Download" to process and download the result'
     ],
     useCase: 'Perfect for removing unwanted edges, extracting a subject, or preparing exact image dimensions for websites and social media.',
     related: ['image/resize', 'image/compressor', 'image/passport-photo']

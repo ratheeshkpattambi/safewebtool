@@ -69,12 +69,28 @@ test.describe('Image Tools E2E (direct URL + built-in sample)', () => {
     await expectProcessedResult(page, { outputSelector: '#compressed-image' });
   });
 
-  test('image/crop loads directly and crops sample image', async ({ page }) => {
+  test('image/crop loads directly and crops sample image via canvas drag', async ({ page }) => {
     await expectImageToolReady(page, '/image/crop');
-    await page.fill('#cropX', '80');
-    await page.fill('#cropY', '60');
-    await page.fill('#cropWidth', '280');
-    await page.fill('#cropHeight', '180');
+
+    const canvas = page.locator('#cropCanvas');
+    await expect(canvas).toBeVisible();
+    await canvas.scrollIntoViewIfNeeded();
+    const box = await canvas.boundingBox();
+
+    const initialWidth = parseInt(await page.locator('#cropReadout').getAttribute('data-crop-width'), 10);
+
+    // The default selection covers the centered 80% of the image, so its
+    // south-east handle sits at 90%/90% of the canvas. Drag it toward the centre.
+    await page.mouse.move(box.x + box.width * 0.9, box.y + box.height * 0.9);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * 0.6, box.y + box.height * 0.6, { steps: 8 });
+    await page.mouse.up();
+
+    const newWidth = parseInt(await page.locator('#cropReadout').getAttribute('data-crop-width'), 10);
+    const newHeight = parseInt(await page.locator('#cropReadout').getAttribute('data-crop-height'), 10);
+    expect(newWidth).toBeLessThan(initialWidth);
+    expect(newHeight).toBeGreaterThan(0);
+
     await expectProcessedResult(page, { outputSelector: '#output-image' });
   });
 });

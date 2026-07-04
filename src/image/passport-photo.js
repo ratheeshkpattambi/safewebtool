@@ -199,7 +199,7 @@ export const template = `
       <div class="mb-2 text-4xl">🪪</div>
       <p class="text-lg font-bold text-slate-800 dark:text-slate-100">Drop a portrait photo here</p>
       <p class="mb-3 text-sm text-slate-500 dark:text-slate-400">JPG, PNG, WebP. Works with camera photos on mobile.</p>
-      <input id="fileInput" type="file" class="hidden" accept="image/*" capture="user" data-agent-input="photo">
+      <input id="fileInput" type="file" class="hidden" accept="image/*" data-agent-input="photo">
       <button type="button" class="file-select-btn rounded-md bg-blue-600 px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-blue-700" data-agent-action="choose-photo">Choose Photo</button>
     </div>
 

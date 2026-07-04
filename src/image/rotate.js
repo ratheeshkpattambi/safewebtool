@@ -7,28 +7,28 @@ import { formatFileSize } from '../common/utils.js';
 
 export const template = `
     <div class="tool-container">
-      <div id="dropZone" class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-slate-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 hover:bg-slate-50 dark:hover:bg-gray-700 transition-colors">
+      <div id="dropZone" class="flex flex-col items-center justify-center p-10 text-center border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
         <div class="text-5xl text-slate-400 dark:text-gray-500 mb-3">🔄</div>
         <p class="text-slate-600 dark:text-slate-300 text-lg mb-1">Drop your image here or click to select</p>
         <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Supports JPEG, PNG, WebP — rotated locally, never uploaded</p>
         <input type="file" id="fileInput" class="hidden" accept="image/*">
-        <button class="file-select-btn px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm font-medium">Select File</button>
+        <button class="file-select-btn min-h-[44px] px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">Select File</button>
       </div>
 
       <div class="my-4 flex flex-wrap gap-2 justify-center">
-        <button id="rotateCwBtn" class="rotate-action px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled>↻ 90° CW</button>
-        <button id="rotateCcwBtn" class="rotate-action px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled>↺ 90° CCW</button>
-        <button id="rotate180Btn" class="rotate-action px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled>180°</button>
-        <button id="flipHBtn" class="rotate-action px-4 py-2 bg-slate-600 dark:bg-slate-500 text-white rounded-md hover:bg-slate-700 dark:hover:bg-slate-600 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled>⇋ Flip Horizontal</button>
-        <button id="flipVBtn" class="rotate-action px-4 py-2 bg-slate-600 dark:bg-slate-500 text-white rounded-md hover:bg-slate-700 dark:hover:bg-slate-600 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled>⥯ Flip Vertical</button>
-        <button id="resetBtn" class="px-4 py-2 bg-yellow-600 dark:bg-yellow-500 text-white rounded-md hover:bg-yellow-700 dark:hover:bg-yellow-600 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled>Reset</button>
+        <button id="rotateCwBtn" class="rotate-action min-h-[44px] px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled>↻ 90° CW</button>
+        <button id="rotateCcwBtn" class="rotate-action min-h-[44px] px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled>↺ 90° CCW</button>
+        <button id="rotate180Btn" class="rotate-action min-h-[44px] px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled>180°</button>
+        <button id="flipHBtn" class="rotate-action min-h-[44px] px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled>⇋ Flip Horizontal</button>
+        <button id="flipVBtn" class="rotate-action min-h-[44px] px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled>⥯ Flip Vertical</button>
+        <button id="resetBtn" class="min-h-[44px] px-4 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-950/60 text-red-600 dark:text-red-300 rounded-lg transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled>Reset</button>
       </div>
 
       <div class="image-wrapper mt-4 text-center">
         <img id="preview" style="display: none;" class="max-w-96 max-h-72 w-auto h-auto border border-slate-200 dark:border-gray-600 rounded-lg inline-block">
       </div>
 
-      <button id="processBtn" class="w-full mt-4 bg-green-600 dark:bg-green-500 hover:bg-green-700 dark:hover:bg-green-600 text-white font-medium py-2.5 px-5 rounded-md shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors" disabled>Download Rotated Image</button>
+      <button id="processBtn" class="w-full mt-4 py-3 px-6 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>Export Rotated Image</button>
 
       <div id="progress" class="my-4 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden" style="display: none;">
         <div class="h-5 bg-blue-600 dark:bg-blue-500 rounded-full transition-all duration-300 ease-in-out" style="width: 0%;"></div>

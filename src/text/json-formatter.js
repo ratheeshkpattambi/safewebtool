@@ -69,8 +69,8 @@ export const template = `
         </div>
         
         <div class="flex gap-2">
-          <button id="validateBtn" class="px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm font-medium">Validate</button>
-          <button id="formatBtn" class="px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm font-medium">Format / Beautify</button>
+          <button id="validateBtn" class="min-h-[44px] px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">Validate</button>
+          <button id="formatBtn" class="min-h-[44px] px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">Format / Beautify</button>
           <button id="minifyBtn" class="px-4 py-2 bg-yellow-600 dark:bg-yellow-500 text-white rounded-md hover:bg-yellow-700 dark:hover:bg-yellow-600 transition-colors text-sm font-medium">Minify / Compact</button>
         </div>
         
@@ -88,7 +88,7 @@ export const template = `
             <input type="radio" name="outputFormat" id="formatYaml" class="form-radio h-3 w-3 text-blue-600 dark:text-blue-500 bg-white dark:bg-gray-700 border-slate-300 dark:border-gray-600">
             YAML
           </label>
-          <button id="convertBtn" class="px-6 py-2 bg-green-600 dark:bg-green-500 text-white rounded-md hover:bg-green-700 dark:hover:bg-green-600 transition-colors text-sm font-medium">Convert</button>
+          <button id="convertBtn" class="min-h-[44px] px-6 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg transition-colors text-sm font-medium">Convert</button>
         </div>
       </div>
       

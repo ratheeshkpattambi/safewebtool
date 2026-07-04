@@ -61,7 +61,7 @@ class TextEditorTool extends Tool {
       
       // Add download button after editor
       const downloadBtn = document.createElement('button');
-      downloadBtn.className = 'w-full bg-green-600 dark:bg-green-500 hover:bg-green-700 dark:hover:bg-green-600 text-white font-medium py-2.5 px-5 rounded-md shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors mt-4';
+      downloadBtn.className = 'w-full py-3 px-6 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-4';
       downloadBtn.textContent = 'Download Text';
       downloadBtn.addEventListener('click', () => this.downloadText());
       this.elements.downloadContainer.appendChild(downloadBtn);

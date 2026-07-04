@@ -7,12 +7,12 @@ import { formatFileSize } from '../common/utils.js';
 
 export const template = `
     <div class="tool-container">
-      <div id="dropZone" class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-slate-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 hover:bg-slate-50 dark:hover:bg-gray-700 transition-colors">
+      <div id="dropZone" class="flex flex-col items-center justify-center p-10 text-center border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
         <div class="text-5xl text-slate-400 dark:text-gray-500 mb-3">🖼️</div>
         <p class="text-slate-600 dark:text-slate-300 text-lg mb-1">Drop your image here or click to select</p>
         <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Supports JPEG, PNG, WebP, GIF, BMP — converted locally, never uploaded</p>
         <input type="file" id="fileInput" class="hidden" accept="image/*">
-        <button class="file-select-btn px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm font-medium">Select File</button>
+        <button class="file-select-btn min-h-[44px] px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">Select File</button>
       </div>
 
       <div class="image-wrapper mt-4">
@@ -22,7 +22,7 @@ export const template = `
       <div class="my-4 grid gap-4 md:grid-cols-2">
         <div class="flex flex-col gap-2">
           <label for="formatSelect" class="font-medium text-slate-700 dark:text-slate-300">Output format:</label>
-          <select id="formatSelect" class="p-2 border border-slate-300 dark:border-gray-600 rounded-md text-base bg-white dark:bg-gray-700 text-slate-900 dark:text-slate-100 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400">
+          <select id="formatSelect" class="px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-base bg-white dark:bg-gray-700 text-slate-900 dark:text-slate-100 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400">
             <option value="image/jpeg">JPG</option>
             <option value="image/png">PNG</option>
             <option value="image/webp">WebP</option>
@@ -32,7 +32,7 @@ export const template = `
           <label for="qualitySlider" class="font-medium text-slate-700 dark:text-slate-300">Quality: <span id="qualityValue">0.9</span></label>
           <input type="range" id="qualitySlider" min="0.1" max="1" step="0.05" value="0.9" class="w-full accent-blue-600">
         </div>
-        <button id="processBtn" class="w-full bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white font-medium py-2.5 px-5 rounded-md shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors md:col-span-2" disabled>Convert Image</button>
+        <button id="processBtn" class="w-full py-3 px-6 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed md:col-span-2" disabled>Convert Image</button>
       </div>
 
       <div id="progress" class="my-4 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden" style="display: none;">

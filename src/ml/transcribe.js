@@ -306,6 +306,7 @@ class TranscribeTool extends Tool {
         this.clearLogs();
         this.elements.result.style.display = 'none';
         this.elements.progress.style.display = 'block';
+        this.elements.processBtn.disabled = true;
 
         try {
             let arrayBuffer;
@@ -335,6 +336,7 @@ class TranscribeTool extends Tool {
         } catch (error) {
             this.addLog(`Error processing audio: ${error.message}`, 'error');
             this.elements.progress.style.display = 'none';
+            this.elements.processBtn.disabled = false;
         }
     }
 
@@ -398,11 +400,13 @@ class TranscribeTool extends Tool {
                     this.addLog(`Transcription result: "${output.text}"`, 'success');
                     this.displayResult(output);
                     this.updateProgress(100, 'Transcription complete.');
+                    this.elements.processBtn.disabled = false;
                     worker.terminate();
                     break;
                 case 'error':
                     this.addLog(`Transcription error: ${error}`, 'error');
-                    this.elements.progress.classList.add('hidden');
+                    this.elements.progress.style.display = 'none';
+                    this.elements.processBtn.disabled = false;
                     worker.terminate();
                     break;
             }
@@ -410,7 +414,8 @@ class TranscribeTool extends Tool {
 
         worker.onerror = (error) => {
             this.addLog(`Worker error: ${error.message}`, 'error');
-            this.elements.progress.classList.add('hidden');
+            this.elements.progress.style.display = 'none';
+            this.elements.processBtn.disabled = false;
             worker.terminate();
         };
     }

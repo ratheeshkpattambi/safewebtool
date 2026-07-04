@@ -16,12 +16,12 @@ import {
 // Video reencode tool template
 export const template = `
     <div class="tool-container">
-      <div id="dropZone" class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-slate-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 hover:bg-slate-50 dark:hover:bg-gray-700 transition-colors">
+      <div id="dropZone" class="flex flex-col items-center justify-center p-10 text-center border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
         <div class="text-5xl text-slate-400 dark:text-gray-500 mb-3">🎬</div>
         <p class="text-slate-600 dark:text-slate-300 text-lg mb-1">Drop your video here or click to select</p>
         <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Supports MP4, WebM, MOV, and other common video formats</p>
         <input type="file" id="fileInput" class="hidden" accept="video/*">
-        <button class="file-select-btn px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm font-medium">Select File</button>
+        <button class="file-select-btn min-h-[44px] px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">Select File</button>
       </div>
       <div class="video-wrapper">
         <video id="input-video" controls style="display: none; max-width: 100%; height: auto;"></video>
@@ -30,7 +30,7 @@ export const template = `
       <div class="my-4 grid gap-4 md:grid-cols-3">
         <div class="flex flex-col gap-2">
           <label for="format" class="font-medium text-slate-700 dark:text-slate-300">Format:</label>
-          <select id="format" class="p-2 border border-slate-300 dark:border-gray-600 rounded-md text-base bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
+          <select id="format" class="px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-base bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
             <option value="mp4">MP4</option>
             <option value="webm">WebM</option>
             <option value="mov">MOV</option>
@@ -38,7 +38,7 @@ export const template = `
         </div>
         <div class="flex flex-col gap-2">
           <label for="quality" class="font-medium text-slate-700 dark:text-slate-300">Quality:</label>
-          <select id="quality" class="p-2 border border-slate-300 dark:border-gray-600 rounded-md text-base bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
+          <select id="quality" class="px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-base bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
             <option value="high">High</option>
             <option value="medium">Medium</option>
             <option value="low">Low</option>
@@ -46,9 +46,9 @@ export const template = `
         </div>
         <div class="flex flex-col gap-2">
           <label for="bitrate" class="font-medium text-slate-700 dark:text-slate-300">Bitrate (kb/s):</label>
-          <input type="number" id="bitrate" value="2000" min="500" class="p-2 border border-slate-300 dark:border-gray-600 rounded-md text-base bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
+          <input type="number" id="bitrate" value="2000" min="500" class="px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-base bg-white dark:bg-gray-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-gray-500 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
         </div>
-        <button id="processBtn" class="w-full bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white font-medium py-2.5 px-5 rounded-md shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors md:col-span-3">Re-encode Video</button>
+        <button id="processBtn" class="w-full py-3 px-6 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed md:col-span-3">Re-encode Video</button>
       </div>
 
       <div id="progress" class="my-4 bg-slate-200 dark:bg-gray-700 rounded-full overflow-hidden transition-colors" style="display: none;">
@@ -122,7 +122,7 @@ class VideoReencodeTool extends Tool {
         <p class="text-slate-600 dark:text-slate-300 text-lg mb-1">Drop your video here or click to select</p>
         <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Supports MP4, WebM, MOV, and other common video formats</p>
         <input type="file" id="fileInput" class="hidden" accept="video/*">
-        <button class="file-select-btn px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm font-medium">Select File</button>
+        <button class="file-select-btn min-h-[44px] px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">Select File</button>
       `;
     }
   }

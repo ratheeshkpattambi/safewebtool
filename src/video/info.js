@@ -8,12 +8,12 @@ import { formatFileSize, escapeHtml } from '../common/utils.js';
 // Video info tool template
 export const template = `
     <div class="tool-container">
-      <div id="videoDropZone" class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-slate-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 hover:bg-slate-50 dark:hover:bg-gray-700 transition-colors">
+      <div id="videoDropZone" class="flex flex-col items-center justify-center p-10 text-center border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
         <div class="text-5xl text-slate-400 dark:text-gray-500 mb-3">🎬</div>
         <p class="text-slate-600 dark:text-slate-300 text-lg mb-1">Drop your video here or click to select</p>
         <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">Supports MP4, WebM, MOV, and other common video formats</p>
         <input type="file" id="fileInput" class="hidden" accept="video/*">
-        <button class="file-select-btn px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-sm font-medium">Select File</button>
+        <button class="file-select-btn min-h-[44px] px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">Select File</button>
       </div>
       <div class="video-wrapper">
         <video id="video-preview" controls style="display: none; max-width: 100%; height: auto;"></video>
