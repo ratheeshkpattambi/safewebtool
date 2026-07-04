@@ -19,9 +19,33 @@ const CORE_BASE_URLS = [
  * Each base URL is tried with its own fresh FFmpeg instance so a partially
  * failed load doesn't leave the worker in a bad state for the next attempt.
  */
+// Fetch a URL to a blob with an optional timeout. Used so the local /ffmpeg
+// fallback fails fast when the files aren't present, rather than hanging for
+// minutes waiting for a fetch that never resolves.
+async function fetchToBlobURL(url, mimeType, timeoutMs) {
+  if (!timeoutMs) return toBlobURL(url, mimeType);
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const blob = new Blob([await response.arrayBuffer()], { type: mimeType });
+    return URL.createObjectURL(blob);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function createFFmpegInstance(baseURLs) {
   let lastError;
-  for (const baseURL of baseURLs) {
+  for (let i = 0; i < baseURLs.length; i++) {
+    const baseURL = baseURLs[i];
+    const isLocal = baseURL.startsWith('/');
+    // Give local paths 8 s to respond — if the files aren't deployed they 404
+    // or hang immediately and we want to reach the CDN quickly.
+    const timeout = isLocal ? 8000 : undefined;
+
     const instance = new FFmpeg();
     instance.on('log', ({ message }) => addLog(message, 'info'));
     instance.on('progress', ({ progress }) => {
@@ -32,8 +56,8 @@ async function createFFmpegInstance(baseURLs) {
       addLog(`Loading FFmpeg core from ${baseURL}...`, 'info');
       updateLoadingIndicator(20, 'Loading FFmpeg core...');
 
-      const coreURL = await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript');
-      const wasmURL = await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm');
+      const coreURL = await fetchToBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript', timeout);
+      const wasmURL = await fetchToBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm', timeout);
       await instance.load({ coreURL, wasmURL });
 
       addLog(`FFmpeg core loaded from ${baseURL}`, 'success');
@@ -41,7 +65,10 @@ async function createFFmpegInstance(baseURLs) {
       return instance;
     } catch (error) {
       lastError = error;
-      addLog(`Failed to load FFmpeg core from ${baseURL}: ${error.message}`, 'error');
+      // Local path failing is expected when files aren't deployed — log as
+      // info rather than error so users aren't alarmed by a normal fallback.
+      const level = isLocal ? 'info' : 'error';
+      addLog(`FFmpeg core not available at ${baseURL} — trying next source`, level);
       instance.terminate();
     }
   }
