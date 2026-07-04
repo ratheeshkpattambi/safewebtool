@@ -1,7 +1,7 @@
 import { Tool } from '../common/base.js';
 import { runInference, cleanGeneratedText, trimForModel } from '../common/ml-loader.js';
 
-const MODEL_ID = 'HuggingFaceTB/SmolLM2-135M-Instruct';
+const MODEL_ID = 'onnx-community/SmolLM2-135M-Instruct';
 const MAX_NEW_TOKENS = 512;
 
 export const template = `
