@@ -128,8 +128,6 @@ class ImageResizeTool extends Tool {
     this.elements.sampleImageBtn?.addEventListener('click', () => {
       this.loadBuiltInSample();
     });
-
-    await this.loadBuiltInSample(true);
   }
 
   async loadBuiltInSample(silent = false) {

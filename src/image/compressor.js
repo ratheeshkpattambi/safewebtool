@@ -175,7 +175,6 @@ export default class ImageCompressor extends Tool {
       document.querySelector('.tool-container')?.setAttribute('data-tool-ready', 'true');
       
       this.initialized = true;
-      await this.loadBuiltInSample(true);
     } catch (error) {
       console.error('Failed to initialize Image Compressor tool:', error);
       addLog(`Initialization error: ${error.message}`, 'error');

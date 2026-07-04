@@ -120,7 +120,6 @@ class ImageCropTool extends Tool {
       }
     });
 
-    await this.loadBuiltInSample(true);
   }
 
   async loadBuiltInSample(silent = false) {
