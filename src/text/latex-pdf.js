@@ -136,11 +136,43 @@ class LatexPdfTool extends Tool {
     await this.loadEngineScript();
 
     this.engine = new PdfTeXEngine();
+    // Capture the worker reference directly after loadEngine resolves,
+    // bypassing the TypeScript generator __awaiter pattern that loses 'this' in Safari.
     await this.engine.loadEngine();
-    this.engine.setTexliveEndpoint('https://texlive.swiftlatex.com');
+    this.latexWorker = this.engine.latexWorker; // own reference — Safari-safe
     this.engineReady = true;
     this.log('LaTeX engine ready.', 'success');
     this.updateProgress(30);
+  }
+
+  // Bypass engine.compileLaTeX() which uses a generator that loses 'this' in Safari.
+  // Talk directly to the worker using the captured reference.
+  _compileDirect(source) {
+    return new Promise((resolve, reject) => {
+      const worker = this.latexWorker;
+      if (!worker) {
+        reject(new Error('LaTeX worker not initialized — try reloading the page'));
+        return;
+      }
+      worker.onmessage = (ev) => {
+        const data = ev.data;
+        if (data.cmd !== 'compile') return;
+        worker.onmessage = null;
+        resolve({
+          pdf: data.result === 'ok' ? new Uint8Array(data.pdf) : null,
+          log: data.log,
+          status: data.status
+        });
+      };
+      worker.onerror = (e) => {
+        worker.onerror = null;
+        reject(new Error(`Worker error: ${e.message || 'unknown'}`));
+      };
+      // Send files and trigger compile
+      worker.postMessage({ cmd: 'writefile', url: 'main.tex', src: source });
+      worker.postMessage({ cmd: 'setmainfile', url: 'main.tex' });
+      worker.postMessage({ cmd: 'compilelatex' });
+    });
   }
 
   async compile() {
@@ -158,10 +190,7 @@ class LatexPdfTool extends Tool {
       this.log('Compiling...', 'info');
       this.updateProgress(50);
 
-      this.engine.writeMemFSFile('main.tex', source);
-      this.engine.setEngineMainFile('main.tex');
-
-      const result = await this.engine.compileLaTeX();
+      const result = await this._compileDirect(source);
 
       if (result.log) {
         this.log(result.log, result.status === 'error' ? 'error' : 'info');
@@ -188,7 +217,7 @@ class LatexPdfTool extends Tool {
 
       this.updateProgress(100);
       this.log('Compilation successful!', 'success');
-      this.engine.flushCache();
+      this.latexWorker.postMessage({ cmd: 'flushcache' });
       this.endProcessing(true);
     } catch (err) {
       this.log(`Error: ${err.message}`, 'error');
