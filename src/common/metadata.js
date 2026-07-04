@@ -538,6 +538,54 @@ export const tools = {
     useCase: 'Build query strings, debug redirect URLs, or decode tracking links without pasting them into a third-party website.',
     related: ['text/base64', 'text/json-formatter', 'text/remove-extra-spaces']
   },
+  'text/grammar-fix': {
+    id: 'grammar-fix',
+    category: 'text',
+    name: 'AI Grammar Fixer',
+    description: 'Fix grammar, spelling, and punctuation errors in your text using a small AI model that runs entirely in your browser. No uploads, no API keys.',
+    icon: '✍️',
+    keywords: ['grammar checker', 'fix grammar', 'spell check', 'grammar fixer', 'grammar correction', 'AI writing tool', 'free grammar check'],
+    howToUse: [
+      'Paste your text into the input box',
+      'Click "Fix Grammar" — the AI model downloads once (~100MB) and runs locally',
+      'Your corrected text appears below',
+      'Copy and use the result'
+    ],
+    useCase: 'Quickly clean up grammar and spelling in emails, documents, or messages without sending your text to any external service.',
+    related: ['text/tone', 'text/summarize']
+  },
+  'text/summarize': {
+    id: 'summarize',
+    category: 'text',
+    name: 'AI Text Summarizer',
+    description: 'Summarize articles, documents, or any long text using an AI model that runs entirely in your browser. Choose short, medium, or detailed output.',
+    icon: '📝',
+    keywords: ['text summarizer', 'summarize text', 'AI summarizer', 'article summary', 'document summary', 'free summarizer', 'browser summarizer'],
+    howToUse: [
+      'Paste your text into the input box',
+      'Choose a summary length: Short, Medium, or Detailed',
+      'Click "Summarize" — model downloads once (~250MB) and runs locally',
+      'Copy the summary'
+    ],
+    useCase: 'Get the key points from long articles, meeting notes, or documents without pasting your content into a cloud service.',
+    related: ['text/grammar-fix', 'text/tone']
+  },
+  'text/tone': {
+    id: 'tone',
+    category: 'text',
+    name: 'AI Tone Rewriter',
+    description: 'Rewrite your text in a different tone — formal, casual, professional, or friendly — using an AI model that runs entirely in your browser.',
+    icon: '🎭',
+    keywords: ['tone rewriter', 'rewrite text', 'change tone', 'formal writing', 'casual writing', 'AI rewriter', 'writing style changer'],
+    howToUse: [
+      'Paste your text into the input box',
+      'Select a tone: Formal, Casual, Professional, or Friendly',
+      'Click "Rewrite" — model downloads once (~250MB) and runs locally',
+      'Copy the rewritten text'
+    ],
+    useCase: 'Adapt emails or messages for different audiences without exposing your content to cloud services.',
+    related: ['text/grammar-fix', 'text/summarize']
+  },
   'time/timer': {
     id: 'timer',
     category: 'time',
