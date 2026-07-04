@@ -715,7 +715,23 @@ export const tools = {
     ],
     useCase: 'Transcribe podcasts, meetings, interviews, lectures, or any audio/video content. Perfect for creating captions, notes, or text records while maintaining complete privacy.',
     related: ['ml/image2text', 'video/trim', 'video/audio']
-  }
+  },
+  'text/latex-pdf': {
+    id: 'latex-pdf',
+    category: 'text',
+    name: 'LaTeX to PDF',
+    description: 'Compile LaTeX documents to PDF directly in your browser using WebAssembly. No uploads, no server — your document stays on your device. Supports math, figures, and standard LaTeX packages.',
+    icon: '📄',
+    keywords: ['latex to pdf', 'latex compiler', 'latex online', 'overleaf alternative', 'browser latex', 'pdf from latex', 'tex to pdf', 'free latex compiler'],
+    howToUse: [
+      'Paste your LaTeX source into the editor, or use the built-in template',
+      'Click "Compile to PDF" — LaTeX packages are downloaded on first use (~20MB, cached)',
+      'Preview the PDF inline and download it',
+      'Edit and recompile — subsequent compiles are 1–5 seconds'
+    ],
+    useCase: 'Compile LaTeX documents privately without uploading to Overleaf or any cloud service. Ideal for academic papers, math documents, and technical reports.',
+    related: ['text/grammar-fix', 'text/summarize']
+  },
 };
 
 /**

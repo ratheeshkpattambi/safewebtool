@@ -38,10 +38,18 @@ Sitemap: https://safewebtool.com/sitemap.xml
   - Agent contract: https://safewebtool.com/text/base64/agent.json
 - Text Editor: https://safewebtool.com/text/editor
   - Agent contract: https://safewebtool.com/text/editor/agent.json
+- AI Grammar Fixer: https://safewebtool.com/text/grammar-fix
+  - Agent contract: https://safewebtool.com/text/grammar-fix/agent.json
 - JSON Formatter & Converter: https://safewebtool.com/text/json-formatter
   - Agent contract: https://safewebtool.com/text/json-formatter/agent.json
+- LaTeX to PDF: https://safewebtool.com/text/latex-pdf
+  - Agent contract: https://safewebtool.com/text/latex-pdf/agent.json
 - Remove Extra Spaces: https://safewebtool.com/text/remove-extra-spaces
   - Agent contract: https://safewebtool.com/text/remove-extra-spaces/agent.json
+- AI Text Summarizer: https://safewebtool.com/text/summarize
+  - Agent contract: https://safewebtool.com/text/summarize/agent.json
+- AI Tone Rewriter: https://safewebtool.com/text/tone
+  - Agent contract: https://safewebtool.com/text/tone/agent.json
 - URL Encode & Decode: https://safewebtool.com/text/url-encode
   - Agent contract: https://safewebtool.com/text/url-encode/agent.json
 - Word & Character Counter: https://safewebtool.com/text/word-count

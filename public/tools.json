@@ -224,7 +224,7 @@
         "name": "Image Tools"
       },
       "name": "Image Crop",
-      "description": "Free online image crop tool. Crop images by exact pixel dimensions and position, all processed locally in your browser.",
+      "description": "Free online image crop tool. Drag a crop box directly on your photo — works with mouse and touch, all processed locally in your browser.",
       "privacy": {
         "mode": "browser-local",
         "fileUpload": false,
@@ -253,9 +253,9 @@
       },
       "howToUse": [
         "Open the page and start with the built-in sample image or upload your own image",
-        "Set X/Y position and crop width/height in pixels",
-        "Use quick actions to center or reset the crop area",
-        "Click \"Crop Image\" to process and download the result"
+        "Drag the highlighted box on the image to choose the crop area",
+        "Resize from the corners or edges — the pixel size updates live",
+        "Click \"Crop & Download\" to process and download the result"
       ],
       "useCase": "Perfect for removing unwanted edges, extracting a subject, or preparing exact image dimensions for websites and social media.",
       "keywords": [
@@ -263,7 +263,7 @@
         "crop image",
         "trim image",
         "image editor",
-        "crop by pixels"
+        "visual crop tool"
       ],
       "externalDownloads": [],
       "exampleTasks": [
@@ -807,6 +807,68 @@
         "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
       ]
     },
+    "text/grammar-fix": {
+      "schemaVersion": "1.0",
+      "id": "grammar-fix",
+      "path": "text/grammar-fix",
+      "canonicalPath": "/text/grammar-fix",
+      "canonicalUrl": "https://safewebtool.com/text/grammar-fix",
+      "category": {
+        "id": "text",
+        "name": "Text Tools"
+      },
+      "name": "AI Grammar Fixer",
+      "description": "Fix grammar, spelling, and punctuation errors in your text using a small AI model that runs entirely in your browser. No uploads, no API keys.",
+      "privacy": {
+        "mode": "browser-local",
+        "fileUpload": false,
+        "note": "SafeWebTool tools are designed to process user data locally in the browser."
+      },
+      "inputs": [
+        {
+          "name": "text",
+          "type": "text"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "browser result",
+          "formats": [
+            "text/html"
+          ]
+        }
+      ],
+      "selectors": {
+        "ready": ".tool-container[data-tool-ready=\"true\"]",
+        "process": "#processBtn",
+        "log": "#logContent"
+      },
+      "howToUse": [
+        "Paste your text into the input box",
+        "Click \"Fix Grammar\" — the AI model downloads once (~100MB) and runs locally",
+        "Your corrected text appears below",
+        "Copy and use the result"
+      ],
+      "useCase": "Quickly clean up grammar and spelling in emails, documents, or messages without sending your text to any external service.",
+      "keywords": [
+        "grammar checker",
+        "fix grammar",
+        "spell check",
+        "grammar fixer",
+        "grammar correction",
+        "AI writing tool",
+        "free grammar check"
+      ],
+      "externalDownloads": [],
+      "exampleTasks": [
+        "Open https://safewebtool.com/text/grammar-fix and use AI Grammar Fixer."
+      ],
+      "automationNotes": [
+        "Prefer the stable selectors in this contract over visible text where possible.",
+        "Wait for selectors.ready before interacting with the tool UI.",
+        "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+      ]
+    },
     "text/json-formatter": {
       "schemaVersion": "1.0",
       "id": "json-formatter",
@@ -873,6 +935,69 @@
         "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
       ]
     },
+    "text/latex-pdf": {
+      "schemaVersion": "1.0",
+      "id": "latex-pdf",
+      "path": "text/latex-pdf",
+      "canonicalPath": "/text/latex-pdf",
+      "canonicalUrl": "https://safewebtool.com/text/latex-pdf",
+      "category": {
+        "id": "text",
+        "name": "Text Tools"
+      },
+      "name": "LaTeX to PDF",
+      "description": "Compile LaTeX documents to PDF directly in your browser using WebAssembly. No uploads, no server — your document stays on your device. Supports math, figures, and standard LaTeX packages.",
+      "privacy": {
+        "mode": "browser-local",
+        "fileUpload": false,
+        "note": "SafeWebTool tools are designed to process user data locally in the browser."
+      },
+      "inputs": [
+        {
+          "name": "text",
+          "type": "text"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "browser result",
+          "formats": [
+            "text/html"
+          ]
+        }
+      ],
+      "selectors": {
+        "ready": ".tool-container[data-tool-ready=\"true\"]",
+        "process": "#processBtn",
+        "log": "#logContent"
+      },
+      "howToUse": [
+        "Paste your LaTeX source into the editor, or use the built-in template",
+        "Click \"Compile to PDF\" — LaTeX packages are downloaded on first use (~20MB, cached)",
+        "Preview the PDF inline and download it",
+        "Edit and recompile — subsequent compiles are 1–5 seconds"
+      ],
+      "useCase": "Compile LaTeX documents privately without uploading to Overleaf or any cloud service. Ideal for academic papers, math documents, and technical reports.",
+      "keywords": [
+        "latex to pdf",
+        "latex compiler",
+        "latex online",
+        "overleaf alternative",
+        "browser latex",
+        "pdf from latex",
+        "tex to pdf",
+        "free latex compiler"
+      ],
+      "externalDownloads": [],
+      "exampleTasks": [
+        "Open https://safewebtool.com/text/latex-pdf and use LaTeX to PDF."
+      ],
+      "automationNotes": [
+        "Prefer the stable selectors in this contract over visible text where possible.",
+        "Wait for selectors.ready before interacting with the tool UI.",
+        "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+      ]
+    },
     "text/remove-extra-spaces": {
       "schemaVersion": "1.0",
       "id": "remove-extra-spaces",
@@ -927,6 +1052,130 @@
       "externalDownloads": [],
       "exampleTasks": [
         "Open https://safewebtool.com/text/remove-extra-spaces and use Remove Extra Spaces."
+      ],
+      "automationNotes": [
+        "Prefer the stable selectors in this contract over visible text where possible.",
+        "Wait for selectors.ready before interacting with the tool UI.",
+        "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+      ]
+    },
+    "text/summarize": {
+      "schemaVersion": "1.0",
+      "id": "summarize",
+      "path": "text/summarize",
+      "canonicalPath": "/text/summarize",
+      "canonicalUrl": "https://safewebtool.com/text/summarize",
+      "category": {
+        "id": "text",
+        "name": "Text Tools"
+      },
+      "name": "AI Text Summarizer",
+      "description": "Summarize articles, documents, or any long text using an AI model that runs entirely in your browser. Choose short, medium, or detailed output.",
+      "privacy": {
+        "mode": "browser-local",
+        "fileUpload": false,
+        "note": "SafeWebTool tools are designed to process user data locally in the browser."
+      },
+      "inputs": [
+        {
+          "name": "text",
+          "type": "text"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "browser result",
+          "formats": [
+            "text/html"
+          ]
+        }
+      ],
+      "selectors": {
+        "ready": ".tool-container[data-tool-ready=\"true\"]",
+        "process": "#processBtn",
+        "log": "#logContent"
+      },
+      "howToUse": [
+        "Paste your text into the input box",
+        "Choose a summary length: Short, Medium, or Detailed",
+        "Click \"Summarize\" — model downloads once (~250MB) and runs locally",
+        "Copy the summary"
+      ],
+      "useCase": "Get the key points from long articles, meeting notes, or documents without pasting your content into a cloud service.",
+      "keywords": [
+        "text summarizer",
+        "summarize text",
+        "AI summarizer",
+        "article summary",
+        "document summary",
+        "free summarizer",
+        "browser summarizer"
+      ],
+      "externalDownloads": [],
+      "exampleTasks": [
+        "Open https://safewebtool.com/text/summarize and use AI Text Summarizer."
+      ],
+      "automationNotes": [
+        "Prefer the stable selectors in this contract over visible text where possible.",
+        "Wait for selectors.ready before interacting with the tool UI.",
+        "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+      ]
+    },
+    "text/tone": {
+      "schemaVersion": "1.0",
+      "id": "tone",
+      "path": "text/tone",
+      "canonicalPath": "/text/tone",
+      "canonicalUrl": "https://safewebtool.com/text/tone",
+      "category": {
+        "id": "text",
+        "name": "Text Tools"
+      },
+      "name": "AI Tone Rewriter",
+      "description": "Rewrite your text in a different tone — formal, casual, professional, or friendly — using an AI model that runs entirely in your browser.",
+      "privacy": {
+        "mode": "browser-local",
+        "fileUpload": false,
+        "note": "SafeWebTool tools are designed to process user data locally in the browser."
+      },
+      "inputs": [
+        {
+          "name": "text",
+          "type": "text"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "browser result",
+          "formats": [
+            "text/html"
+          ]
+        }
+      ],
+      "selectors": {
+        "ready": ".tool-container[data-tool-ready=\"true\"]",
+        "process": "#processBtn",
+        "log": "#logContent"
+      },
+      "howToUse": [
+        "Paste your text into the input box",
+        "Select a tone: Formal, Casual, Professional, or Friendly",
+        "Click \"Rewrite\" — model downloads once (~250MB) and runs locally",
+        "Copy the rewritten text"
+      ],
+      "useCase": "Adapt emails or messages for different audiences without exposing your content to cloud services.",
+      "keywords": [
+        "tone rewriter",
+        "rewrite text",
+        "change tone",
+        "formal writing",
+        "casual writing",
+        "AI rewriter",
+        "writing style changer"
+      ],
+      "externalDownloads": [],
+      "exampleTasks": [
+        "Open https://safewebtool.com/text/tone and use AI Tone Rewriter."
       ],
       "automationNotes": [
         "Prefer the stable selectors in this contract over visible text where possible.",

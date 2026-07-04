@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "1.0",
+  "id": "summarize",
+  "path": "text/summarize",
+  "canonicalPath": "/text/summarize",
+  "canonicalUrl": "https://safewebtool.com/text/summarize",
+  "category": {
+    "id": "text",
+    "name": "Text Tools"
+  },
+  "name": "AI Text Summarizer",
+  "description": "Summarize articles, documents, or any long text using an AI model that runs entirely in your browser. Choose short, medium, or detailed output.",
+  "privacy": {
+    "mode": "browser-local",
+    "fileUpload": false,
+    "note": "SafeWebTool tools are designed to process user data locally in the browser."
+  },
+  "inputs": [
+    {
+      "name": "text",
+      "type": "text"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "browser result",
+      "formats": [
+        "text/html"
+      ]
+    }
+  ],
+  "selectors": {
+    "ready": ".tool-container[data-tool-ready=\"true\"]",
+    "process": "#processBtn",
+    "log": "#logContent"
+  },
+  "howToUse": [
+    "Paste your text into the input box",
+    "Choose a summary length: Short, Medium, or Detailed",
+    "Click \"Summarize\" — model downloads once (~250MB) and runs locally",
+    "Copy the summary"
+  ],
+  "useCase": "Get the key points from long articles, meeting notes, or documents without pasting your content into a cloud service.",
+  "keywords": [
+    "text summarizer",
+    "summarize text",
+    "AI summarizer",
+    "article summary",
+    "document summary",
+    "free summarizer",
+    "browser summarizer"
+  ],
+  "externalDownloads": [],
+  "exampleTasks": [
+    "Open https://safewebtool.com/text/summarize and use AI Text Summarizer."
+  ],
+  "automationNotes": [
+    "Prefer the stable selectors in this contract over visible text where possible.",
+    "Wait for selectors.ready before interacting with the tool UI.",
+    "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+  ]
+}

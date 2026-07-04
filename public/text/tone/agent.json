@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "1.0",
+  "id": "tone",
+  "path": "text/tone",
+  "canonicalPath": "/text/tone",
+  "canonicalUrl": "https://safewebtool.com/text/tone",
+  "category": {
+    "id": "text",
+    "name": "Text Tools"
+  },
+  "name": "AI Tone Rewriter",
+  "description": "Rewrite your text in a different tone — formal, casual, professional, or friendly — using an AI model that runs entirely in your browser.",
+  "privacy": {
+    "mode": "browser-local",
+    "fileUpload": false,
+    "note": "SafeWebTool tools are designed to process user data locally in the browser."
+  },
+  "inputs": [
+    {
+      "name": "text",
+      "type": "text"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "browser result",
+      "formats": [
+        "text/html"
+      ]
+    }
+  ],
+  "selectors": {
+    "ready": ".tool-container[data-tool-ready=\"true\"]",
+    "process": "#processBtn",
+    "log": "#logContent"
+  },
+  "howToUse": [
+    "Paste your text into the input box",
+    "Select a tone: Formal, Casual, Professional, or Friendly",
+    "Click \"Rewrite\" — model downloads once (~250MB) and runs locally",
+    "Copy the rewritten text"
+  ],
+  "useCase": "Adapt emails or messages for different audiences without exposing your content to cloud services.",
+  "keywords": [
+    "tone rewriter",
+    "rewrite text",
+    "change tone",
+    "formal writing",
+    "casual writing",
+    "AI rewriter",
+    "writing style changer"
+  ],
+  "externalDownloads": [],
+  "exampleTasks": [
+    "Open https://safewebtool.com/text/tone and use AI Tone Rewriter."
+  ],
+  "automationNotes": [
+    "Prefer the stable selectors in this contract over visible text where possible.",
+    "Wait for selectors.ready before interacting with the tool UI.",
+    "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+  ]
+}

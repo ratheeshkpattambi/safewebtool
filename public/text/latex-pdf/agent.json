@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "1.0",
+  "id": "latex-pdf",
+  "path": "text/latex-pdf",
+  "canonicalPath": "/text/latex-pdf",
+  "canonicalUrl": "https://safewebtool.com/text/latex-pdf",
+  "category": {
+    "id": "text",
+    "name": "Text Tools"
+  },
+  "name": "LaTeX to PDF",
+  "description": "Compile LaTeX documents to PDF directly in your browser using WebAssembly. No uploads, no server — your document stays on your device. Supports math, figures, and standard LaTeX packages.",
+  "privacy": {
+    "mode": "browser-local",
+    "fileUpload": false,
+    "note": "SafeWebTool tools are designed to process user data locally in the browser."
+  },
+  "inputs": [
+    {
+      "name": "text",
+      "type": "text"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "browser result",
+      "formats": [
+        "text/html"
+      ]
+    }
+  ],
+  "selectors": {
+    "ready": ".tool-container[data-tool-ready=\"true\"]",
+    "process": "#processBtn",
+    "log": "#logContent"
+  },
+  "howToUse": [
+    "Paste your LaTeX source into the editor, or use the built-in template",
+    "Click \"Compile to PDF\" — LaTeX packages are downloaded on first use (~20MB, cached)",
+    "Preview the PDF inline and download it",
+    "Edit and recompile — subsequent compiles are 1–5 seconds"
+  ],
+  "useCase": "Compile LaTeX documents privately without uploading to Overleaf or any cloud service. Ideal for academic papers, math documents, and technical reports.",
+  "keywords": [
+    "latex to pdf",
+    "latex compiler",
+    "latex online",
+    "overleaf alternative",
+    "browser latex",
+    "pdf from latex",
+    "tex to pdf",
+    "free latex compiler"
+  ],
+  "externalDownloads": [],
+  "exampleTasks": [
+    "Open https://safewebtool.com/text/latex-pdf and use LaTeX to PDF."
+  ],
+  "automationNotes": [
+    "Prefer the stable selectors in this contract over visible text where possible.",
+    "Wait for selectors.ready before interacting with the tool UI.",
+    "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+  ]
+}
