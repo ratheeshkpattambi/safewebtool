@@ -38,12 +38,16 @@ The Gaussian integral:
 `;
 
 const ENGINE_SCRIPT_URL = '/swiftlatex/PdfTeXEngine.js';
+const BUNDLE_URL = '/swiftlatex/format-bundle.json';
+const IDB_DB = 'swiftlatex-cache';
+const IDB_STORE = 'formats';
+const IDB_KEY = 'swiftlatexpdftex.fmt';
 
 export const template = `
   <div class="tool-container space-y-4">
     <div class="rounded-md bg-blue-50 dark:bg-blue-900/20 p-3 text-sm text-blue-800 dark:text-blue-200">
       Compiles LaTeX entirely in your browser — your document is never uploaded anywhere.
-      First compile downloads LaTeX packages (~20MB, cached after). Subsequent compiles are 1–5s.
+      First compile downloads LaTeX packages (~3MB, cached after). Subsequent compiles are 1–5s.
     </div>
 
     <div>
@@ -79,6 +83,39 @@ export const template = `
   </div>
 `;
 
+// ---------- IndexedDB helpers ----------
+
+function idbOpen() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_DB, 1);
+    req.onupgradeneeded = (e) => e.target.result.createObjectStore(IDB_STORE);
+    req.onsuccess = (e) => resolve(e.target.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbGet(key) {
+  const db = await idbOpen();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).get(key);
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbPut(key, value) {
+  const db = await idbOpen();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, 'readwrite');
+    const req = tx.objectStore(IDB_STORE).put(value, key);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+// ---------- Tool class ----------
+
 class LatexPdfTool extends Tool {
   constructor() {
     super({
@@ -91,6 +128,7 @@ class LatexPdfTool extends Tool {
       template
     });
     this.engine = null;
+    this.latexWorker = null;
     this.engineReady = false;
   }
 
@@ -114,8 +152,10 @@ class LatexPdfTool extends Tool {
     this.elements.loadTemplateBtn.addEventListener('click', () => {
       this.elements.latexInput.value = DEFAULT_TEMPLATE;
     });
-    this.log('Paste your LaTeX source and click "Compile to PDF". First compile downloads packages (~20MB, cached after).', 'info');
+    this.log('Paste your LaTeX source and click "Compile to PDF". First compile downloads packages (~3MB, cached after).', 'info');
   }
+
+  // ---------- Engine loading ----------
 
   async loadEngineScript() {
     if (typeof PdfTeXEngine !== 'undefined') return;
@@ -130,50 +170,77 @@ class LatexPdfTool extends Tool {
 
   async loadEngine() {
     if (this.engineReady) return;
-    this.log('Loading LaTeX engine (first time only)...', 'info');
-    this.updateProgress(10);
 
+    // Step 1: Load WASM engine
+    this.log('Loading LaTeX engine...', 'info');
+    this.updateProgress(5);
     await this.loadEngineScript();
-
     this.engine = new PdfTeXEngine();
-    // Capture the worker reference directly after loadEngine resolves,
-    // bypassing the TypeScript generator __awaiter pattern that loses 'this' in Safari.
     await this.engine.loadEngine();
-    this.latexWorker = this.engine.latexWorker; // own reference — Safari-safe
+    this.latexWorker = this.engine.latexWorker;
 
-    // compileFormat() generates swiftlatexpdftex.fmt — required before any compileLaTeX call.
-    this.log('Building LaTeX format (one-time, ~5s)...', 'info');
-    this.updateProgress(20);
-    await this._compileFormatDirect();
+    // Step 2: Download file bundle (pdflatex.ini, latex.ltx, fonts, packages)
+    this.log('Loading LaTeX package files (~3MB, cached after first run)...', 'info');
+    this.updateProgress(15);
+    const bundleResp = await fetch(BUNDLE_URL);
+    if (!bundleResp.ok) throw new Error('Failed to load LaTeX package bundle');
+    const bundle = await bundleResp.json();
+
+    // Write all bundle files to worker WORKROOT (fire-and-forget — worker is FIFO)
+    for (const [name, b64] of Object.entries(bundle)) {
+      const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+      this.latexWorker.postMessage({ cmd: 'writefile', url: name, src: bytes });
+    }
+    this.updateProgress(35);
+
+    // Step 3: Load or generate the format file (swiftlatexpdftex.fmt)
+    let fmtBytes = await idbGet(IDB_KEY).catch(() => null);
+    if (fmtBytes) {
+      this.log('Using cached LaTeX format.', 'info');
+    } else {
+      this.log('Generating LaTeX format (one-time, ~15s)...', 'info');
+      this.updateProgress(45);
+      fmtBytes = await this._compileFormatDirect();
+      await idbPut(IDB_KEY, fmtBytes).catch(() => {}); // save to IndexedDB
+    }
+
+    // Write format as swiftlatexpdftex.fmt so compileLaTeX can find it
+    this.latexWorker.postMessage({ cmd: 'writefile', url: IDB_KEY, src: fmtBytes });
+    this.updateProgress(60);
 
     this.engineReady = true;
     this.log('LaTeX engine ready.', 'success');
-    this.updateProgress(30);
+    this.updateProgress(70);
   }
 
-  // Sends {cmd:'compileformat'} directly to the worker. The worker responds with
-  // {cmd:'compile', result:'ok', pdf:<fmt buffer>} on success.
+  // ---------- Worker communication ----------
+
+  // Sends {cmd:'compileformat'} to the worker.
+  // The worker runs pdfTeX INITEX with pdflatex.ini (pre-uploaded to WORKROOT).
+  // Response: {cmd:'compile', result:'ok', pdf: <format bytes>}
+  // The format bytes are written back as swiftlatexpdftex.fmt for compileLaTeX to find.
   _compileFormatDirect() {
     return new Promise((resolve, reject) => {
       const worker = this.latexWorker;
       if (!worker) { reject(new Error('Worker not ready')); return; }
-      worker.onmessage = (ev) => {
+      const onmsg = (ev) => {
         const data = ev.data;
         if (data.cmd !== 'compile') return;
-        worker.onmessage = null;
-        if (data.result === 'ok') resolve();
-        else reject(new Error('Format compilation failed: ' + (data.log || 'unknown error')));
+        worker.removeEventListener('message', onmsg);
+        if (data.result === 'ok' && data.pdf) {
+          resolve(new Uint8Array(data.pdf));
+        } else {
+          reject(new Error('Format compilation failed: ' + (data.log || 'unknown')));
+        }
       };
-      worker.onerror = (e) => {
-        worker.onerror = null;
-        reject(new Error(`Worker error during format: ${e.message || 'unknown'}`));
-      };
+      worker.addEventListener('message', onmsg);
       worker.postMessage({ cmd: 'compileformat' });
     });
   }
 
-  // Bypass engine.compileLaTeX() which uses a generator that loses 'this' in Safari.
-  // Talk directly to the worker using the captured reference.
+  // Sends the .tex source + compilelatex command. The worker is FIFO so
+  // any preceding writefile commands complete before compilation starts.
+  // Bypasses engine.compileLaTeX() generator which loses 'this' in Safari.
   _compileDirect(source) {
     return new Promise((resolve, reject) => {
       const worker = this.latexWorker;
@@ -181,26 +248,25 @@ class LatexPdfTool extends Tool {
         reject(new Error('LaTeX worker not initialized — try reloading the page'));
         return;
       }
-      worker.onmessage = (ev) => {
+      const onmsg = (ev) => {
         const data = ev.data;
         if (data.cmd !== 'compile') return;
-        worker.onmessage = null;
+        worker.removeEventListener('message', onmsg);
         resolve({
           pdf: data.result === 'ok' ? new Uint8Array(data.pdf) : null,
           log: data.log,
           status: data.status
         });
       };
-      worker.onerror = (e) => {
-        worker.onerror = null;
-        reject(new Error(`Worker error: ${e.message || 'unknown'}`));
-      };
-      // Send files and trigger compile
+      worker.addEventListener('message', onmsg);
+      // writefile + setmainfile go into the FIFO queue before compilelatex
       worker.postMessage({ cmd: 'writefile', url: 'main.tex', src: source });
       worker.postMessage({ cmd: 'setmainfile', url: 'main.tex' });
       worker.postMessage({ cmd: 'compilelatex' });
     });
   }
+
+  // ---------- Compile ----------
 
   async compile() {
     const source = this.elements.latexInput.value.trim();
@@ -215,7 +281,7 @@ class LatexPdfTool extends Tool {
     try {
       await this.loadEngine();
       this.log('Compiling...', 'info');
-      this.updateProgress(50);
+      this.updateProgress(80);
 
       const result = await this._compileDirect(source);
 
@@ -227,7 +293,7 @@ class LatexPdfTool extends Tool {
         throw new Error('Compilation failed — check the log for errors');
       }
 
-      this.updateProgress(90);
+      this.updateProgress(95);
 
       const blob = new Blob([result.pdf], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
@@ -244,7 +310,7 @@ class LatexPdfTool extends Tool {
 
       this.updateProgress(100);
       this.log('Compilation successful!', 'success');
-      this.latexWorker.postMessage({ cmd: 'flushcache' });
+      // Do NOT flush cache — we need swiftlatexpdftex.fmt + package files for next compile
       this.endProcessing(true);
     } catch (err) {
       this.log(`Error: ${err.message}`, 'error');
