@@ -14,7 +14,7 @@ const DEFAULT_TEMPLATE = `\\documentclass{article}
 \\maketitle
 
 \\section{Introduction}
-Hello, World! This document was compiled entirely in your browser using WebAssembly — no uploads, no server.
+Hello, World! This document was compiled entirely in your browser using WebAssembly --- no uploads, no server.
 
 \\section{Mathematics}
 Einstein's famous equation:
