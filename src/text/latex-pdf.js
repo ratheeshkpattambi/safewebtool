@@ -50,8 +50,7 @@ const IDB_KEY = 'swiftlatexpdftex.fmt';
 export const template = `
   <div class="tool-container space-y-4">
     <div class="rounded-md bg-blue-50 dark:bg-blue-900/20 p-3 text-sm text-blue-800 dark:text-blue-200">
-      Compiles LaTeX entirely in your browser — your document is never uploaded anywhere.
-      First compile downloads the LaTeX engine + format (~15MB total, cached after). Subsequent compiles are fast.
+      Compiles LaTeX in your browser — your document is never uploaded. Each compile takes about 1 minute. First run downloads ~15MB (cached).
     </div>
 
     <div>
@@ -156,7 +155,7 @@ class LatexPdfTool extends Tool {
     this.elements.loadTemplateBtn.addEventListener('click', () => {
       this.elements.latexInput.value = DEFAULT_TEMPLATE;
     });
-    this.log('Paste your LaTeX source and click "Compile to PDF". First compile downloads the LaTeX engine (~15MB, cached after first use).', 'info');
+    this.log('Paste your LaTeX source and click "Compile to PDF". First compile takes ~1 minute (downloads the LaTeX engine, ~15MB cached). Subsequent compiles are similar.', 'info');
   }
 
   // ---------- Engine loading ----------
