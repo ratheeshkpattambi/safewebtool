@@ -1,7 +1,31 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import { execSync } from 'child_process';
+
+// Resolve build-time version info (Cloudflare Pages env takes priority over local git)
+function getCommitSha() {
+  if (process.env.CF_PAGES_COMMIT_SHA) return process.env.CF_PAGES_COMMIT_SHA.slice(0, 7);
+  try { return execSync('git rev-parse --short HEAD').toString().trim(); } catch { return 'dev'; }
+}
+function getBuildDate() {
+  return new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+}
 
 export default defineConfig({
+  plugins: [
+    {
+      name: 'inject-build-version',
+      transformIndexHtml(html) {
+        const sha = getCommitSha();
+        const date = getBuildDate();
+        // Replace the hardcoded version text with live build info
+        return html.replace(
+          /<span class="version">Version:.*?<\/span>/,
+          `<span class="version" title="Deploy: ${date} · ${sha}">v${date} · ${sha}</span>`
+        );
+      }
+    }
+  ],
   server: {
     headers: {
       'Cross-Origin-Opener-Policy': 'same-origin',
