@@ -140,9 +140,36 @@ class LatexPdfTool extends Tool {
     // bypassing the TypeScript generator __awaiter pattern that loses 'this' in Safari.
     await this.engine.loadEngine();
     this.latexWorker = this.engine.latexWorker; // own reference — Safari-safe
+
+    // compileFormat() generates swiftlatexpdftex.fmt — required before any compileLaTeX call.
+    this.log('Building LaTeX format (one-time, ~5s)...', 'info');
+    this.updateProgress(20);
+    await this._compileFormatDirect();
+
     this.engineReady = true;
     this.log('LaTeX engine ready.', 'success');
     this.updateProgress(30);
+  }
+
+  // Sends {cmd:'compileformat'} directly to the worker. The worker responds with
+  // {cmd:'compile', result:'ok', pdf:<fmt buffer>} on success.
+  _compileFormatDirect() {
+    return new Promise((resolve, reject) => {
+      const worker = this.latexWorker;
+      if (!worker) { reject(new Error('Worker not ready')); return; }
+      worker.onmessage = (ev) => {
+        const data = ev.data;
+        if (data.cmd !== 'compile') return;
+        worker.onmessage = null;
+        if (data.result === 'ok') resolve();
+        else reject(new Error('Format compilation failed: ' + (data.log || 'unknown error')));
+      };
+      worker.onerror = (e) => {
+        worker.onerror = null;
+        reject(new Error(`Worker error during format: ${e.message || 'unknown'}`));
+      };
+      worker.postMessage({ cmd: 'compileformat' });
+    });
   }
 
   // Bypass engine.compileLaTeX() which uses a generator that loses 'this' in Safari.
