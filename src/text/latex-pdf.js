@@ -39,6 +39,7 @@ The Gaussian integral:
 
 const ENGINE_SCRIPT_URL = '/swiftlatex/PdfTeXEngine.js';
 const BUNDLE_URL = '/swiftlatex/format-bundle.json';
+const FORMAT_URL = '/swiftlatex/swiftlatexpdftex.fmt';
 const IDB_DB = 'swiftlatex-cache';
 const IDB_STORE = 'formats';
 const IDB_KEY = 'swiftlatexpdftex.fmt';
@@ -47,7 +48,7 @@ export const template = `
   <div class="tool-container space-y-4">
     <div class="rounded-md bg-blue-50 dark:bg-blue-900/20 p-3 text-sm text-blue-800 dark:text-blue-200">
       Compiles LaTeX entirely in your browser — your document is never uploaded anywhere.
-      First compile downloads LaTeX packages (~3MB, cached after). Subsequent compiles are 1–5s.
+      First compile downloads the LaTeX engine + format (~15MB total, cached after). Subsequent compiles are fast.
     </div>
 
     <div>
@@ -152,7 +153,7 @@ class LatexPdfTool extends Tool {
     this.elements.loadTemplateBtn.addEventListener('click', () => {
       this.elements.latexInput.value = DEFAULT_TEMPLATE;
     });
-    this.log('Paste your LaTeX source and click "Compile to PDF". First compile downloads packages (~3MB, cached after).', 'info');
+    this.log('Paste your LaTeX source and click "Compile to PDF". First compile downloads the LaTeX engine (~15MB, cached after first use).', 'info');
   }
 
   // ---------- Engine loading ----------
@@ -193,15 +194,18 @@ class LatexPdfTool extends Tool {
     }
     this.updateProgress(35);
 
-    // Step 3: Load or generate the format file (swiftlatexpdftex.fmt)
+    // Step 3: Load or download the pre-built format file (swiftlatexpdftex.fmt)
     let fmtBytes = await idbGet(IDB_KEY).catch(() => null);
     if (fmtBytes) {
       this.log('Using cached LaTeX format.', 'info');
     } else {
-      this.log('Generating LaTeX format (one-time, ~15s)...', 'info');
+      this.log('Downloading LaTeX format (~10MB, cached after first run)...', 'info');
       this.updateProgress(45);
-      fmtBytes = await this._compileFormatDirect();
-      await idbPut(IDB_KEY, fmtBytes).catch(() => {}); // save to IndexedDB
+      const fmtResp = await fetch(FORMAT_URL);
+      if (!fmtResp.ok) throw new Error('Failed to download LaTeX format file');
+      fmtBytes = new Uint8Array(await fmtResp.arrayBuffer());
+      this.log(`Format loaded (${(fmtBytes.length / 1024 / 1024).toFixed(1)}MB).`, 'info');
+      await idbPut(IDB_KEY, fmtBytes).catch(() => {}); // cache in IndexedDB
     }
 
     // Write format as swiftlatexpdftex.fmt so compileLaTeX can find it
