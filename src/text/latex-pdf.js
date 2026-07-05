@@ -6,6 +6,9 @@ const DEFAULT_TEMPLATE = `\\documentclass{article}
 \\usepackage{geometry}
 \\geometry{margin=2.5cm}
 
+% Use math bullet for itemize (avoids TC font dependency in browser compiler)
+\\renewcommand\\labelitemi{$\\bullet$}
+
 \\title{My Document}
 \\author{Author Name}
 \\date{\\today}
