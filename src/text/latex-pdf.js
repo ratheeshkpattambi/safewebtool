@@ -50,7 +50,7 @@ const IDB_KEY = 'swiftlatexpdftex.fmt';
 export const template = `
   <div class="tool-container space-y-4">
     <div class="rounded-md bg-blue-50 dark:bg-blue-900/20 p-3 text-sm text-blue-800 dark:text-blue-200">
-      Compiles LaTeX in your browser — your document is never uploaded. Each compile takes about 1 minute. First run downloads ~15MB (cached).
+      Compiles LaTeX in your browser — your document is never uploaded. Compile takes ~10–30 seconds. First run downloads ~15MB (cached).
     </div>
 
     <div>
@@ -155,7 +155,10 @@ class LatexPdfTool extends Tool {
     this.elements.loadTemplateBtn.addEventListener('click', () => {
       this.elements.latexInput.value = DEFAULT_TEMPLATE;
     });
-    this.log('Paste your LaTeX source and click "Compile to PDF". First compile takes ~1 minute (downloads the LaTeX engine, ~15MB cached). Subsequent compiles are similar.', 'info');
+    this.log('Paste your LaTeX source and click "Compile to PDF". First compile downloads the LaTeX engine (~15MB, cached). Compile typically takes 10–30 seconds.', 'info');
+
+    // Start loading the engine in the background so it's ready by the time the user clicks Compile.
+    this.loadEngine().catch((err) => this.log(`Engine preload failed: ${err.message}`, 'error'));
   }
 
   // ---------- Engine loading ----------
@@ -171,9 +174,18 @@ class LatexPdfTool extends Tool {
     });
   }
 
-  async loadEngine() {
-    if (this.engineReady) return;
+  loadEngine() {
+    if (this.engineReady) return Promise.resolve();
+    if (!this._engineLoadPromise) {
+      this._engineLoadPromise = this._loadEngineImpl().catch((err) => {
+        this._engineLoadPromise = null;
+        throw err;
+      });
+    }
+    return this._engineLoadPromise;
+  }
 
+  async _loadEngineImpl() {
     // Step 1: Load WASM engine
     this.log('Loading LaTeX engine...', 'info');
     this.updateProgress(5);
