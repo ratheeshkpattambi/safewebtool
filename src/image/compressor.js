@@ -431,7 +431,11 @@ export default class ImageCompressor extends Tool {
 
   renderResultDownload() {
     if (!this.compressed.blob) return;
-    this.displayOutputMedia(this.compressed.blob, 'compressedImage', this.getCompressedFileName(), 'downloadContainer');
+    // Pass null for mediaKey: the compressed image is already displayed via
+    // compressedImage.src set in the compressImage() success callback.
+    // Passing 'compressedImage' here would re-set its src, re-triggering
+    // the onload handler and causing an infinite loop.
+    this.displayOutputMedia(this.compressed.blob, null, this.getCompressedFileName(), 'downloadContainer');
   }
   
   /**
