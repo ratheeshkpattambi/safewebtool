@@ -10,17 +10,32 @@ function isLocalHost(hostname) {
   return ['localhost', '127.0.0.1', '::1'].includes(hostname) || hostname.endsWith('.netlify.app');
 }
 
+const NAV_LINK_CLASSES = 'px-3 py-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors inline-flex items-center';
+const NAV_LINK_ACTIVE_CLASSES = 'px-3 py-2 text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-900/30 rounded-md transition-colors inline-flex items-center';
+
+function updateNavActiveState() {
+  const navList = document.querySelector('header nav ul');
+  if (!navList) return;
+
+  const path = window.location.pathname;
+  navList.querySelectorAll('a[data-nav-link]').forEach(link => {
+    const href = link.getAttribute('href');
+    const isActive = href === '/' ? path === '/' : (path === href || path.startsWith(`${href}/`));
+    link.className = isActive ? NAV_LINK_ACTIVE_CLASSES : NAV_LINK_CLASSES;
+  });
+}
+
 function renderNavigation() {
   const navList = document.querySelector('header nav ul');
   if (!navList) return;
 
   navList.innerHTML = `
     <li>
-      <a href="/" class="px-3 py-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors inline-flex items-center">Home</a>
+      <a href="/" data-nav-link class="${NAV_LINK_CLASSES}">Home</a>
     </li>
     ${Object.values(categories).map(category => `
       <li>
-        <a href="/${category.id}" class="px-3 py-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors inline-flex items-center">${category.name.replace(' Tools', '')}</a>
+        <a href="/${category.id}" data-nav-link class="${NAV_LINK_CLASSES}">${category.name.replace(' Tools', '')}</a>
       </li>
     `).join('')}
     <li class="ml-1">
@@ -34,6 +49,8 @@ function renderNavigation() {
       </button>
     </li>
   `;
+
+  updateNavActiveState();
 }
 
 function getToolSearchEntries() {
@@ -223,6 +240,7 @@ function initRouter() {
   window.addEventListener('popstate', () => {
     const newPath = window.location.pathname;
     handleRoute(newPath);
+    updateNavActiveState();
   });
 
   // Handle link clicks for SPA routing
@@ -240,6 +258,7 @@ function initRouter() {
       // Update URL and handle route
       window.history.pushState({}, '', href);
       handleRoute(href);
+      updateNavActiveState();
     }
   });
 }

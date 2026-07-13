@@ -15,17 +15,6 @@ function renderToolCard(path, tool, index = 0) {
   `;
 }
 
-function renderCategoryPills(activeCategory = '') {
-  return `
-    <div class="flex flex-wrap gap-2" aria-label="Tool categories">
-      <a href="/" class="rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${activeCategory ? 'border-slate-200 text-slate-600 hover:border-blue-300 hover:text-blue-700 dark:border-gray-700 dark:text-slate-300' : 'border-blue-600 bg-blue-600 text-white'}">All</a>
-      ${Object.values(categories).map(category => `
-        <a href="/${category.id}" class="rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${activeCategory === category.id ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 text-slate-600 hover:border-blue-300 hover:text-blue-700 dark:border-gray-700 dark:text-slate-300'}">${category.icon} ${category.name.replace(' Tools', '')}</a>
-      `).join('')}
-    </div>
-  `;
-}
-
 export function renderCategoryPage(categoryConfig, categoryId) {
   const categoryTools = listToolsForCategory(categoryId);
   return `
@@ -34,13 +23,6 @@ export function renderCategoryPage(categoryConfig, categoryId) {
         <p class="text-sm font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400">${categoryConfig.icon} ${categoryTools.length} tools</p>
         <h1 class="mt-2 text-4xl font-black text-slate-950 dark:text-white">${categoryConfig.name}</h1>
         <p class="mt-2 max-w-3xl text-base leading-relaxed text-slate-600 dark:text-slate-300">${categoryConfig.description}</p>
-      </div>
-      <div class="mb-5">
-        ${renderCategoryPills(categoryId)}
-      </div>
-      <div class="mb-5">
-        <label class="sr-only" for="categoryToolFilter">Search ${categoryConfig.name}</label>
-        <input id="categoryToolFilter" data-tool-filter type="search" placeholder="Search ${categoryConfig.name.toLowerCase()}..." class="w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-base text-slate-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:ring-blue-950">
       </div>
       <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3" itemscope itemtype="https://schema.org/ItemList" data-tool-grid>
         ${categoryTools.map(([path, tool], index) => renderToolCard(path, tool, index)).join('')}

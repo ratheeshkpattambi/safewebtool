@@ -33,13 +33,6 @@
     <link rel="preload" href="/src/styles/main.css" as="style">
     <link rel="preload" href="/src/assets/logo.svg" as="image" type="image/svg+xml">
     <link rel="stylesheet" href="/src/styles/main.css">
-    <style>
-        @media (hover: none), (pointer: coarse) {
-            nav .group > div.absolute {
-                display: none !important;
-            }
-        }
-    </style>
     <script defer src="/src/main.js" type="module"></script>
     <!-- COOP and COEP headers for SharedArrayBuffer support (needed for WASM) -->
     <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
@@ -77,256 +70,34 @@
                             <a href="/" class="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors inline-flex items-center">Home</a>
                         </li>
                         
-                        <!-- Video Tools Flyout -->
-                        <li class="relative group">
+                        <li>
                             <a href="/video" class="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors inline-flex items-center">
                                 Video
-                                <svg class="ml-1 h-4 w-4 transform group-hover:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                </svg>
                             </a>
-                            <!-- Video Flyout Menu -->
-                            <div class="hidden md:block absolute left-0 mt-1 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                                <div class="p-4">
-                                    <div class="flex items-center mb-4 pb-3 border-b border-gray-100 dark:border-gray-600">
-                                        <span class="text-2xl mr-2">🎥</span>
-                                        <h3 class="font-bold text-gray-900 dark:text-gray-100 text-lg">Video Tools</h3>
-                                    </div>
-                                    <div class="space-y-1">
-                                        <a href="/video/info" class="flex items-start p-3 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group/item">
-                                            <span class="text-lg mr-3 mt-0.5">📊</span>
-                                            <div>
-                                                <div class="font-medium text-gray-800 dark:text-gray-200 group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400">Extract Video Metadata</div>
-                                                <div class="text-sm text-gray-500 dark:text-gray-400">Get codec, resolution, duration info</div>
-                                            </div>
-                                        </a>
-                                        <a href="/video/resize" class="flex items-start p-3 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group/item">
-                                            <span class="text-lg mr-3 mt-0.5">🔄</span>
-                                            <div>
-                                                <div class="font-medium text-gray-800 dark:text-gray-200 group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400">Video Resize</div>
-                                                <div class="text-sm text-gray-500 dark:text-gray-400">Change video dimensions and resolution</div>
-                                            </div>
-                                        </a>
-                                        <a href="/video/trim" class="flex items-start p-3 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group/item">
-                                            <span class="text-lg mr-3 mt-0.5">✂️</span>
-                                            <div>
-                                                <div class="font-medium text-gray-800 dark:text-gray-200 group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400">Video Trimmer</div>
-                                                <div class="text-sm text-gray-500 dark:text-gray-400">Cut videos to specific time ranges</div>
-                                            </div>
-                                        </a>
-                                        <a href="/video/reverse" class="flex items-start p-3 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group/item">
-                                            <span class="text-lg mr-3 mt-0.5">⏪</span>
-                                            <div>
-                                                <div class="font-medium text-gray-800 dark:text-gray-200 group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400">Video Reverse</div>
-                                                <div class="text-sm text-gray-500 dark:text-gray-400">Reverse videos to play backwards</div>
-                                            </div>
-                                        </a>
-                                        <a href="/video/reencode" class="flex items-start p-3 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group/item">
-                                            <span class="text-lg mr-3 mt-0.5">🔄</span>
-                                            <div>
-                                                <div class="font-medium text-gray-800 dark:text-gray-200 group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400">Video Re-encode</div>
-                                                <div class="text-sm text-gray-500 dark:text-gray-400">Convert between MP4, WebM, MOV</div>
-                                            </div>
-                                        </a>
-                                        <a href="/video/gif" class="flex items-start p-3 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group/item">
-                                            <span class="text-lg mr-3 mt-0.5">🎞️</span>
-                                            <div>
-                                                <div class="font-medium text-gray-800 dark:text-gray-200 group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400">Video to GIF</div>
-                                                <div class="text-sm text-gray-500 dark:text-gray-400">Create animated GIFs from videos</div>
-                                            </div>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
                         </li>
                         
-                        <!-- Image Tools Flyout -->
-                        <li class="relative group">
+                        <li>
                             <a href="/image" class="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors inline-flex items-center">
                                 Image
-                                <svg class="ml-1 h-4 w-4 transform group-hover:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                </svg>
                             </a>
-                            <!-- Image Flyout Menu -->
-                            <div class="hidden md:block absolute left-0 mt-1 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                                <div class="p-4">
-                                    <div class="flex items-center mb-4 pb-3 border-b border-gray-100 dark:border-gray-600">
-                                        <span class="text-2xl mr-2">🖼️</span>
-                                        <h3 class="font-bold text-gray-900 dark:text-gray-100 text-lg">Image Tools</h3>
-                                    </div>
-                                    <div class="space-y-1">
-                                        <a href="/image/passport" class="flex items-start p-3 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group/item">
-                                            <span class="text-lg mr-3 mt-0.5">🪪</span>
-                                            <div>
-                                                <div class="font-medium text-gray-800 dark:text-gray-200 group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400">Passport Photo</div>
-                                                <div class="text-sm text-gray-500 dark:text-gray-400">Make private passport and visa photos</div>
-                                            </div>
-                                        </a>
-                                        <a href="/image/resize" class="flex items-start p-3 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group/item">
-                                            <span class="text-lg mr-3 mt-0.5">🖼️</span>
-                                            <div>
-                                                <div class="font-medium text-gray-800 dark:text-gray-200 group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400">Image Resize</div>
-                                                <div class="text-sm text-gray-500 dark:text-gray-400">Change image dimensions and resolution</div>
-                                            </div>
-                                        </a>
-                                        <a href="/image/compressor" class="flex items-start p-3 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group/item">
-                                            <span class="text-lg mr-3 mt-0.5">🗜️</span>
-                                            <div>
-                                                <div class="font-medium text-gray-800 dark:text-gray-200 group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400">Image Compressor</div>
-                                                <div class="text-sm text-gray-500 dark:text-gray-400">Reduce file size while maintaining quality</div>
-                                            </div>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
                         </li>
                         
-                        <!-- Text Tools Flyout -->
-                        <li class="relative group">
+                        <li>
                             <a href="/text" class="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors inline-flex items-center">
                                 Text
-                                <svg class="ml-1 h-4 w-4 transform group-hover:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                </svg>
                             </a>
-                            <!-- Text Flyout Menu -->
-                            <div class="hidden md:block absolute left-0 mt-1 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                                <div class="p-4">
-                                    <div class="flex items-center mb-4 pb-3 border-b border-gray-100 dark:border-gray-600">
-                                        <span class="text-2xl mr-2">📝</span>
-                                        <h3 class="font-bold text-gray-900 dark:text-gray-100 text-lg">Text Tools</h3>
-                                    </div>
-                                    <div class="space-y-1">
-                                        <a href="/text/editor" class="flex items-start p-3 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group/item">
-                                            <span class="text-lg mr-3 mt-0.5">📝</span>
-                                            <div>
-                                                <div class="font-medium text-gray-800 dark:text-gray-200 group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400">Text Editor</div>
-                                                <div class="text-sm text-gray-500 dark:text-gray-400">Write and format text content</div>
-                                            </div>
-                                        </a>
-                                        <a href="/text/yaml" class="flex items-start p-3 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group/item">
-                                            <span class="text-lg mr-3 mt-0.5">🔍</span>
-                                            <div>
-                                                <div class="font-medium text-gray-800 dark:text-gray-200 group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400">YAML Validator</div>
-                                                <div class="text-sm text-gray-500 dark:text-gray-400">Validate and convert YAML to JSON</div>
-                                            </div>
-                                        </a>
-                                        <a href="/text/remove-extra-spaces" class="flex items-start p-3 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group/item">
-                                            <span class="text-lg mr-3 mt-0.5">✂️</span>
-                                            <div>
-                                                <div class="font-medium text-gray-800 dark:text-gray-200 group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400">Remove Extra Spaces</div>
-                                                <div class="text-sm text-gray-500 dark:text-gray-400">Clean up text spacing and formatting</div>
-                                            </div>
-                                        </a>
-                                        <a href="/text/json-formatter" class="flex items-start p-3 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group/item">
-                                            <span class="text-lg mr-3 mt-0.5">⚙️</span>
-                                            <div>
-                                                <div class="font-medium text-gray-800 dark:text-gray-200 group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400">JSON Formatter</div>
-                                                <div class="text-sm text-gray-500 dark:text-gray-400">Format, validate, and convert JSON</div>
-                                            </div>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
                         </li>
 
-                        <!-- Time Tools Flyout -->
-                        <li class="relative group">
+                        <li>
                             <a href="/time" class="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors inline-flex items-center">
                                 Time
-                                <svg class="ml-1 h-4 w-4 transform group-hover:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                </svg>
                             </a>
-                            <!-- Time Flyout Menu -->
-                            <div class="hidden md:block absolute left-0 mt-1 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                                <div class="p-4">
-                                    <div class="flex items-center mb-4 pb-3 border-b border-gray-100 dark:border-gray-600">
-                                        <span class="text-2xl mr-2">⏱️</span>
-                                        <h3 class="font-bold text-gray-900 dark:text-gray-100 text-lg">Time Tools</h3>
-                                    </div>
-                                    <div class="space-y-1">
-                                        <a href="/time/timer" class="flex items-start p-3 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group/item">
-                                            <span class="text-lg mr-3 mt-0.5">⏱️</span>
-                                            <div>
-                                                <div class="font-medium text-gray-800 dark:text-gray-200 group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400">Timer</div>
-                                                <div class="text-sm text-gray-500 dark:text-gray-400">Countdown timer for focus, cooking, and workouts</div>
-                                            </div>
-                                        </a>
-                                        <a href="/time/meeting-planner" class="flex items-start p-3 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group/item">
-                                            <span class="text-lg mr-3 mt-0.5">🌐</span>
-                                            <div>
-                                                <div class="font-medium text-gray-800 dark:text-gray-200 group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400">Meeting Time Finder</div>
-                                                <div class="text-sm text-gray-500 dark:text-gray-400">Find overlap hours across time zones</div>
-                                            </div>
-                                        </a>
-                                        <a href="/time/timezone-converter" class="flex items-start p-3 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group/item">
-                                            <span class="text-lg mr-3 mt-0.5">🕘</span>
-                                            <div>
-                                                <div class="font-medium text-gray-800 dark:text-gray-200 group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400">Time Zone Converter</div>
-                                                <div class="text-sm text-gray-500 dark:text-gray-400">Convert a time for several regions</div>
-                                            </div>
-                                        </a>
-                                        <a href="/time/business-days" class="flex items-start p-3 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group/item">
-                                            <span class="text-lg mr-3 mt-0.5">📅</span>
-                                            <div>
-                                                <div class="font-medium text-gray-800 dark:text-gray-200 group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400">Business Days Calculator</div>
-                                                <div class="text-sm text-gray-500 dark:text-gray-400">Add or subtract working days</div>
-                                            </div>
-                                        </a>
-                                        <a href="/time/date-difference" class="flex items-start p-3 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group/item">
-                                            <span class="text-lg mr-3 mt-0.5">📆</span>
-                                            <div>
-                                                <div class="font-medium text-gray-800 dark:text-gray-200 group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400">Date Duration Calculator</div>
-                                                <div class="text-sm text-gray-500 dark:text-gray-400">Count days, weeks, and weekdays</div>
-                                            </div>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
                         </li>
 
-                        <!-- ML Tools Flyout -->
-                        <li class="relative group">
+                        <li>
                             <a href="/ml" class="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors inline-flex items-center">
                                 ML
-                                <svg class="ml-1 h-4 w-4 transform group-hover:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                </svg>
                             </a>
-                            <!-- ML Flyout Menu -->
-                            <div class="hidden md:block absolute left-0 mt-1 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                                <div class="p-4">
-                                    <div class="flex items-center mb-4 pb-3 border-b border-gray-100 dark:border-gray-600">
-                                        <span class="text-2xl mr-2">🤖</span>
-                                        <h3 class="font-bold text-gray-900 dark:text-gray-100 text-lg">ML Tools</h3>
-                                    </div>
-                                    <div class="space-y-1">
-                                        <a href="/ml/face_detect" class="flex items-start p-3 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group/item">
-                                            <span class="text-lg mr-3 mt-0.5">🧑‍💻</span>
-                                            <div>
-                                                <div class="font-medium text-gray-800 dark:text-gray-200 group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400">Face Detection</div>
-                                                <div class="text-sm text-gray-500 dark:text-gray-400">Detect faces in images using MediaPipe</div>
-                                            </div>
-                                        </a>
-                                        <a href="/ml/image2text" class="flex items-start p-3 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group/item">
-                                            <span class="text-lg mr-3 mt-0.5">📷</span>
-                                            <div>
-                                                <div class="font-medium text-gray-800 dark:text-gray-200 group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400">Image to Text (OCR)</div>
-                                                <div class="text-sm text-gray-500 dark:text-gray-400">Extract text from images using Tesseract.js</div>
-                                            </div>
-                                        </a>
-                                        <a href="/ml/transcribe" class="flex items-start p-3 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group/item">
-                                            <span class="text-lg mr-3 mt-0.5">🎤</span>
-                                            <div>
-                                                <div class="font-medium text-gray-800 dark:text-gray-200 group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400">Audio/Video Transcription</div>
-                                                <div class="text-sm text-gray-500 dark:text-gray-400">Convert speech to text using Whisper</div>
-                                            </div>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
                         </li>
 
                         <!-- Theme Toggle Button -->
