@@ -188,27 +188,6 @@ function initInlineToolFilters() {
   });
 }
 
-function initToolShareButtons() {
-  document.addEventListener('click', async event => {
-    const button = event.target.closest('[data-share-tool]');
-    if (!button) return;
-
-    const sharePath = button.getAttribute('data-share-url') || window.location.pathname;
-    const url = new URL(sharePath, window.location.origin).toString();
-
-    try {
-      await navigator.clipboard.writeText(url);
-      const original = button.textContent;
-      button.textContent = 'Copied';
-      setTimeout(() => {
-        button.textContent = original;
-      }, 1800);
-    } catch {
-      window.prompt('Copy this link', url);
-    }
-  });
-}
-
 // Warm the tool chunk before the click so navigation feels instant.
 function initToolPrefetch() {
   const prefetched = new Set();
@@ -329,7 +308,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initGlobalToolSearch();
   initSearchSync();
   initInlineToolFilters();
-  initToolShareButtons();
   initThemeToggle();
   scheduleAnalytics();
 }); 

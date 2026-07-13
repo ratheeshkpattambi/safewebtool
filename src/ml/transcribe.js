@@ -123,11 +123,11 @@ export const template = `
       </div>
 
       <!-- Logs Section -->
-      <div id="transcribe-logs" class="mt-6 bg-slate-100 dark:bg-gray-700 p-2.5 rounded-md cursor-pointer flex justify-between items-center transition-colors">
+      <div id="logHeader" class="mt-6 bg-slate-100 dark:bg-gray-700 p-2.5 rounded-md cursor-pointer flex justify-between items-center transition-colors">
         <span class="font-medium text-slate-700 dark:text-slate-300">Logs</span>
-        <span class="text-slate-500 dark:text-slate-400 transform transition-transform">▼</span>
+        <span id="logToggle" class="text-slate-500 dark:text-slate-400 transform transition-transform">▼</span>
       </div>
-      <textarea id="transcribe-log-text" class="w-full h-48 p-4 rounded-b-md mt-px font-mono text-xs resize-none bg-slate-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300 border-0 focus:outline-none" readonly></textarea>
+      <textarea id="logContent" class="w-full h-48 p-4 rounded-b-md mt-px font-mono text-xs resize-none bg-slate-100 dark:bg-gray-700 text-slate-700 dark:text-slate-300 border-0 focus:outline-none" readonly placeholder="Logs will appear here..."></textarea>
     </div>
 `;
 
@@ -174,8 +174,8 @@ class TranscribeTool extends Tool {
             resultText: 'transcribe-result-text',
             copyBtn: 'transcribe-copy-btn',
             downloadBtn: 'transcribe-download-btn',
-            logs: 'transcribe-logs',
-            logText: 'transcribe-log-text'
+            logHeader: 'logHeader',
+            logText: 'logContent'
         };
     }
 
@@ -185,9 +185,9 @@ class TranscribeTool extends Tool {
     }
     
     _initializeUI() {
-        const { 
-            dropZone, fileInput, urlBtn, urlInput, processBtn, 
-            copyBtn, downloadBtn, logs, modelSelect, languageContainer, timestamps
+        const {
+            dropZone, fileInput, urlBtn, urlInput, processBtn,
+            copyBtn, downloadBtn, modelSelect, languageContainer, timestamps
         } = this.elements;
 
         // File upload
@@ -220,14 +220,6 @@ class TranscribeTool extends Tool {
         copyBtn.addEventListener('click', () => this.copyResult());
         downloadBtn.addEventListener('click', () => this.downloadResult());
 
-        // Logs toggle
-        logs.addEventListener('click', () => {
-            const logText = this.elements.logText;
-            const isVisible = logText.style.display !== 'none';
-            logText.style.display = isVisible ? 'none' : 'block';
-            logs.querySelector('span:last-child').style.transform = isVisible ? 'rotate(0deg)' : 'rotate(180deg)';
-        });
-        
         // Settings
         modelSelect.addEventListener('change', () => {
             const isMultilingual = !modelSelect.value.endsWith('.en');

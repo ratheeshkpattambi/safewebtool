@@ -68,8 +68,6 @@ function renderRelatedTools(toolInfo) {
 }
 
 export function renderToolPageShell(toolInfo) {
-  const toolPath = `${toolInfo.category}/${toolInfo.id}`;
-  const canonicalPath = getCanonicalPathForToolPath(toolPath);
   return `
     <div class="tool-page container mx-auto px-4 py-8" itemscope itemtype="https://schema.org/SoftwareApplication" data-agent-page="tool" data-agent-tool="${toolInfo.category}/${toolInfo.id}" data-agent-category="${toolInfo.category}">
       <meta itemprop="applicationCategory" content="WebApplication">
@@ -83,17 +81,14 @@ export function renderToolPageShell(toolInfo) {
             <span class="text-slate-400">/</span>
             <span class="text-slate-500 dark:text-slate-400">${toolInfo.name}</span>
           </div>
-          <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-            <div>
-              <h1 class="text-3xl font-black text-slate-950 dark:text-white">${toolInfo.name}</h1>
-              <p class="mt-2 max-w-3xl text-base leading-relaxed text-slate-600 dark:text-slate-300">${toolInfo.description || ''}</p>
-              <div class="mt-3 flex flex-wrap gap-2">
-                <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 dark:bg-blue-950/50 dark:text-blue-200">Local processing</span>
-                <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-200">Free</span>
-                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700 dark:bg-gray-700 dark:text-slate-200">No login</span>
-              </div>
+          <div>
+            <h1 class="text-3xl font-black text-slate-950 dark:text-white">${toolInfo.name}</h1>
+            <p class="mt-2 max-w-3xl text-base leading-relaxed text-slate-600 dark:text-slate-300">${toolInfo.description || ''}</p>
+            <div class="mt-3 flex flex-wrap gap-2">
+              <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 dark:bg-blue-950/50 dark:text-blue-200">Local processing</span>
+              <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-200">Free</span>
+              <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700 dark:bg-gray-700 dark:text-slate-200">No login</span>
             </div>
-            <button type="button" data-share-tool data-share-url="${canonicalPath}" class="inline-flex items-center justify-center rounded-md border border-slate-300 px-4 py-2 text-sm font-bold text-slate-700 transition-colors hover:border-blue-300 hover:text-blue-700 dark:border-gray-600 dark:text-slate-200">Copy link</button>
           </div>
         </div>
         <div class="px-4 py-5 sm:p-6">
