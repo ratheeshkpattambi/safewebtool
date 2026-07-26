@@ -43,3 +43,6 @@ Thumbs.db
 .specstory/.what-is-this.md
 # SpecStory derived-cursor-rules.mdc backup files
 .specstory/ai_rules_backups/*
+
+# Local Netlify folder
+.netlify

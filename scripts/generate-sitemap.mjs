@@ -1,33 +1,20 @@
+/**
+ * Writes public/sitemap.xml.
+ *
+ * The XML itself is built by src/common/sitemap.js — the same generator the prerenderer
+ * uses for dist/sitemap.xml — so there is exactly one definition of which URLs the site
+ * publishes and in which canonical form. This script used to carry its own copy of that
+ * logic, and the two drifted: one emitted trailing-slash canonical URLs and the other
+ * emitted bare paths that 301, which is what broke indexing.
+ */
 import { writeFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { categories, tools, routeAliases, baseUrl } from '../src/common/metadata.js';
+import { baseUrl } from '../src/common/metadata.js';
+import { generateSitemap } from '../src/common/sitemap.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const today = new Date().toISOString().split('T')[0];
-
-const urls = [
-  { loc: '/', priority: '1.0', changefreq: 'weekly' },
-  ...Object.keys(categories).map(id => ({
-    loc: `/${id}`, priority: '0.8', changefreq: 'weekly'
-  })),
-  ...Object.keys(tools).map(path => ({
-    loc: `/${path}`, priority: '0.7', changefreq: 'monthly'
-  })),
-  ...Object.keys(routeAliases).map(path => ({
-    loc: path, priority: '0.7', changefreq: 'monthly'
-  }))
-];
-
-const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.map(u => `  <url>
-    <loc>${baseUrl}${u.loc}</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>${u.changefreq}</changefreq>
-    <priority>${u.priority}</priority>
-  </url>`).join('\n')}
-</urlset>`;
+const xml = generateSitemap(baseUrl);
 
 writeFileSync(join(__dirname, '../public/sitemap.xml'), xml);
-console.log(`Generated public/sitemap.xml with ${urls.length} URLs`);
+console.log(`Generated public/sitemap.xml with ${(xml.match(/<loc>/g) || []).length} URLs`);

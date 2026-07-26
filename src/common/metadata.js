@@ -22,23 +22,30 @@ const canonicalRouteByToolPath = Object.fromEntries(
   Object.entries(routeAliases).map(([aliasPath, toolPath]) => [toolPath, aliasPath])
 );
 
-function normalizeMetadataPath(path = '/') {
-  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-  return normalizedPath.split('?')[0].split('#')[0] || '/';
+// The one path normaliser for the whole app: strips query, hash and trailing slashes so
+// /video/resize and /video/resize/ are the same key everywhere — routing, metadata
+// lookups and nav highlighting all import this rather than rolling their own.
+export function normalizeRoutePath(path = '/') {
+  const withoutQuery = path.split('?')[0].split('#')[0];
+  const withLeadingSlash = withoutQuery.startsWith('/') ? withoutQuery : `/${withoutQuery}`;
+  return withLeadingSlash.replace(/\/+$/, '') || '/';
 }
 
 function resolveMetadataPath(path) {
-  const normalizedPath = normalizeMetadataPath(path);
+  const normalizedPath = normalizeRoutePath(path);
   return routeAliases[normalizedPath] ? `/${routeAliases[normalizedPath]}` : normalizedPath;
 }
 
 function getCanonicalPath(path) {
-  const normalizedPath = normalizeMetadataPath(path);
+  const normalizedPath = normalizeRoutePath(path);
   const metadataPath = resolveMetadataPath(normalizedPath);
   const toolPath = metadataPath.split('/').filter(Boolean).join('/');
   return canonicalRouteByToolPath[toolPath] || normalizedPath;
 }
 
+// Canonical URLs are the short, extensionless form (/video/reencode) — the URL the
+// prerendered flat file serves directly with a 200. Never emit a trailing slash here:
+// that form redirects, and a canonical pointing at a redirect is not indexable.
 export function getCanonicalPathForToolPath(toolPath) {
   return canonicalRouteByToolPath[toolPath] || `/${toolPath}`;
 }
@@ -379,7 +386,6 @@ export const tools = {
       { q: 'Does the face detection upload my image?', a: 'No. Face alignment uses MediaPipe running entirely in your browser — your photo is not uploaded even for the face-detection step.' }
     ],
     agent: {
-      canonicalPath: '/image/passport',
       privacy: {
         mode: 'browser-local',
         fileUpload: false,
@@ -761,7 +767,8 @@ export function generateMetaTags(path) {
   const metadataPath = resolveMetadataPath(path);
   const parts = metadataPath.split('/').filter(p => p);
   const canonicalPathValue = getCanonicalPath(path);
-  const canonicalPath = canonicalPathValue === '/' || canonicalPathValue === '/home' ? '' : canonicalPathValue;
+  // Root canonicalises to "/"; every other route to its bare extensionless path.
+  const canonicalPath = canonicalPathValue === '/' || canonicalPathValue === '/home' ? '/' : canonicalPathValue;
   
   // Default metadata for home page
   let title = siteInfo.name;
@@ -825,7 +832,7 @@ export function generateMetaTags(path) {
  * @returns {string} One or more <script type="application/ld+json"> blocks
  */
 export function generateStructuredData(path) {
-  const normalizedPath = normalizeMetadataPath(path);
+  const normalizedPath = normalizeRoutePath(path);
   if (normalizedPath === '/' || normalizedPath === '/home') {
     const faq = {
       "@context": "https://schema.org",

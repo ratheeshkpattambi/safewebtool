@@ -33,11 +33,19 @@ const escapeHtml = (value = '') =>
   value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 // Every route to prerender: { url: path passed to the router, file: output path }
+//
+// Routes are written as flat <route>.html files rather than <route>/index.html. Netlify
+// serves a flat file at its extensionless path with a 200, whereas a directory index is
+// only served at the trailing-slash URL and the bare path 301s to it. Writing directory
+// indexes is what made every canonical URL a redirect, so Search Console reported
+// "Duplicate without user-selected canonical" and left 23 of 30 tool pages unindexed.
+// A flat file also takes precedence over a same-named directory, so the agent.json files
+// under e.g. /video/resize/ keep resolving.
 const routes = [
   { url: '/', file: 'index.html' },
-  ...Object.keys(categories).map(id => ({ url: `/${id}`, file: `${id}/index.html` })),
-  ...Object.keys(tools).map(key => ({ url: `/${key}`, file: `${key}/index.html` })),
-  ...Object.keys(routeAliases).map(alias => ({ url: alias, file: `${alias.slice(1)}/index.html` }))
+  ...Object.keys(categories).map(id => ({ url: `/${id}`, file: `${id}.html` })),
+  ...Object.keys(tools).map(key => ({ url: `/${key}`, file: `${key}.html` })),
+  ...Object.keys(routeAliases).map(alias => ({ url: alias, file: `${alias.slice(1)}.html` }))
 ];
 
 // SEO <head> for a route: tag each node so the client router replaces it.

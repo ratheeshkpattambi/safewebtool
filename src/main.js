@@ -1,5 +1,5 @@
 import { handleRoute } from './router.js';
-import { categories, getToolEntries, getToolSearchText } from './common/metadata.js';
+import { categories, getToolEntries, getToolSearchText, normalizeRoutePath } from './common/metadata.js';
 import { loadToolModule, resolveAppRoute } from './common/tool-registry.js';
 import './styles/main.css';
 import './index.css';
@@ -17,10 +17,14 @@ function updateNavActiveState() {
   const navList = document.querySelector('header nav ul');
   if (!navList) return;
 
-  const path = window.location.pathname;
+  // Both sides are normalised because canonical hrefs carry a trailing slash while the
+  // browser may be sitting on either form.
+  const current = normalizeRoutePath(window.location.pathname);
   navList.querySelectorAll('a[data-nav-link]').forEach(link => {
-    const href = link.getAttribute('href');
-    const isActive = href === '/' ? path === '/' : (path === href || path.startsWith(`${href}/`));
+    const target = normalizeRoutePath(link.getAttribute('href'));
+    const isActive = target === '/'
+      ? current === '/'
+      : (current === target || current.startsWith(`${target}/`));
     link.className = isActive ? NAV_LINK_ACTIVE_CLASSES : NAV_LINK_CLASSES;
   });
 }

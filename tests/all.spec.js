@@ -1,6 +1,6 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
-import { tools, categories } from '../src/common/metadata.js';
+import { tools, categories, getCanonicalPathForToolPath } from '../src/common/metadata.js';
 
 test.describe('SafeWebTool Tests', () => {
   // Basic navigation tests
@@ -8,13 +8,13 @@ test.describe('SafeWebTool Tests', () => {
     await page.goto('/');
     await expect(page).toHaveTitle('SafeWebTool');
     await expect(page.locator('header img[alt*="Logo"]')).toBeVisible();
-    await expect(page.locator('header h1')).toContainText('SafeWebTool');
+    await expect(page.getByRole('banner')).toContainText('SafeWebTool');
     await expect(page.locator('nav a[href="/"]')).toBeVisible();
   });
 
   test('home alias route works', async ({ page }) => {
     await page.goto('/home');
-    await expect(page.locator('main h1')).toContainText('A safe, open-source collection of everyday tools');
+    await expect(page.locator('main h1')).toContainText('Free, safe browser tools');
     await expect(page.locator('nav a[href="/"]')).toHaveClass(/active/);
   });
   
@@ -270,12 +270,15 @@ test.describe('SafeWebTool Tests', () => {
     expect(response?.status()).toBe(200);
     const content = await page.content();
     expect(content).toContain('urlset');
-    
-    // Check for tool and category paths
+
+    // Every tool must be listed under its canonical URL. A tool with a short share alias
+    // (image/passport-photo -> /image/passport) appears only under the alias, so assert
+    // on the canonical URL rather than on the raw tool id.
     for (const toolPath of Object.keys(tools)) {
-      const [category, toolId] = toolPath.split('/');
-      expect(content).toContain(category);
-      expect(content).toContain(toolId);
+      expect(content).toContain(getCanonicalPathForToolPath(toolPath));
+    }
+    for (const categoryId of Object.keys(categories)) {
+      expect(content).toContain(`/${categoryId}/`);
     }
   });
 }); 

@@ -1,15 +1,9 @@
-import { categories, routeAliases, tools } from './metadata.js';
+import { categories, normalizeRoutePath, routeAliases, tools } from './metadata.js';
 
 // Vite discovers one-level tool modules at build time. A category becomes routable
 // when it exists in metadata; adding tools to that category should not require a
 // router or registry edit.
 const toolModuleLoaders = import.meta.glob(['../*/*.js', '!../common/*.js']);
-
-function normalizePath(path = '/') {
-  const withoutQuery = path.split('?')[0].split('#')[0] || '/';
-  if (withoutQuery === '') return '/';
-  return withoutQuery.startsWith('/') ? withoutQuery : `/${withoutQuery}`;
-}
 
 function buildFallbackTool(categoryId, toolId) {
   return {
@@ -26,7 +20,7 @@ function buildFallbackTool(categoryId, toolId) {
  * @param {string} path
  */
 export function resolveAppRoute(path) {
-  const normalizedPath = normalizePath(path);
+  const normalizedPath = normalizeRoutePath(path);
   const aliasedToolPath = routeAliases[normalizedPath];
   const routePath = aliasedToolPath ? `/${aliasedToolPath}` : normalizedPath;
   const segments = routePath.split('/').filter(Boolean);

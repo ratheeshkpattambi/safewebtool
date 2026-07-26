@@ -1,7 +1,7 @@
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { categories, routeAliases, siteInfo, tools } from '../src/common/metadata.js';
+import { categories, getCanonicalPathForToolPath, routeAliases, siteInfo, tools } from '../src/common/metadata.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, '..');
@@ -9,16 +9,8 @@ const publicDir = path.join(repoRoot, 'public');
 const baseUrl = 'https://safewebtool.com';
 const schemaVersion = '1.0';
 
-const aliasByToolPath = Object.fromEntries(
-  Object.entries(routeAliases).map(([aliasPath, toolPath]) => [toolPath, aliasPath])
-);
-
 function withoutLeadingSlash(value) {
   return value.replace(/^\//, '');
-}
-
-function canonicalPathForTool(toolPath, tool) {
-  return tool.agent?.canonicalPath || aliasByToolPath[toolPath] || `/${toolPath}`;
 }
 
 function canonicalUrlForPath(pathname) {
@@ -74,7 +66,10 @@ function cleanObject(value) {
 }
 
 function buildToolContract(toolPath, tool) {
-  const canonicalPath = canonicalPathForTool(toolPath, tool);
+  // Canonical URLs come from metadata.js so aliases are defined in exactly one place;
+  // adding a tool never requires touching this script.
+  const canonicalPath = getCanonicalPathForToolPath(toolPath);
+  const isAliased = canonicalPath !== `/${toolPath}`;
   const category = categories[tool.category];
 
   return cleanObject({
@@ -83,7 +78,7 @@ function buildToolContract(toolPath, tool) {
     path: toolPath,
     canonicalPath,
     canonicalUrl: canonicalUrlForPath(canonicalPath),
-    legacyUrl: canonicalPath === `/${toolPath}` ? undefined : canonicalUrlForPath(`/${toolPath}`),
+    legacyUrl: isAliased ? canonicalUrlForPath(`/${toolPath}`) : undefined,
     category: {
       id: tool.category,
       name: category?.name
