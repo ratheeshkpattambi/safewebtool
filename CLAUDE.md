@@ -29,13 +29,31 @@ That's it. Do not edit the router or registry — tools are discovered automatic
 3. **Never edit `tool-registry.js` or `router.js` to add a tool.**
 4. **Reuse `src/common/*`.** No copy-paste, no heavy libraries.
 5. **Must work on mobile** (small screens).
+6. **Every canonical URL must return 200, never a redirect.** See [URLs & SEO](#urls--seo-read-before-touching-anything-that-emits-a-url).
+
+## URLs & SEO — read before touching anything that emits a URL
+
+A canonical pointing at a redirect kept 23 of 30 tool pages out of Google's index for
+months, while the site looked perfectly healthy. Full postmortem and verification
+commands: [documentation/seo-and-urls.md](documentation/seo-and-urls.md).
+
+- Canonical URLs are **short and extensionless** — `/video/reencode`, never `/video/reencode/`.
+- `getCanonicalPathForToolPath()` in `metadata.js` is the **only** source of tool URLs. Never re-derive canonical paths or alias maps in a script.
+- The prerenderer writes flat `dist/<route>.html`. Netlify serves those at the bare path with a 200; `<route>/index.html` would only serve at `/route/` and make `/route` a 301.
+- The sitemap lists canonical URLs **only, once each** — never both an alias and the tool path it aliases.
+- A missing prerendered file does **not** 404. The SPA rewrite silently serves the homepage shell, so assert on canonical/title, not just on a 200.
+
+Adding a tool needs none of this — it all derives from the metadata entry.
 
 ## DO NOT
 
 - DO NOT edit `src/common/tool-registry.js`, `src/router.js`, or `src/common/page-renderers.js` when adding a tool.
 - DO NOT import one tool module from another tool module.
 - DO NOT rename these DOM IDs (tests depend on them): `dropZone`, `fileInput`, `processBtn`, `progress`, `logHeader`, `logContent`, `downloadContainer`, `input-video`, `output-video`.
-- DO NOT hand-edit generated files: `public/llms.txt`, `public/tools.json`, `public/**/agent.json`, `public/og/safewebtool.png`.
+- DO NOT hand-edit generated files: `public/llms.txt`, `public/tools.json`, `public/**/agent.json`, `public/og/safewebtool.png`, `public/sitemap.xml`.
+- DO NOT emit a canonical URL, `og:url`, JSON-LD `url`, or sitemap `<loc>` that redirects — and DO NOT add a trailing slash to a tool or category URL.
+- DO NOT write a second copy of URL/sitemap logic in a script; import from `src/common/`. Two copies drifted once and broke indexing.
+- DO NOT invent structured data to silence a Search Console warning (e.g. a `VideoObject` thumbnail for an empty `<video>` placeholder) — describing content that does not exist risks a manual action.
 - DO NOT leave `FILL IN` placeholders or empty strings in metadata.
 - DO NOT use `libopus` for WebM audio in FFmpeg args — use `libvorbis` (libopus crashes ffmpeg.wasm).
 - DO NOT commit changes to shared files (`base.js`, `metadata.js`, `page-renderers.js`, `tool-registry.js`) without running `npm run test:contract` first.

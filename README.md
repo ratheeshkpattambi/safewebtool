@@ -44,6 +44,14 @@ npm run scaffold:tool -- image/my-tool --name="My Tool" --icon="🧰"
 
 Then implement the scaffolded function in `src/<category>/<toolId>.js` and refine the metadata entry in `src/common/metadata.js`. See [CLAUDE.md](CLAUDE.md) for the full guide.
 
+Routing, canonical URLs, the sitemap and the agent manifests all derive from that metadata entry — adding a tool never requires touching them.
+
+## URLs & SEO
+
+Pages are prerendered to flat `dist/<route>.html` files so each route is served at its short, extensionless URL (`/video/reencode`) with a 200 — no redirect. Canonical tags, `og:url`, JSON-LD and `sitemap.xml` must all use that exact URL; a canonical that points at a redirect is not indexable and once cost this site most of its Google coverage.
+
+If you change the prerenderer, the sitemap, or anything that emits a URL, read [documentation/seo-and-urls.md](documentation/seo-and-urls.md) first — it has the invariants and the verification commands.
+
 ## Contributing
 
 1. Fork and clone

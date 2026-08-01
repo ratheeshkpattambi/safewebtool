@@ -8,6 +8,8 @@ Start here for scalable tool work:
 
 - `documentation/tool-architecture-playbook.md`
   - Durable workflow for adding/fixing tools, targeted tests, Netlify verification, and scale rules.
+- `documentation/seo-and-urls.md`
+  - Required reading before changing the prerenderer, the sitemap, or anything that emits a URL. A canonical URL that redirects is not indexable — that defect once cost this site most of its Google coverage, silently.
 - `npm run test:contract`
   - Fast metadata/module contract check. Run before browser tests.
 - `npm run test:tool -- <category/toolId>`
@@ -22,6 +24,7 @@ Start here for scalable tool work:
 - Small changes should be low-risk.
 - New tools should be addable with minimal router changes (ideally none).
 - Adding tools to existing categories, and to categories declared in metadata, should not require router or registry edits.
+- URLs are derived in exactly one place (`metadata.js`). A second copy of that logic in a script drifted once and broke indexing — import, never re-derive.
 
 ## Architecture Map (Current)
 
