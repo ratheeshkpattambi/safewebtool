@@ -46,3 +46,7 @@ Thumbs.db
 
 # Local Netlify folder
 .netlify
+
+# Personal video kept locally for real-world video-tool testing — never pushed.
+# Small synthetic fixtures (sample.*) are committed; this one is the owner's own file.
+tests/fixtures/IMG_0201.MOV

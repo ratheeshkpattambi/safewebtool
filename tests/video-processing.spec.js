@@ -23,7 +23,15 @@ const FIXTURE_GIF = path.join(__dirname, 'fixtures', 'sample.gif');
 const TOOL_TIMEOUT = 90_000;
 const FFMPEG_LOAD_TIMEOUT = 70_000;
 
-/** Wait for FFmpeg to finish loading (log shows "FFmpeg loaded"). */
+/**
+ * Wait for FFmpeg to finish loading (log shows "FFmpeg loaded").
+ *
+ * IMPORTANT: call this AFTER clickProcess(), never before. Tools load FFmpeg lazily
+ * from inside processFile() — selecting a file does not start the download. Waiting for
+ * the load before clicking Process waits for a log line that cannot appear yet, which
+ * burns the full timeout and (because this describe block is serial) blocks every
+ * remaining video test from running at all.
+ */
 async function waitForFFmpegLoad(page) {
   await expect.poll(
     async () => {
@@ -84,13 +92,15 @@ test.describe('Video processing — actual FFmpeg output', () => {
   test.describe.configure({ mode: 'serial' });
 
   // ── video/gif ──────────────────────────────────────────────────────────
+  // This one caught the multi-threaded-core deadlock: it hung here indefinitely (240s+
+  // with no error and no progress) until the core was switched to single-thread.
   test('video/gif: converts sample MP4 to GIF', async ({ page }) => {
     test.setTimeout(TOOL_TIMEOUT);
     await page.goto('/video/gif');
     await expect(page.locator('.tool-page')).toBeVisible();
     await uploadFile(page, FIXTURE_MP4);
-    await waitForFFmpegLoad(page);
     await clickProcess(page);
+    await waitForFFmpegLoad(page);
     await waitForDownload(page);
     const href = await page.locator('#downloadContainer a[download]').getAttribute('href');
     expect(href).toMatch(/^blob:/);
@@ -103,8 +113,8 @@ test.describe('Video processing — actual FFmpeg output', () => {
     await page.goto('/video/mp4');
     await expect(page.locator('.tool-page')).toBeVisible();
     await uploadFile(page, FIXTURE_MP4);
-    await waitForFFmpegLoad(page);
     await clickProcess(page);
+    await waitForFFmpegLoad(page);
     await waitForDownload(page);
     await expect(page.locator('#output-video')).toBeVisible();
     await assertNoFatalError(page);
@@ -116,9 +126,9 @@ test.describe('Video processing — actual FFmpeg output', () => {
     await page.goto('/video/trim');
     await expect(page.locator('.tool-page')).toBeVisible();
     await uploadFile(page, FIXTURE_MP4);
-    await waitForFFmpegLoad(page);
     // Defaults (0s to end) are fine for the tiny fixture
     await clickProcess(page);
+    await waitForFFmpegLoad(page);
     await waitForDownload(page);
     await assertNoFatalError(page);
   });
@@ -129,8 +139,8 @@ test.describe('Video processing — actual FFmpeg output', () => {
     await page.goto('/video/reverse');
     await expect(page.locator('.tool-page')).toBeVisible();
     await uploadFile(page, FIXTURE_MP4);
-    await waitForFFmpegLoad(page);
     await clickProcess(page);
+    await waitForFFmpegLoad(page);
     await waitForDownload(page);
     await assertNoFatalError(page);
   });
@@ -141,8 +151,8 @@ test.describe('Video processing — actual FFmpeg output', () => {
     await page.goto('/video/reencode');
     await expect(page.locator('.tool-page')).toBeVisible();
     await uploadFile(page, FIXTURE_MP4);
-    await waitForFFmpegLoad(page);
     await clickProcess(page);
+    await waitForFFmpegLoad(page);
     await waitForDownload(page);
     await assertNoFatalError(page);
   });
@@ -153,7 +163,6 @@ test.describe('Video processing — actual FFmpeg output', () => {
     await page.goto('/video/resize');
     await expect(page.locator('.tool-page')).toBeVisible();
     await uploadFile(page, FIXTURE_MP4);
-    await waitForFFmpegLoad(page);
     // Pick a small preset so it processes quickly
     const preset = page.locator('select[id*="resolution"], select[id*="preset"], select').first();
     if (await preset.count() > 0) {
@@ -161,6 +170,7 @@ test.describe('Video processing — actual FFmpeg output', () => {
       await preset.selectOption({ index: 0 }).catch(() => {});
     }
     await clickProcess(page);
+    await waitForFFmpegLoad(page);
     await waitForDownload(page);
     await assertNoFatalError(page);
   });
@@ -171,11 +181,11 @@ test.describe('Video processing — actual FFmpeg output', () => {
     await page.goto('/video/audio');
     await expect(page.locator('.tool-page')).toBeVisible();
     await uploadFile(page, FIXTURE_MP4);
-    await waitForFFmpegLoad(page);
     // Select "remove" mode if available, otherwise default is fine
     const removeBtn = page.locator('button:has-text("Remove"), input[value="remove"], #mode-remove').first();
     if (await removeBtn.count() > 0) await removeBtn.click().catch(() => {});
     await clickProcess(page);
+    await waitForFFmpegLoad(page);
     await waitForDownload(page);
     await assertNoFatalError(page);
   });
@@ -187,16 +197,22 @@ test.describe('Video processing — actual FFmpeg output', () => {
     await page.goto('/video/info');
     await expect(page.locator('.tool-page')).toBeVisible();
     await uploadFile(page, FIXTURE_MP4);
-    // Wait for the info container to populate (a table row with video info)
+    // Assert on real decoded metadata, not just "a table exists". The container shows
+    // filename/size/type from the File object before FFmpeg runs at all, so polling for
+    // any row passed even while the probe was erroring and no codec was ever extracted.
     await expect.poll(
       async () => {
-        const hasTable = await page.locator('#videoInfoContainer table').count();
         const logs = await page.locator('#logContent').inputValue().catch(() => '');
         if (/All FFmpeg CDN sources failed/i.test(logs)) throw new Error('FFmpeg CDN failed');
-        return hasTable > 0;
+        return page.locator('#videoInfoContainer table tr').count();
       },
       { timeout: FFMPEG_LOAD_TIMEOUT, intervals: [500, 1000, 2000] }
-    ).toBeTruthy();
+    ).toBeGreaterThan(6);
+
+    const info = await page.locator('#videoInfoContainer').innerText();
+    expect(info).toMatch(/h264/i);
+    expect(info).toMatch(/320/);
+    expect(info).toMatch(/Frame Rate/i);
     await assertNoFatalError(page);
   });
 });

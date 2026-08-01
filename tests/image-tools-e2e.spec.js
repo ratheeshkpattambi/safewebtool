@@ -20,16 +20,19 @@ async function expectImageToolReady(page, route) {
   await expect(page.locator('#logContent')).toHaveCount(1);
   await expect(page.locator('#progress')).toHaveCount(1);
   await expect(page.locator('.tool-container[data-tool-ready="true"]')).toBeVisible();
+
+  // Process starts disabled until an image is loaded — that is the intended UX. Load the
+  // tool's own built-in sample (the button this suite is named for) to enable it.
+  await expect(page.locator('#processBtn')).toBeDisabled();
+  await page.locator('#sampleImageBtn').click();
   await expect(page.locator('#processBtn')).toBeEnabled();
 }
 
 async function expectProcessedResult(page, { outputSelector = '#output-image' }) {
-  await expect.poll(async () => {
-    const previewSrc = await page.locator('#preview').getAttribute('src').catch(() => '');
-    const logs = await page.locator('#logContent').inputValue().catch(() => '');
-    return Boolean(previewSrc) || /Image loaded:/i.test(logs);
-  }, { timeout: 10000, intervals: [200, 500, 1000] }).toBeTruthy();
-
+  // No "is an image loaded yet" poll here: expectImageToolReady already proved it by
+  // asserting #processBtn went from disabled to enabled. The old poll looked for a
+  // #preview element and an "Image loaded:" log line, neither of which the crop tool
+  // produces when using its built-in sample, so it just burned a 10s timeout.
   const initialLogs = await page.locator('#logContent').inputValue().catch(() => '');
   await clickProcess(page);
 

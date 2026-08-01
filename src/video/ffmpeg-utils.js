@@ -5,16 +5,21 @@ import { addLog, updateProgress } from '../common/utils.js';
 let ffmpeg = null;
 let ffmpegLoadPromise = null;
 
-// Core version must match @ffmpeg/core and @ffmpeg/core-mt in package.json.
+// Core version must match @ffmpeg/core in package.json.
 const CORE_VERSION = '0.12.10';
 
-// Detect multi-thread support. MT requires SharedArrayBuffer + cross-origin
-// isolation (COOP/COEP headers). It's 4-8× faster on desktop but unavailable
-// on iOS Safari < 15.2 and some older Android browsers. ST works everywhere.
-const MT_SUPPORTED = typeof SharedArrayBuffer !== 'undefined' &&
-  (typeof crossOriginIsolated !== 'undefined' ? crossOriginIsolated : false);
-
-const CORE_PKG = MT_SUPPORTED ? `@ffmpeg/core-mt@${CORE_VERSION}` : `@ffmpeg/core@${CORE_VERSION}`;
+// Single-threaded core only.
+//
+// The multi-threaded build (@ffmpeg/core-mt) is nominally 4-8× faster, but it
+// deadlocks: the encode stops mid-run with no error and no progress, and the tool
+// hangs forever. Reproduced on two unrelated workloads — video/gif's palettegen pass
+// on an 11 KB clip, and a 1080p re-encode — both of which hang indefinitely on MT and
+// finish in 5s and 25s on this core. Because MT was only selected when the browser was
+// cross-origin isolated, it hit desktop Chrome/Firefox users while leaving the tiny
+// test fixture working, which is how it stayed hidden.
+//
+// Do not reintroduce MT without a fixture that actually exercises a real encode.
+const CORE_PKG = `@ffmpeg/core@${CORE_VERSION}`;
 
 // Two CDN mirrors — jsDelivr primary (fast, long-lived cache), unpkg fallback.
 // No local /ffmpeg path: it adds complexity and breaks silently when files
@@ -34,20 +39,15 @@ async function createFFmpegInstance() {
     });
 
     try {
-      const mode = MT_SUPPORTED ? 'multi-thread' : 'single-thread';
       const cdn = baseURL.includes('jsdelivr') ? 'jsDelivr' : 'unpkg';
-      addLog(`Loading FFmpeg (${mode}) from ${cdn}...`, 'info');
+      addLog(`Loading FFmpeg (single-thread) from ${cdn}...`, 'info');
       updateLoadingIndicator(20, 'Loading FFmpeg core...');
 
       const coreURL = await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript');
       const wasmURL = await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm');
-      const loadOpts = { coreURL, wasmURL };
-      if (MT_SUPPORTED) {
-        loadOpts.workerURL = await toBlobURL(`${baseURL}/ffmpeg-core.worker.js`, 'text/javascript');
-      }
 
-      await instance.load(loadOpts);
-      addLog(`FFmpeg loaded (${mode})`, 'success');
+      await instance.load({ coreURL, wasmURL });
+      addLog(`FFmpeg loaded (single-thread)`, 'success');
       updateLoadingIndicator(100, 'FFmpeg loaded successfully!');
       return instance;
     } catch (error) {

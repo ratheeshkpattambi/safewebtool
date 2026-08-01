@@ -46,6 +46,20 @@ Then implement the scaffolded function in `src/<category>/<toolId>.js` and refin
 
 Routing, canonical URLs, the sitemap and the agent manifests all derive from that metadata entry — adding a tool never requires touching them.
 
+## Video tools — hard-won lessons
+
+Two bugs made the video tools fail on real files while the test suite looked healthy. Both are fixed; don't reintroduce them.
+
+- **Single-threaded FFmpeg core only.** `@ffmpeg/core-mt` is nominally 4–8× faster but *deadlocks mid-encode* — no error, no progress, hangs forever. It hit anyone on a cross-origin-isolated desktop browser. `0.12.10` is the latest MT build and is still affected, and self-hosting the wasm does not help: the bytes load fine, the deadlock is inside the compiled code. See the comment in [`src/video/ffmpeg-utils.js`](src/video/ffmpeg-utils.js).
+- **`ffmpeg -i <file>` with no output always exits 1.** That's normal for a bare probe, but `executeFFmpeg` treats non-zero as failure, so `video/info` showed only filename/size/type for *every* file. Probe with `-vframes 1 -f null -`, which exits 0.
+
+Testing video tools:
+
+- FFmpeg loads lazily inside `processFile()` — **selecting a file downloads nothing**. Tests must click Process, or they wait forever for a log line that cannot appear.
+- `tests/video-processing.spec.js` is a `serial` block: the first failing test blocks every later one from running at all. Check for "did not run" in the output, not just the failure count.
+- Assert on real decoded output (codec, dimensions), not "a table exists" — the info table renders filename/size/type before FFmpeg runs, so weak assertions pass while the tool is broken.
+- The committed fixtures are tiny and forgiving; a real 1080p clip is what exposed both bugs. Keep personal test videos out of git (see `.gitignore`).
+
 ## URLs & SEO
 
 Pages are prerendered to flat `dist/<route>.html` files so each route is served at its short, extensionless URL (`/video/reencode`) with a 200 — no redirect. Canonical tags, `og:url`, JSON-LD and `sitemap.xml` must all use that exact URL; a canonical that points at a redirect is not indexable and once cost this site most of its Google coverage.

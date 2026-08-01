@@ -56,6 +56,8 @@ Adding a tool needs none of this — it all derives from the metadata entry.
 - DO NOT invent structured data to silence a Search Console warning (e.g. a `VideoObject` thumbnail for an empty `<video>` placeholder) — describing content that does not exist risks a manual action.
 - DO NOT leave `FILL IN` placeholders or empty strings in metadata.
 - DO NOT use `libopus` for WebM audio in FFmpeg args — use `libvorbis` (libopus crashes ffmpeg.wasm).
+- DO NOT switch FFmpeg back to the multi-threaded core (`@ffmpeg/core-mt`) — it deadlocks mid-encode.
+- DO NOT write a test that asserts only "an element exists" for a tool whose UI renders placeholder rows before processing; assert on real output, or the test passes while the tool is broken.
 - DO NOT commit changes to shared files (`base.js`, `metadata.js`, `page-renderers.js`, `tool-registry.js`) without running `npm run test:contract` first.
 
 ## Copy-paste metadata template
@@ -256,6 +258,10 @@ After implementation run `npm run test:video-fast` to verify it processes the ti
 
 ## Video tools — extra rules
 
+- **Single-threaded core only.** `@ffmpeg/core-mt` deadlocks mid-encode (hangs forever, no error). It broke video/gif and any real-size file while the 11KB fixture still passed. 0.12.10 is the latest MT build and is still affected; self-hosting the wasm does not help — the deadlock is in the compiled code, not the delivery.
+- **Never probe with a bare `ffmpeg -i <file>`** — no output file means exit code 1 by design, and `executeFFmpeg` throws on non-zero. Use `-vframes 1 -f null -` (exits 0, same metadata).
+- **FFmpeg loads lazily inside `processFile()`.** Selecting a file downloads nothing — a test must click Process or it waits forever.
+- `tests/video-processing.spec.js` is `serial`: the first failure blocks every later test. Read "did not run" in the output, not just the failure count.
 - FFmpeg WASM is slow: prefer fast presets (H.264 `ultrafast`, VP8/`libvpx` over VP9).
 - WebM audio: `libvorbis`, never `libopus` (crashes `@ffmpeg/core@0.12.10`). See `getFastWebMEncodeArgs` in `src/video/ffmpeg-utils.js`.
 - Check FFmpeg exit codes in `ffmpeg-utils.js` — empty output means a decode/encode error, not success.

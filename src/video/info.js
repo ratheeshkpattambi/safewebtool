@@ -2,7 +2,7 @@
  * Video info tool using FFmpeg
  */
 import { Tool } from '../common/base.js';
-import { loadFFmpeg, writeInputFile, executeFFmpeg, getExtension } from './ffmpeg-utils.js';
+import { loadFFmpeg, writeInputFile, getExtension } from './ffmpeg-utils.js';
 import { formatFileSize, escapeHtml } from '../common/utils.js';
 
 // Video info tool template
@@ -141,8 +141,12 @@ class VideoInfoTool extends Tool {
         }
       });
 
-      await executeFFmpeg(this.ffmpeg, ['-i', inputFileName]);
-      
+      // Probe with a null output. `ffmpeg -i <file>` on its own prints the metadata and
+      // then exits 1 ("At least one output file must be specified") — that exit code is
+      // normal for a bare probe, but executeFFmpeg treats non-zero as a failure and threw
+      // before anything could be displayed, so this tool never showed more than filename,
+      // size and type for ANY file. Decoding one frame to null gives the same log lines
+      // and exits 0.
       await this.ffmpeg.exec([
         '-i', inputFileName,
         '-vframes', '1',
