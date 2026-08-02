@@ -117,31 +117,50 @@ export const MODELS = {
   },
 
   /**
-   * Instruct models behind text/summarize, text/tone and text/grammar-fix.
+   * Instruct models behind text/grammar-fix (135M) and text/summarize + text/tone (360M).
    *
-   * NOT mirrored (yet) — q4 is ~390 MB for the 360M, which is a bigger hosting
-   * decision than the TTS/ASR pair. They still get pinned revisions, which is the
-   * point: these tools previously pointed at `onnx-community/SmolLM2-*-Instruct`,
-   * which now returns 401 — the repos are gone. Three tools were dead in production
-   * with no deploy on our side. Exactly the failure this registry exists to prevent.
+   * These tools previously pointed at `onnx-community/SmolLM2-*-Instruct`, which now
+   * returns 401 — the repos are gone, and three tools were dead in production with no
+   * deploy on our side. Exactly the failure this registry exists to prevent.
+   *
+   * dtype stays q4 (not the smaller q4f16) because that is what these tools already
+   * shipped with; changing precision changes output quality and is a separate decision.
    */
   'smollm2-135m': {
     repo: 'HuggingFaceTB/SmolLM2-135M-Instruct',
     revision: '12fd25f77366fa6b3b4b768ec3050bf629380bac',
     task: 'text-generation',
-    mirrored: false,
+    mirrored: true,
     dtype: 'q4',
-    approxBytes: 100e6,
-    files: [],
+    approxBytes: 186e6,
+    files: [
+      'config.json',
+      'generation_config.json',
+      'tokenizer.json',
+      'tokenizer_config.json',
+      'special_tokens_map.json',
+      'vocab.json',
+      'merges.txt',
+      'onnx/model_q4.onnx',
+    ],
   },
   'smollm2-360m': {
     repo: 'HuggingFaceTB/SmolLM2-360M-Instruct',
     revision: 'a10cc1512eabd3dde888204e902eca88bddb4951',
     task: 'text-generation',
-    mirrored: false,
+    mirrored: true,
     dtype: 'q4',
-    approxBytes: 250e6,
-    files: [],
+    approxBytes: 392e6,
+    files: [
+      'config.json',
+      'generation_config.json',
+      'tokenizer.json',
+      'tokenizer_config.json',
+      'special_tokens_map.json',
+      'vocab.json',
+      'merges.txt',
+      'onnx/model_q4.onnx',
+    ],
   },
 };
 
@@ -194,6 +213,32 @@ export function toMirrorUrl(url, host, revisions) {
 /** Bound to the configured host and pins — the form tools and tests use. */
 export function mirrorUrlFor(url) {
   return toMirrorUrl(url, MODEL_HOST, PINNED_REVISIONS);
+}
+
+/**
+ * Non-Hugging-Face model files we also mirror.
+ *
+ * These are plain URLs rather than `<repo>/resolve/<sha>/<file>` paths, so the fetch
+ * shim (which only understands Hub URLs) cannot rewrite them — callers must ask for
+ * the URL via getStaticAssetUrl() instead of hardcoding the vendor URL.
+ */
+export const STATIC_ASSETS = {
+  /** MediaPipe BlazeFace, used by ml/face_detect. Removes storage.googleapis.com. */
+  'blazeface-short-range': {
+    source:
+      'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite',
+    key: 'mediapipe/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite',
+    approxBytes: 230e3,
+  },
+};
+
+/** Mirror URL when configured, otherwise the original vendor URL. */
+export function getStaticAssetUrl(name) {
+  const asset = STATIC_ASSETS[name];
+  if (!asset) {
+    throw new Error(`Unknown static asset "${name}". Known: ${Object.keys(STATIC_ASSETS).join(', ')}`);
+  }
+  return USING_MIRROR ? MODEL_HOST + asset.key : asset.source;
 }
 
 /** Look up a model, failing loudly rather than returning undefined. */

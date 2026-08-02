@@ -24,7 +24,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { MIRRORED_MODEL_KEYS, getModel, HF_HOST } from '../src/common/ml-models.js';
+import { MIRRORED_MODEL_KEYS, STATIC_ASSETS, getModel, HF_HOST } from '../src/common/ml-models.js';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -241,6 +241,41 @@ async function syncModel(client, key, { dryRun, force }) {
   return { uploaded, skipped, bytes };
 }
 
+/** Mirror plain-URL assets that are not Hugging Face repos. */
+async function syncStaticAssets(client, { dryRun, force }) {
+  const names = Object.keys(STATIC_ASSETS);
+  if (!names.length) return 0;
+
+  console.log('\nstatic assets');
+  let bytes = 0;
+
+  for (const name of names) {
+    const { source, key } = STATIC_ASSETS[name];
+
+    if (!force) {
+      const existing = await client.head(key);
+      if (existing !== null) {
+        console.log(`  skip    ${name}  (${formatMB(existing)} already present)`);
+        continue;
+      }
+    }
+    if (dryRun) {
+      console.log(`  would upload  ${name}`);
+      continue;
+    }
+
+    process.stdout.write(`  fetch   ${name} ... `);
+    const response = await fetch(source);
+    if (!response.ok) throw new Error(`Download failed (${response.status}) for ${source}`);
+    const body = Buffer.from(await response.arrayBuffer());
+    await client.put(key, body, contentTypeFor(key));
+    console.log(`${formatMB(body.length)} -> R2 ... done`);
+    bytes += body.length;
+  }
+
+  return bytes;
+}
+
 async function main() {
   loadDotEnv();
 
@@ -266,6 +301,11 @@ async function main() {
   for (const key of keys) {
     const { bytes } = await syncModel(client, key, { dryRun, force });
     totalBytes += bytes;
+  }
+
+  // Non-Hub assets (e.g. the MediaPipe face model) ride along on a full sync.
+  if (!requested.length) {
+    totalBytes += await syncStaticAssets(client, { dryRun, force });
   }
 
   console.log(`\nTotal transferred: ${formatMB(totalBytes)}`);

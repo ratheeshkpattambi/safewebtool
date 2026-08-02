@@ -1,5 +1,6 @@
 import * as vision from 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.1/vision_bundle.js';
 import { Tool } from '../common/base.js';
+import { getStaticAssetUrl } from '../common/ml-models.js';
 import { formatFileSize } from '../common/utils.js';
 
 export const template = `
@@ -125,7 +126,8 @@ class FaceDetectionTool extends Tool {
       
       this.faceDetector = await vision.FaceDetector.createFromOptions(filesetResolver, {
         baseOptions: {
-          modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite'
+          // Mirrored to R2 when configured; falls back to the vendor URL otherwise.
+          modelAssetPath: getStaticAssetUrl('blazeface-short-range')
         },
         runningMode: 'IMAGE',
         minDetectionConfidence: 0.5

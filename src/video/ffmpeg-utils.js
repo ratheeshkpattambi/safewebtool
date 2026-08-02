@@ -21,10 +21,20 @@ const CORE_VERSION = '0.12.10';
 // Do not reintroduce MT without a fixture that actually exercises a real encode.
 const CORE_PKG = `@ffmpeg/core@${CORE_VERSION}`;
 
-// Two CDN mirrors — jsDelivr primary (fast, long-lived cache), unpkg fallback.
-// No local /ffmpeg path: it adds complexity and breaks silently when files
-// aren't deployed. The browser caches CDN blobs after the first load.
+// Self-hosted first, CDN mirrors as fallback.
+//
+// `npm run copy-ffmpeg-files` already downloads the core into dist/ffmpeg at build
+// time, so ~10 MB per session was being fetched from a third party while an identical
+// local copy sat unused. Serving it from our own origin removes that dependency and
+// keeps the privacy story honest: nothing about which tool you opened leaks to a CDN.
+//
+// An earlier comment here rejected a local path because it "breaks silently when files
+// aren't deployed". That concern is real and is why local is FIRST rather than ONLY —
+// if dist/ffmpeg is missing (notably `npm run dev`, which does not run the copy step)
+// the loop falls through to jsDelivr and the tool still works, just with a logged miss.
+const LOCAL_SOURCE = '/ffmpeg';
 const CDN_SOURCES = [
+  LOCAL_SOURCE,
   `https://cdn.jsdelivr.net/npm/${CORE_PKG}/dist/esm`,
   `https://unpkg.com/${CORE_PKG}/dist/esm`,
 ];
@@ -39,15 +49,17 @@ async function createFFmpegInstance() {
     });
 
     try {
-      const cdn = baseURL.includes('jsdelivr') ? 'jsDelivr' : 'unpkg';
-      addLog(`Loading FFmpeg (single-thread) from ${cdn}...`, 'info');
+      const source = baseURL === LOCAL_SOURCE
+        ? 'this site'
+        : baseURL.includes('jsdelivr') ? 'jsDelivr' : 'unpkg';
+      addLog(`Loading FFmpeg (single-thread) from ${source}...`, 'info');
       updateLoadingIndicator(20, 'Loading FFmpeg core...');
 
       const coreURL = await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript');
       const wasmURL = await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm');
 
       await instance.load({ coreURL, wasmURL });
-      addLog(`FFmpeg loaded (single-thread)`, 'success');
+      addLog(`FFmpeg loaded (single-thread) from ${source}`, 'success');
       updateLoadingIndicator(100, 'FFmpeg loaded successfully!');
       return instance;
     } catch (error) {

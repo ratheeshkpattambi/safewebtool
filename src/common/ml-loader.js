@@ -96,7 +96,21 @@ async function getTTS(modelId, dtype, onProgress) {
   // kokoro bundles its OWN copy of Transformers.js, so the env configured above does
   // not apply to it. Only allowLocalModels is set here — remoteHost is left alone for
   // the same reason as above; the fetch shim does the routing.
-  if (kokoro.env) kokoro.env.allowLocalModels = false;
+  if (kokoro.env) {
+    kokoro.env.allowLocalModels = false;
+    // This site is cross-origin isolated site-wide for FFmpeg's SharedArrayBuffer, so
+    // self.crossOriginIsolated is true here too — which makes onnxruntime-web pick its
+    // multi-threaded WASM build and spawn navigator.hardwareConcurrency pthread workers
+    // NESTED inside this already-a-worker context. That's the documented cause of
+    // Kokoro hanging/crashing mobile Safari and Android Chrome (nested WASM-thread
+    // workers on constrained memory) — the same class of bug as the multi-threaded
+    // FFmpeg core this codebase already avoids for the same reason. Force single-
+    // threaded WASM so TTS never spawns worker threads of its own.
+    if (kokoro.env.backends?.onnx?.wasm) {
+      kokoro.env.backends.onnx.wasm.numThreads = 1;
+      kokoro.env.backends.onnx.wasm.proxy = false;
+    }
+  }
   const { KokoroTTS } = kokoro;
   ttsInstance = await KokoroTTS.from_pretrained(modelId, {
     dtype,
@@ -271,9 +285,20 @@ export function pingWorker() {
 const SPECIAL_TOKEN_RE = /<\|[^|>]*\|>/g;
 
 /**
- * Strip an echoed prompt and model special tokens from raw text-generation output.
+ * Extract model output text and strip special tokens.
+ *
+ * When `runInference` is called with a chat message array (the SmolLM2 instruct
+ * models require this — they're trained on ChatML and free-associate on raw string
+ * prompts instead of following the instruction), Transformers.js returns
+ * `generated_text` as the full conversation array with the reply appended, not a
+ * string. `fullText` is the array in that case; `prompt` is unused. For plain string
+ * completions, `fullText` is the echoed prompt + completion and `prompt` is stripped.
  */
 export function cleanGeneratedText(fullText, prompt) {
+  if (Array.isArray(fullText)) {
+    const reply = fullText[fullText.length - 1]?.content || '';
+    return reply.replace(SPECIAL_TOKEN_RE, '').trim();
+  }
   let text = fullText || '';
   if (prompt && text.startsWith(prompt)) text = text.slice(prompt.length);
   return text.replace(SPECIAL_TOKEN_RE, '').trim();

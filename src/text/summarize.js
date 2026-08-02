@@ -3,6 +3,7 @@ import { runInference, cleanGeneratedText, trimForModel } from '../common/ml-loa
 import { getModel, getPipelineOptions } from '../common/ml-models.js';
 
 const MODEL_KEY = 'smollm2-360m';
+const modelSizeMB = Math.round(getModel(MODEL_KEY).approxBytes / 1e6);
 
 const LENGTH_CONFIG = {
   short: {
@@ -21,7 +22,7 @@ const LENGTH_CONFIG = {
 
 export const template = `
   <div class="tool-container space-y-4">
-    <p class="text-sm text-slate-500 dark:text-slate-400">Runs a small AI model entirely in your browser — your text is never uploaded. The model downloads once (~250MB) and is cached for next time.</p>
+    <p class="text-sm text-slate-500 dark:text-slate-400">Runs a small AI model entirely in your browser — your text is never uploaded. The model downloads once (~${modelSizeMB}MB) and is cached for next time.</p>
 
     <div>
       <label for="inputText" class="block font-bold text-lg mb-1 text-slate-700 dark:text-slate-200">Input</label>
@@ -116,15 +117,21 @@ class SummarizeTool extends Tool {
     this.startProcessing();
     this.elements.copyBtn.disabled = true;
     this.elements.downloadBtn.disabled = true;
-    this.log('Downloading AI model (first time only, ~250MB)... This is cached after the first run.', 'info');
+    this.log(`Downloading AI model (first time only, ~${modelSizeMB}MB)... This is cached after the first run.`, 'info');
 
-    const prompt = `${instruction} Return only the summary with no explanation:\n\n${input}`;
+    // SmolLM2-Instruct is trained on ChatML; a raw string prompt skips the
+    // <|im_start|>user...<|im_end|> structure it expects and produces free-associated
+    // continuations instead of following the instruction. Use chat messages so
+    // Transformers.js applies the model's chat template.
+    const messages = [
+      { role: 'system', content: `${instruction} Return only the summary with no explanation.` },
+      { role: 'user', content: input }
+    ];
 
     try {
-      const output = await runInference('text-generation', getModel(MODEL_KEY).repo, prompt, {
+      const output = await runInference('text-generation', getModel(MODEL_KEY).repo, messages, {
         loadOptions: getPipelineOptions(MODEL_KEY),
         max_new_tokens: maxNewTokens,
-        repetition_penalty: 1.3,
         no_repeat_ngram_size: 3,
         onProgress: (progress) => {
           if (progress?.status === 'progress' && typeof progress.progress === 'number') {
@@ -139,7 +146,7 @@ class SummarizeTool extends Tool {
       this.updateProgress(95);
 
       const generated = output?.[0]?.generated_text ?? '';
-      const cleaned = cleanGeneratedText(generated, prompt);
+      const cleaned = cleanGeneratedText(generated);
 
       this.elements.outputText.value = cleaned;
       this.elements.copyBtn.disabled = !cleaned;
