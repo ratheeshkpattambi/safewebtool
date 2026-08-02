@@ -45,6 +45,37 @@ commands: [documentation/seo-and-urls.md](documentation/seo-and-urls.md).
 
 Adding a tool needs none of this — it all derives from the metadata entry.
 
+## ML models — read before touching anything that loads model weights
+
+Model weights are mirrored to a Cloudflare R2 bucket. Setup state, the sync runbook and
+the reasoning behind every model choice live in
+[documentation/self-hosted-ml-models.md](documentation/self-hosted-ml-models.md).
+
+- `src/common/ml-models.js` is the **only** source of model ids, pinned revisions, dtypes
+  and file lists. Never hardcode a Hugging Face repo id or model URL in a tool module or
+  a script — import from it.
+- **Every model revision must be a commit SHA, never `main`.** A repo owner
+  re-quantising upstream otherwise breaks production with no deploy on our side.
+- `npm run sync:models` mirrors files to R2. It needs write credentials from `.env`
+  (gitignored) — never in CI, never client-side.
+- `kokoro-js` hardcodes its voice URLs to huggingface.co and ignores `env.remoteHost`.
+  The ML worker needs a fetch shim rewriting Hub URLs, or voices silently bypass the
+  mirror. Assert zero requests to `huggingface.co` in tests.
+- The site is cross-origin isolated (`COEP: require-corp`, for FFmpeg's SharedArrayBuffer)
+  in both prod and dev. Cross-origin model fetches must satisfy CORS or the browser
+  blocks them outright.
+- **Import Transformers.js from jsdelivr's `+esm` endpoint, version-pinned.** The
+  `/dist/transformers.web.min.js` build has an unresolvable bare `onnxruntime-common`
+  import; it kills the worker on startup with an empty error, and every tool using it
+  reports only "ML worker crashed".
+- **Never set `env.remoteHost`.** It is global and would redirect unmirrored models to
+  R2, where they 404. The worker's fetch shim routes per repo instead.
+- **`page.route` does not intercept Web Worker traffic**, and the Cache API keys on the
+  pre-rewrite URL. Neither can prove where model bytes came from — assert on
+  `toMirrorUrl()` or `response.url`.
+- ML tools need a real end-to-end test (see `tests/ml-text-to-speech.real.spec.js`).
+  Two separate outages here rendered a perfect-looking page while the tool was dead.
+
 ## DO NOT
 
 - DO NOT edit `src/common/tool-registry.js`, `src/router.js`, or `src/common/page-renderers.js` when adding a tool.

@@ -738,6 +738,32 @@ export const tools = {
     useCase: 'Compile LaTeX documents privately without uploading to Overleaf or any cloud service. Ideal for academic papers, math documents, and technical reports.',
     related: ['text/grammar-fix', 'text/summarize']
   },
+  'ml/text-to-speech': {
+    id: 'text-to-speech',
+    category: 'ml',
+    name: 'Text to Speech',
+    description: 'Convert text to natural-sounding speech and download it as a WAV file. Powered by Kokoro, a small AI voice model that runs entirely in your browser — your text is never uploaded.',
+    icon: '🔊',
+    keywords: [
+      'text to speech',
+      'free text to speech',
+      'text to speech online no signup',
+      'ai voice generator',
+      'text to speech download mp3 wav',
+      'offline text to speech',
+      'private text to speech',
+      'kokoro tts'
+    ],
+    howToUse: [
+      'Type or paste the text you want spoken',
+      'Pick a voice — American or British English, Spanish, Japanese, or Mandarin',
+      'Adjust the speed slider if you want faster or slower speech',
+      'Click "Speak" to download the voice model (first run only) and generate audio',
+      'Play the result inline, or click "Download WAV" to save it'
+    ],
+    useCase: 'Narrate scripts, generate voiceovers, proofread your writing by ear, or make text accessible — without sending your words to a cloud service or paying per character.',
+    related: ['ml/transcribe', 'text/summarize', 'ml/image2text']
+  },
 };
 
 /**

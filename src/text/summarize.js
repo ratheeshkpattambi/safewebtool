@@ -1,7 +1,8 @@
 import { Tool } from '../common/base.js';
 import { runInference, cleanGeneratedText, trimForModel } from '../common/ml-loader.js';
+import { getModel, getPipelineOptions } from '../common/ml-models.js';
 
-const MODEL_ID = 'onnx-community/SmolLM2-360M-Instruct';
+const MODEL_KEY = 'smollm2-360m';
 
 const LENGTH_CONFIG = {
   short: {
@@ -120,7 +121,8 @@ class SummarizeTool extends Tool {
     const prompt = `${instruction} Return only the summary with no explanation:\n\n${input}`;
 
     try {
-      const output = await runInference('text-generation', MODEL_ID, prompt, {
+      const output = await runInference('text-generation', getModel(MODEL_KEY).repo, prompt, {
+        loadOptions: getPipelineOptions(MODEL_KEY),
         max_new_tokens: maxNewTokens,
         repetition_penalty: 1.3,
         no_repeat_ngram_size: 3,

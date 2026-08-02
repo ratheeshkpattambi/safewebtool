@@ -3,273 +3,280 @@
   <!-- Home page -->
   <url>
     <loc>https://safewebtool.com/</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <!-- Video Tools category page -->
   <url>
     <loc>https://safewebtool.com/video</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <!-- Image Tools category page -->
   <url>
     <loc>https://safewebtool.com/image</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <!-- Text Tools category page -->
   <url>
     <loc>https://safewebtool.com/text</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <!-- ML Tools category page -->
   <url>
     <loc>https://safewebtool.com/ml</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <!-- Time Tools category page -->
   <url>
     <loc>https://safewebtool.com/time</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <!-- Extract Video Metadata tool page -->
   <url>
     <loc>https://safewebtool.com/video/info</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- Video Resize tool page -->
   <url>
     <loc>https://safewebtool.com/video/resize</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- Video Trimmer tool page -->
   <url>
     <loc>https://safewebtool.com/video/trim</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- Video Reverse tool page -->
   <url>
     <loc>https://safewebtool.com/video/reverse</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- Video Re-encode tool page -->
   <url>
     <loc>https://safewebtool.com/video/reencode</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- Video to GIF tool page -->
   <url>
     <loc>https://safewebtool.com/video/gif</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- Add or Remove Audio from Video tool page -->
   <url>
     <loc>https://safewebtool.com/video/audio</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- Convert to MP4 tool page -->
   <url>
     <loc>https://safewebtool.com/video/mp4</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- Image Resize tool page -->
   <url>
     <loc>https://safewebtool.com/image/resize</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- Image Compressor tool page -->
   <url>
     <loc>https://safewebtool.com/image/compressor</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- Image Crop tool page -->
   <url>
     <loc>https://safewebtool.com/image/crop</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- Image Format Converter tool page -->
   <url>
     <loc>https://safewebtool.com/image/convert</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- Image Rotator tool page -->
   <url>
     <loc>https://safewebtool.com/image/rotate</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- Passport Photo Maker tool page -->
   <url>
     <loc>https://safewebtool.com/image/passport</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- Text Editor tool page -->
   <url>
     <loc>https://safewebtool.com/text/editor</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- YAML Validator tool page -->
   <url>
     <loc>https://safewebtool.com/text/yaml</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- Remove Extra Spaces tool page -->
   <url>
     <loc>https://safewebtool.com/text/remove-extra-spaces</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- JSON Formatter & Converter tool page -->
   <url>
     <loc>https://safewebtool.com/text/json-formatter</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- Base64 Encode & Decode tool page -->
   <url>
     <loc>https://safewebtool.com/text/base64</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- Word & Character Counter tool page -->
   <url>
     <loc>https://safewebtool.com/text/word-count</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- URL Encode & Decode tool page -->
   <url>
     <loc>https://safewebtool.com/text/url-encode</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- AI Grammar Fixer tool page -->
   <url>
     <loc>https://safewebtool.com/text/grammar-fix</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- AI Text Summarizer tool page -->
   <url>
     <loc>https://safewebtool.com/text/summarize</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- AI Tone Rewriter tool page -->
   <url>
     <loc>https://safewebtool.com/text/tone</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- Timer tool page -->
   <url>
     <loc>https://safewebtool.com/time/timer</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- Meeting Time Finder tool page -->
   <url>
     <loc>https://safewebtool.com/time/meeting-planner</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- Time Zone Converter tool page -->
   <url>
     <loc>https://safewebtool.com/time/timezone-converter</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- Business Days Calculator tool page -->
   <url>
     <loc>https://safewebtool.com/time/business-days</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- Date Duration Calculator tool page -->
   <url>
     <loc>https://safewebtool.com/time/date-difference</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- Face Detection tool page -->
   <url>
     <loc>https://safewebtool.com/ml/face_detect</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- Image to Text (OCR) tool page -->
   <url>
     <loc>https://safewebtool.com/ml/image2text</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- Audio/Video Transcription tool page -->
   <url>
     <loc>https://safewebtool.com/ml/transcribe</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- LaTeX to PDF tool page -->
   <url>
     <loc>https://safewebtool.com/text/latex-pdf</loc>
-    <lastmod>2026-08-01</lastmod>
+    <lastmod>2026-08-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <!-- Text to Speech tool page -->
+  <url>
+    <loc>https://safewebtool.com/ml/text-to-speech</loc>
+    <lastmod>2026-08-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>

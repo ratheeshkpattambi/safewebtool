@@ -24,6 +24,7 @@
     "verify:full": "npm run generate:share-image && npm run generate:agent-manifest && npm run test:contract && npm run test:chrome -- --reporter=line",
     "verify:netlify": "npm run build:netlify && npm run test:contract",
     "scaffold:tool": "node scripts/scaffold-tool.mjs",
+    "sync:models": "node scripts/sync-models-to-r2.mjs",
     "copy-src": "mkdir -p dist/src && cp -r src/* dist/src/",
     "copy-ffmpeg-files": "node scripts/copy-ffmpeg-files.mjs"
   },

@@ -32,6 +32,8 @@ Sitemap: https://safewebtool.com/sitemap.xml
   - Agent contract: https://safewebtool.com/ml/face_detect/agent.json
 - Image to Text (OCR): https://safewebtool.com/ml/image2text
   - Agent contract: https://safewebtool.com/ml/image2text/agent.json
+- Text to Speech: https://safewebtool.com/ml/text-to-speech
+  - Agent contract: https://safewebtool.com/ml/text-to-speech/agent.json
 - Audio/Video Transcription: https://safewebtool.com/ml/transcribe
   - Agent contract: https://safewebtool.com/ml/transcribe/agent.json
 - Base64 Encode & Decode: https://safewebtool.com/text/base64

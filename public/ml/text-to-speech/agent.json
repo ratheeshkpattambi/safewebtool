@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "1.0",
+  "id": "text-to-speech",
+  "path": "ml/text-to-speech",
+  "canonicalPath": "/ml/text-to-speech",
+  "canonicalUrl": "https://safewebtool.com/ml/text-to-speech",
+  "category": {
+    "id": "ml",
+    "name": "ML Tools"
+  },
+  "name": "Text to Speech",
+  "description": "Convert text to natural-sounding speech and download it as a WAV file. Powered by Kokoro, a small AI voice model that runs entirely in your browser — your text is never uploaded.",
+  "privacy": {
+    "mode": "browser-local",
+    "fileUpload": false,
+    "note": "SafeWebTool tools are designed to process user data locally in the browser."
+  },
+  "inputs": [
+    {
+      "name": "file or text",
+      "type": "mixed",
+      "accept": "*/*"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "download or browser result",
+      "formats": [
+        "varies by tool"
+      ]
+    }
+  ],
+  "selectors": {
+    "ready": ".tool-container[data-tool-ready=\"true\"]",
+    "fileInput": "#fileInput",
+    "process": "#processBtn",
+    "log": "#logContent"
+  },
+  "howToUse": [
+    "Type or paste the text you want spoken",
+    "Pick a voice — American or British English, Spanish, Japanese, or Mandarin",
+    "Adjust the speed slider if you want faster or slower speech",
+    "Click \"Speak\" to download the voice model (first run only) and generate audio",
+    "Play the result inline, or click \"Download WAV\" to save it"
+  ],
+  "useCase": "Narrate scripts, generate voiceovers, proofread your writing by ear, or make text accessible — without sending your words to a cloud service or paying per character.",
+  "keywords": [
+    "text to speech",
+    "free text to speech",
+    "text to speech online no signup",
+    "ai voice generator",
+    "text to speech download mp3 wav",
+    "offline text to speech",
+    "private text to speech",
+    "kokoro tts"
+  ],
+  "externalDownloads": [],
+  "exampleTasks": [
+    "Open https://safewebtool.com/ml/text-to-speech and use Text to Speech."
+  ],
+  "automationNotes": [
+    "Prefer the stable selectors in this contract over visible text where possible.",
+    "Wait for selectors.ready before interacting with the tool UI.",
+    "Do not upload private user media to a remote agent service; operate the browser-local UI instead."
+  ]
+}

@@ -8,19 +8,107 @@
  * downloads once.
  */
 
+import { MODEL_HOST, PINNED_REVISIONS, getModel, toMirrorUrl } from './ml-models.js';
+
+/*
+ * MUST be the `+esm` build, and MUST be version-pinned.
+ *
+ * `@huggingface/transformers@3/dist/transformers.web.min.js` — the URL this file used
+ * previously — contains a bare `import ... from "onnxruntime-common"` that no browser
+ * can resolve, so the worker died on startup with an empty ErrorEvent and every tool
+ * built on it (summarize, tone, grammar-fix) silently reported "ML worker crashed".
+ * jsdelivr's `+esm` endpoint rewrites bare specifiers; the `/dist/` file does not.
+ *
+ * The floating `@3` range is also how this broke without a deploy — the same class of
+ * failure that motivated pinning model revisions in ml-models.js. Keep this pinned in
+ * step with the `@huggingface/transformers` version in package.json.
+ */
+const TRANSFORMERS_URL = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.6.3/+esm';
+
+/**
+ * kokoro-js ships a self-contained web build that bundles its OWN copy of
+ * Transformers.js. Configuring `env` from the import above therefore does not affect
+ * it — its env must be set on the module's own export (see getTTS).
+ */
+const KOKORO_URL = 'https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/dist/kokoro.web.js';
+
 // Inline worker source — avoids file URL / Vite bundling issues.
 // Uses transformers.web.min.js (the browser-specific ESM build of v3).
+//
+// MODEL_HOST and the pinned revisions are interpolated as JSON because a blob worker
+// has no module base URL and so cannot import ml-models.js by relative path.
 const WORKER_SOURCE = `
-import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3/dist/transformers.web.min.js';
+import { pipeline, env } from '${TRANSFORMERS_URL}';
+
+const MODEL_HOST = ${JSON.stringify(MODEL_HOST)};
+const PINNED_REVISIONS = ${JSON.stringify(PINNED_REVISIONS)};
+const HF_HOST = 'https://huggingface.co/';
 
 env.allowLocalModels = false;
+
+// NOTE: deliberately NOT setting env.remoteHost. It is global, so it would also
+// redirect models we have NOT mirrored (the SmolLM2 models behind summarize/tone/
+// grammar-fix) to R2, where they 404. The fetch shim below routes per repo instead:
+// mirrored repos go to R2, everything else falls through to the Hub untouched.
+
+/*
+ * Fetch shim — rewrites any Hugging Face Hub URL to the mirror at its pinned revision.
+ *
+ * env.remoteHost alone is NOT enough. kokoro-js hardcodes
+ *   https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX/resolve/main/voices/<v>.bin
+ * and never consults env, so without this the model would load from the mirror while
+ * every voice quietly came from huggingface.co. It also pins the revision, since
+ * kokoro-js offers no way to pass one and our mirror stores only resolve/<sha>/.
+ *
+ * The rewrite function is injected verbatim from ml-models.js via .toString() so there
+ * is exactly one definition — the one the tests assert on. Note that the browser Cache
+ * API still keys on the ORIGINAL Hub URL, so cache contents are not evidence of where
+ * bytes came from; assert on toMirrorUrl or on response.url instead.
+ */
+${toMirrorUrl.toString()}
+
+const rewrite = (url) => toMirrorUrl(url, MODEL_HOST, PINNED_REVISIONS);
+
+if (MODEL_HOST !== HF_HOST) {
+  const nativeFetch = self.fetch.bind(self);
+  self.fetch = (input, init) => {
+    if (typeof input === 'string') return nativeFetch(rewrite(input), init);
+    if (input instanceof Request) {
+      const rewritten = rewrite(input.url);
+      if (rewritten !== input.url) return nativeFetch(rewritten, init);
+    }
+    return nativeFetch(input, init);
+  };
+}
+
+let kokoroPromise = null;
+let ttsInstance = null;
+let ttsModelId = null;
+
+async function getTTS(modelId, dtype, onProgress) {
+  if (ttsInstance && ttsModelId === modelId) return ttsInstance;
+  kokoroPromise ??= import(${JSON.stringify(KOKORO_URL)});
+  const kokoro = await kokoroPromise;
+  // kokoro bundles its OWN copy of Transformers.js, so the env configured above does
+  // not apply to it. Only allowLocalModels is set here — remoteHost is left alone for
+  // the same reason as above; the fetch shim does the routing.
+  if (kokoro.env) kokoro.env.allowLocalModels = false;
+  const { KokoroTTS } = kokoro;
+  ttsInstance = await KokoroTTS.from_pretrained(modelId, {
+    dtype,
+    device: 'wasm',
+    progress_callback: onProgress,
+  });
+  ttsModelId = modelId;
+  return ttsInstance;
+}
 
 let loadedModelId = null;
 let loadedPipeline = null;
 let loadingModelId = null;
 let loadingPromise = null;
 
-function getPipeline(task, modelId, onProgress) {
+function getPipeline(task, modelId, onProgress, loadOptions = {}) {
   if (loadedModelId === modelId && loadedPipeline) {
     return Promise.resolve(loadedPipeline);
   }
@@ -28,10 +116,15 @@ function getPipeline(task, modelId, onProgress) {
     return loadingPromise;
   }
 
+  // dtype defaults to q4 for the SmolLM2 tools, which predate the model registry.
+  // Anything in ml-models.js should pass its own dtype and pinned revision instead.
+  const { dtype = 'q4', revision } = loadOptions;
+
   loadingModelId = modelId;
   loadingPromise = pipeline(task, modelId, {
     progress_callback: (p) => self.postMessage({ type: 'progress', progress: p }),
-    dtype: 'q4',
+    dtype,
+    ...(revision ? { revision } : {}),
   })
     .then((pipe) => {
       loadedModelId = modelId;
@@ -50,17 +143,30 @@ function getPipeline(task, modelId, onProgress) {
 }
 
 self.onmessage = async (event) => {
-  const { id, ping, task, modelId, input, options } = event.data;
+  const { id, ping, task, modelId, input, options, loadOptions } = event.data;
 
   if (ping) {
     self.postMessage({ id, type: 'result', result: 'pong' });
     return;
   }
 
+  const reportProgress = (p) => self.postMessage({ id, type: 'progress', progress: p });
+
   try {
-    const pipe = await getPipeline(task, modelId, (p) => {
-      self.postMessage({ id, type: 'progress', progress: p });
-    });
+    // Kokoro is not a Transformers.js pipeline — it has its own loader class.
+    if (task === 'text-to-speech') {
+      const { voice, speed } = options || {};
+      const tts = await getTTS(modelId, loadOptions?.dtype, reportProgress);
+      const audio = await tts.generate(input, { voice, speed });
+      const wav = audio.toWav();
+      self.postMessage(
+        { id, type: 'result', result: { wav, samplingRate: audio.sampling_rate } },
+        [wav],
+      );
+      return;
+    }
+
+    const pipe = await getPipeline(task, modelId, reportProgress, loadOptions);
     const result = await pipe(input, options);
     self.postMessage({ id, type: 'result', result });
   } catch (error) {
@@ -117,11 +223,35 @@ function getWorker() {
  * @returns {Promise<*>}
  */
 export function runInference(task, modelId, input, opts = {}) {
-  const { onProgress, ...pipelineOptions } = opts;
+  const { onProgress, loadOptions, ...pipelineOptions } = opts;
   return new Promise((resolve, reject) => {
     const id = crypto.randomUUID();
     pending.set(id, { resolve, reject, onProgress });
-    getWorker().postMessage({ id, task, modelId, input, options: pipelineOptions });
+    getWorker().postMessage({ id, task, modelId, input, options: pipelineOptions, loadOptions });
+  });
+}
+
+/**
+ * Synthesise speech with Kokoro, entirely in the browser.
+ *
+ * Resolves to `{ wav, samplingRate }` where `wav` is a transferred ArrayBuffer of a
+ * complete RIFF/WAVE file, ready to drop into a Blob.
+ *
+ * @param {string} modelKey - Key into MODELS in ml-models.js
+ * @param {string} text - Text to speak
+ * @param {{ voice?: string, speed?: number, onProgress?: Function }} [opts]
+ * @returns {Promise<{ wav: ArrayBuffer, samplingRate: number }>}
+ */
+export function runTextToSpeech(modelKey, text, opts = {}) {
+  const { voice, speed, onProgress } = opts;
+  const { repo, dtype } = getModel(modelKey);
+  return runInference('text-to-speech', repo, text, {
+    voice,
+    speed,
+    onProgress,
+    // Revision is forced by the worker's fetch shim, since kokoro-js accepts no
+    // revision option of its own.
+    loadOptions: { dtype },
   });
 }
 

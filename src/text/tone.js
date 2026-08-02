@@ -1,7 +1,8 @@
 import { Tool } from '../common/base.js';
 import { runInference, cleanGeneratedText, trimForModel } from '../common/ml-loader.js';
+import { getModel, getPipelineOptions } from '../common/ml-models.js';
 
-const MODEL_ID = 'onnx-community/SmolLM2-360M-Instruct';
+const MODEL_KEY = 'smollm2-360m';
 const MAX_NEW_TOKENS = 512;
 const TONES = ['Formal', 'Casual', 'Professional', 'Friendly'];
 
@@ -121,7 +122,8 @@ class ToneTool extends Tool {
     const prompt = `Rewrite the following text in a ${this.selectedTone.toLowerCase()} tone. Return only the rewritten text:\n\n${input}`;
 
     try {
-      const output = await runInference('text-generation', MODEL_ID, prompt, {
+      const output = await runInference('text-generation', getModel(MODEL_KEY).repo, prompt, {
+        loadOptions: getPipelineOptions(MODEL_KEY),
         max_new_tokens: MAX_NEW_TOKENS,
         repetition_penalty: 1.3,
         no_repeat_ngram_size: 3,
