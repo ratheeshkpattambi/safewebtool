@@ -20,8 +20,12 @@ import { MODEL_HOST, PINNED_REVISIONS, getModel, toMirrorUrl } from './ml-models
  * jsdelivr's `+esm` endpoint rewrites bare specifiers; the `/dist/` file does not.
  *
  * The floating `@3` range is also how this broke without a deploy — the same class of
- * failure that motivated pinning model revisions in ml-models.js. Keep this pinned in
- * step with the `@huggingface/transformers` version in package.json.
+ * failure that motivated pinning model revisions in ml-models.js.
+ *
+ * This URL is the ONLY place the Transformers.js version is declared. The npm package
+ * was removed from package.json because nothing ever imported it — it was dead weight
+ * that only dragged in `sharp`, a Node-side image library that never reaches the
+ * browser but did carry four libvips CVEs. Bump the version here, not in package.json.
  */
 const TRANSFORMERS_URL = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.6.3/+esm';
 
