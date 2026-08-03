@@ -337,15 +337,31 @@ class TranscribeTool extends Tool {
         this.updateProgress(10, 'Worker started...');
 
         const workerCode = `
-            import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.1';
-            
-            env.allowLocalModels = false;
-            
+            // Loaded with a DYNAMIC import inside onmessage, not a top-level static one.
+            //
+            // A static "import ... from" at the top of this module worker fails on WebKit
+            // (desktop Safari, and — since Apple requires every iOS browser to embed
+            // WebKit — mobile Safari AND mobile Chrome on iOS) with "Worker load was
+            // blocked by Cross-Origin-Embedder-Policy", even though jsdelivr sends a valid
+            // Cross-Origin-Resource-Policy: cross-origin header. WebKit appears to route a
+            // module worker's static imports through the same COEP check as constructing a
+            // nested Worker(), which additionally wants the imported resource to itself
+            // send a Cross-Origin-Embedder-Policy header. Chromium does not apply this
+            // check, so the bug is invisible on desktop and in chromium-mobile-emulated
+            // tests; it only reproduces under a real WebKit engine (see ml-loader.js for
+            // the same fix applied to the shared ML worker, and tests/ml-transcribe.real.spec.js
+            // running under the webkit-iphone Playwright project). A dynamic import()
+            // inside the try block goes through the normal module-fetch/CORS path instead
+            // and is caught by the existing try/catch, turning a bare unrecoverable worker
+            // crash into a real, user-visible error message.
             self.onmessage = async (event) => {
                 try {
+                    const { pipeline, env } = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.1');
+                    env.allowLocalModels = false;
+
                     const { audioData, model, task, language, returnTimestamps } = event.data;
                     self.postMessage({ status: 'log', message: 'Worker received task.' });
-                    
+
                     const transcriber = await pipeline('automatic-speech-recognition', model, {
                         progress_callback: (progress) => self.postMessage({ status: 'progress', data: progress })
                     });

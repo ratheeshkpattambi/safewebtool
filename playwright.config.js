@@ -29,6 +29,15 @@ export default defineConfig({
       name: 'chromium-mobile',
       use: { ...devices['Pixel 5'] },
     },
+    {
+      // Real WebKit engine, not just a Chromium viewport preset. iOS requires every
+      // browser (including mobile Chrome) to embed WebKit, so this — not
+      // chromium-mobile — is what actually exercises iOS-specific WASM/worker
+      // behavior. chromium-mobile only emulates viewport/UA/touch on desktop
+      // Chromium/V8 and cannot reproduce a WebKit-only crash.
+      name: 'webkit-iphone',
+      use: { ...devices['iPhone 14'] },
+    },
   ],
   webServer: {
     command: 'npm run dev',

@@ -42,13 +42,38 @@ const KOKORO_URL = 'https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/dist/kokoro.web
 // MODEL_HOST and the pinned revisions are interpolated as JSON because a blob worker
 // has no module base URL and so cannot import ml-models.js by relative path.
 const WORKER_SOURCE = `
-import { pipeline, env } from '${TRANSFORMERS_URL}';
-
 const MODEL_HOST = ${JSON.stringify(MODEL_HOST)};
 const PINNED_REVISIONS = ${JSON.stringify(PINNED_REVISIONS)};
 const HF_HOST = 'https://huggingface.co/';
 
-env.allowLocalModels = false;
+/*
+ * Transformers.js is loaded with a DYNAMIC import, not a top-level static one.
+ *
+ * A static \`import ... from TRANSFORMERS_URL\` at the top of this module worker fails
+ * on WebKit (desktop Safari, and — since Apple requires every iOS browser to embed
+ * WebKit — mobile Safari AND mobile Chrome on iOS) with "Worker load was blocked by
+ * Cross-Origin-Embedder-Policy", even though jsdelivr sends a valid
+ * Cross-Origin-Resource-Policy: cross-origin header. WebKit appears to route a module
+ * worker's static imports through the same COEP check as constructing a nested
+ * Worker(), which additionally wants the imported resource to itself send a
+ * Cross-Origin-Embedder-Policy header — something a generic CDN has no reason to send.
+ * Chromium does not apply this check, so the bug was invisible in every desktop and
+ * chromium-mobile-emulated test; it only reproduces under a real WebKit engine.
+ *
+ * Because this failure happens at module-evaluation time, before self.onmessage is
+ * even registered, it killed EVERY tool built on this worker on WebKit — not just TTS.
+ * A dynamic import() goes through the normal module-fetch/CORS path instead of that
+ * nested-worker check, and (per testing on WebKit) succeeds. It also runs inside
+ * self.onmessage's try/catch, so any future load failure becomes a real, user-visible
+ * error instead of a bare, unrecoverable worker crash.
+ */
+let transformersPromise = null;
+async function getTransformers() {
+  transformersPromise ??= import('${TRANSFORMERS_URL}');
+  const transformers = await transformersPromise;
+  transformers.env.allowLocalModels = false;
+  return transformers;
+}
 
 // NOTE: deliberately NOT setting env.remoteHost. It is global, so it would also
 // redirect models we have NOT mirrored (the SmolLM2 models behind summarize/tone/
@@ -139,11 +164,12 @@ function getPipeline(task, modelId, onProgress, loadOptions = {}) {
   const { dtype = 'q4', revision } = loadOptions;
 
   loadingModelId = modelId;
-  loadingPromise = pipeline(task, modelId, {
-    progress_callback: (p) => self.postMessage({ type: 'progress', progress: p }),
-    dtype,
-    ...(revision ? { revision } : {}),
-  })
+  loadingPromise = getTransformers()
+    .then(({ pipeline }) => pipeline(task, modelId, {
+      progress_callback: (p) => self.postMessage({ type: 'progress', progress: p }),
+      dtype,
+      ...(revision ? { revision } : {}),
+    }))
     .then((pipe) => {
       loadedModelId = modelId;
       loadedPipeline = pipe;

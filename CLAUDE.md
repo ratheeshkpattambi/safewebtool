@@ -68,6 +68,20 @@ the reasoning behind every model choice live in
   `/dist/transformers.web.min.js` build has an unresolvable bare `onnxruntime-common`
   import; it kills the worker on startup with an empty error, and every tool using it
   reports only "ML worker crashed".
+- **Every third-party import inside a Worker must be a DYNAMIC `import()`, never a
+  top-level static `import`.** A static import of a cross-origin script at the top of a
+  module Worker fails on WebKit — desktop Safari, and (since Apple requires every iOS
+  browser to embed WebKit) mobile Safari **and mobile Chrome on iOS** — with "Worker
+  load was blocked by Cross-Origin-Embedder-Policy", even when the CDN sends a valid
+  `Cross-Origin-Resource-Policy: cross-origin` header. WebKit appears to route a module
+  Worker's static imports through the same COEP check as constructing a *nested*
+  `Worker()`, which additionally wants the imported resource to send its own
+  `Cross-Origin-Embedder-Policy` header — something a generic CDN has no reason to send.
+  Chromium does not apply this check. Because the failure happens at module-evaluation
+  time, before `self.onmessage` is even registered, it kills the ENTIRE worker — every
+  tool sharing it — with no way for that tool's own try/catch to help, since the crash
+  happens before the tool's code runs at all. `chromium-mobile` cannot catch this (see
+  below); this class of bug is invisible until tested against a real WebKit engine.
 - **Never set `env.remoteHost`.** It is global and would redirect unmirrored models to
   R2, where they 404. The worker's fetch shim routes per repo instead.
 - **`page.route` does not intercept Web Worker traffic**, and the Cache API keys on the
@@ -267,7 +281,8 @@ npm run test:tool -- <category>/<toolId>           # smoke test one tool
 npm run test:tool -- <category>/<toolId> --mobile --real   # mobile + real file
 npm run test:ffmpeg                                # FFmpeg CDN load + MT detection (add after ffmpeg-utils.js changes)
 npm run test:video-fast                            # all 8 video tools, actual FFmpeg processing (add after FFmpeg/infra changes)
-npm run verify:full                                # before PR / cross-cutting changes
+npm run test:webkit-ios                            # ML real-inference tools on real WebKit (iPhone) — add after ml-loader.js changes
+npm run verify:full                                # before PR / cross-cutting changes (runs test:webkit-ios too)
 ```
 
 ### When to run which test
@@ -276,6 +291,7 @@ npm run verify:full                                # before PR / cross-cutting c
 |---|---|
 | Any single tool | `test:contract` then `test:tool -- <id>` |
 | `ffmpeg-utils.js`, CDN URLs, WASM version | `test:contract` then `test:ffmpeg` then `test:video-fast` |
+| `ml-loader.js`, a tool's own inline worker, or any CDN import inside a Worker | `test:contract` then `test:webkit-ios` — **`chromium-mobile` cannot catch this.** It only emulates viewport/UA/touch on desktop Chromium/V8; it does not run WebKit and will not reproduce a WebKit-only bug. iOS requires every browser (including mobile Chrome) to embed WebKit, so `webkit-iphone` is the only project that actually exercises iOS behavior. |
 | `base.js`, `fileUpload.js`, routing, or 3+ tools | `verify:full` |
 | Before any PR | `verify:full` |
 
