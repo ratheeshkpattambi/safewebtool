@@ -480,10 +480,50 @@ class TimerTool extends Tool {
     this.setInputsFromDuration(this.durationMs);
     this.elements.tickToggle.checked = window.localStorage.getItem(TICK_KEY) !== 'false';
     this.updateDisplay();
-    document.addEventListener('visibilitychange', () => this.handleVisibilityChange());
-    window.addEventListener('focus', () => this.syncRunningTimer());
-    window.addEventListener('pageshow', () => this.syncRunningTimer());
+
+    // Bound once and stored so destroy() can remove the exact same function reference —
+    // document/window listeners outlive this tool's DOM on SPA navigation otherwise.
+    this._boundVisibilityChange = () => this.handleVisibilityChange();
+    this._boundSyncRunningTimer = () => this.syncRunningTimer();
+    document.addEventListener('visibilitychange', this._boundVisibilityChange);
+    window.addEventListener('focus', this._boundSyncRunningTimer);
+    window.addEventListener('pageshow', this._boundSyncRunningTimer);
     this.log('Timer ready', 'info');
+  }
+
+  /**
+   * Stop everything that outlives this tool's DOM on SPA navigation: the tick interval,
+   * the scheduled-sound timeout, the wake lock, the document/window listeners, and the
+   * Audio/AudioContext objects. None of these are DOM nodes, so router.js replacing
+   * .tool-content-area's innerHTML does nothing to them — without this, a running timer
+   * keeps ticking, and keeps making sound, after the user navigates away.
+   */
+  destroy() {
+    this.stopInterval();
+    this.stopSoundSchedule();
+    this.releaseWakeLock();
+    this.running = false;
+
+    if (this._boundVisibilityChange) {
+      document.removeEventListener('visibilitychange', this._boundVisibilityChange);
+    }
+    if (this._boundSyncRunningTimer) {
+      window.removeEventListener('focus', this._boundSyncRunningTimer);
+      window.removeEventListener('pageshow', this._boundSyncRunningTimer);
+    }
+
+    [this.tickAudio, this.finishAudio].forEach(audio => {
+      if (!audio) return;
+      audio.pause();
+      audio.src = '';
+    });
+    this.tickAudio = null;
+    this.finishAudio = null;
+
+    if (this.audioContext) {
+      this.audioContext.close().catch(() => {});
+      this.audioContext = null;
+    }
   }
 
   setupControls() {

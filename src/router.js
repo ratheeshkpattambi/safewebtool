@@ -10,6 +10,20 @@ import { serveSitemap } from './common/sitemap.js';
 import { loadToolModule, resolveAppRoute } from './common/tool-registry.js';
 
 let navigationToken = 0;
+// The currently active tool instance (as returned by its initTool()), so its
+// destroy() can be called before the next route replaces its DOM. See Tool.destroy()
+// in common/base.js for why this is needed on an SPA that swaps content via innerHTML.
+let currentToolInstance = null;
+
+function destroyCurrentTool() {
+  if (!currentToolInstance) return;
+  try {
+    currentToolInstance.destroy();
+  } catch (error) {
+    console.error('Error destroying previous tool:', error);
+  }
+  currentToolInstance = null;
+}
 
 function isHomePath(path) {
   return path === '/' || path === '/home';
@@ -140,7 +154,21 @@ async function initializeToolRoute(route, main, tokenAtStart) {
       return;
     }
 
-    moduleImport.initTool();
+    const toolInstance = await moduleImport.initTool();
+
+    if (tokenAtStart !== navigationToken) {
+      // The user navigated again while this tool was still initializing — its DOM was
+      // never left on screen, but it may already hold timers/audio/listeners. Destroy
+      // immediately rather than leaking it as an orphaned currentToolInstance.
+      try {
+        toolInstance?.destroy();
+      } catch (error) {
+        console.error('Error destroying superseded tool:', error);
+      }
+      return;
+    }
+
+    currentToolInstance = toolInstance;
   } catch (error) {
     console.error('Error initializing tool:', error);
     if (tokenAtStart !== navigationToken) return;
@@ -195,6 +223,7 @@ export async function handleRoute(path) {
   const route = resolveAppRoute(path);
   const token = ++navigationToken;
 
+  destroyCurrentTool();
   document.body.classList.remove('timer-app-mode');
   footerManager.restoreOriginalFooter();
   updateActiveNavigation(route.path);

@@ -137,6 +137,22 @@ export class Tool {
   async processFile(file) {
     throw new Error('processFile() must be implemented by derived classes');
   }
+
+  /**
+   * Tear down the tool before its DOM is replaced by SPA navigation.
+   *
+   * router.js swaps page content via innerHTML on route change — it does not reload
+   * the page. That removes DOM nodes but does nothing to JS-level state: a running
+   * setInterval/setTimeout, an `Audio`/AudioContext object (never attached to the DOM
+   * in the first place), or a listener added to `document`/`window` all keep running
+   * after navigation, invisibly, with no page left that can stop them.
+   *
+   * Default is a no-op. Override in any tool that holds this kind of state — timers,
+   * audio, WakeLock, or document/window-level event listeners — and stop/release it
+   * here. Called automatically by router.js before the next route's content replaces
+   * this tool's.
+   */
+  destroy() {}
   
   /**
    * Log a message
