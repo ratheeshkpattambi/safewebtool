@@ -36,6 +36,30 @@ const TRANSFORMERS_URL = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers
  */
 const KOKORO_URL = 'https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/dist/kokoro.web.js';
 
+/**
+ * Reject if `promise` doesn't settle within `ms`.
+ *
+ * Self-contained (no closure over module scope) because ml-loader.js injects it into
+ * the worker via .toString() — a blob worker cannot import by relative path. See its
+ * use in the text-to-speech branch of self.onmessage: kokoro-js's bundled
+ * onnxruntime-web ships only the threaded WASM binary (confirmed by inspecting
+ * kokoro.web.js — there is no non-threaded fallback file at all), so it unconditionally
+ * spawns a nested "em-pthread" Worker for model init/inference on this
+ * cross-origin-isolated site, even with wasm.numThreads forced to 1. That nested worker
+ * has completed correctly in every environment this was tested against, but a stuck or
+ * silently-failed pthread handshake on real, memory-constrained iOS hardware — which
+ * neither desktop Chromium nor desktop WebKit reproduces — would otherwise hang forever
+ * with the UI stuck at "Downloaded onnx/model_quantized.onnx" and no further signal.
+ * This turns that into a real, user-visible, recoverable error instead.
+ */
+export function withTimeout(promise, ms, message) {
+  let timeoutId;
+  const timeout = new Promise((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error(message)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timeoutId));
+}
+
 // Inline worker source — avoids file URL / Vite bundling issues.
 // Uses transformers.web.min.js (the browser-specific ESM build of v3).
 //
@@ -110,6 +134,16 @@ if (MODEL_HOST !== HF_HOST) {
   };
 }
 
+${withTimeout.toString()}
+
+// Model init (post-download session creation) and generation each get their own
+// timeout window rather than one covering the whole flow, so a hang is attributed to
+// the right phase in the error message. Generous, since real mobile hardware running
+// single-threaded WASM inference is genuinely much slower than the desktop/CI
+// environments this is tested in — this is a safety net for a true hang, not a
+// performance budget.
+const TTS_TIMEOUT_MS = 60000;
+
 let kokoroPromise = null;
 let ttsInstance = null;
 let ttsModelId = null;
@@ -123,14 +157,14 @@ async function getTTS(modelId, dtype, onProgress) {
   // the same reason as above; the fetch shim does the routing.
   if (kokoro.env) {
     kokoro.env.allowLocalModels = false;
-    // This site is cross-origin isolated site-wide for FFmpeg's SharedArrayBuffer, so
-    // self.crossOriginIsolated is true here too — which makes onnxruntime-web pick its
-    // multi-threaded WASM build and spawn navigator.hardwareConcurrency pthread workers
-    // NESTED inside this already-a-worker context. That's the documented cause of
-    // Kokoro hanging/crashing mobile Safari and Android Chrome (nested WASM-thread
-    // workers on constrained memory) — the same class of bug as the multi-threaded
-    // FFmpeg core this codebase already avoids for the same reason. Force single-
-    // threaded WASM so TTS never spawns worker threads of its own.
+    // Bounds the pthread pool to 1 worker rather than navigator.hardwareConcurrency.
+    // This does NOT avoid a nested worker entirely — kokoro-js's bundled
+    // onnxruntime-web ships only the threaded WASM binary (verified: no non-threaded
+    // fallback file exists in the package), so on this cross-origin-isolated site it
+    // unconditionally spawns exactly one nested "em-pthread" Worker regardless of this
+    // setting. Confirmed by instrumenting self.Worker in this exact worker: the nested
+    // worker is still constructed with numThreads=1. The real safety net for that
+    // worker hanging on constrained hardware is the withTimeout() wrap below, not this.
     if (kokoro.env.backends?.onnx?.wasm) {
       kokoro.env.backends.onnx.wasm.numThreads = 1;
       kokoro.env.backends.onnx.wasm.proxy = false;
@@ -200,8 +234,21 @@ self.onmessage = async (event) => {
     // Kokoro is not a Transformers.js pipeline — it has its own loader class.
     if (task === 'text-to-speech') {
       const { voice, speed } = options || {};
-      const tts = await getTTS(modelId, loadOptions?.dtype, reportProgress);
-      const audio = await tts.generate(input, { voice, speed });
+      const tts = await withTimeout(
+        getTTS(modelId, loadOptions?.dtype, reportProgress),
+        TTS_TIMEOUT_MS,
+        'Loading the voice model timed out. This can happen on older or memory-constrained devices — try reloading the page.'
+      );
+      // Model weights are downloaded and the inference session is ready — the only
+      // step left is generation, which reports no progress of its own. Without this,
+      // the UI has nothing to show between "model downloaded" and "audio ready" and a
+      // slow-but-working synthesis on weak hardware looks identical to a hang.
+      reportProgress({ status: 'synthesizing' });
+      const audio = await withTimeout(
+        tts.generate(input, { voice, speed }),
+        TTS_TIMEOUT_MS,
+        'Speech generation timed out. This can happen on older or memory-constrained devices — try shorter text, or reload the page and try again.'
+      );
       const wav = audio.toWav();
       self.postMessage(
         { id, type: 'result', result: { wav, samplingRate: audio.sampling_rate } },

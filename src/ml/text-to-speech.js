@@ -142,11 +142,18 @@ class TextToSpeechTool extends Tool {
             this.updateProgress(Math.min(90, progress.progress * 0.9));
           } else if (progress?.status === 'done') {
             this.log(`Downloaded ${progress.file}`, 'info');
+          } else if (progress?.status === 'synthesizing') {
+            // Fires once model download + session init are done and generation is
+            // actually starting — the one point in the flow with no progress signal of
+            // its own. Without this, a slow-but-working synthesis on weak/mobile
+            // hardware looks identical to a hang: the log's last line stays "Downloaded
+            // ..." for however long inference takes.
+            this.updateProgress(93);
+            this.log('Model ready. Synthesizing speech...', 'info');
           }
         }
       });
 
-      this.log('Model ready. Generating speech...', 'success');
       this.updateProgress(95);
 
       const blob = new Blob([wav], { type: 'audio/wav' });

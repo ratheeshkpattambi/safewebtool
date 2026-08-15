@@ -122,4 +122,41 @@ test.describe('Text to Speech', () => {
     expect(offered.length).toBeGreaterThan(0);
     expect(offered.sort()).toEqual(mirrored.sort());
   });
+
+  /**
+   * Regression guard for a real bug: TTS hung forever on real iOS hardware after model
+   * download completed, with no error and no further log line — the ML worker's
+   * text-to-speech branch had no bound on how long model init / generation could take.
+   * Root cause: kokoro-js's bundled onnxruntime-web ships only the threaded WASM
+   * binary, so it always spawns a nested "em-pthread" Worker on this
+   * cross-origin-isolated site (confirmed by instrumenting self.Worker inside the ML
+   * worker) — a stuck pthread handshake on constrained real hardware, which neither
+   * desktop Chromium nor desktop WebKit reproduces, would hang silently forever.
+   * ml-loader.js now wraps both getTTS() and generate() in withTimeout() so that
+   * becomes a real, user-visible error instead. This test exercises withTimeout()
+   * itself directly and fast (short timeouts, no model download) rather than trying to
+   * simulate an actual hang.
+   */
+  test('withTimeout rejects a promise that never settles, resolves one that does', async ({ page }) => {
+    await page.goto('/ml/text-to-speech');
+    await expect(page.locator('.tool-container[data-tool-ready="true"]')).toBeVisible();
+
+    const result = await page.evaluate(async () => {
+      const { withTimeout } = await import('/src/common/ml-loader.js');
+
+      const resolved = await withTimeout(Promise.resolve('done'), 1000, 'should not fire');
+
+      let rejectedMessage = null;
+      try {
+        await withTimeout(new Promise(() => {}), 50, 'synthesis timed out');
+      } catch (error) {
+        rejectedMessage = error.message;
+      }
+
+      return { resolved, rejectedMessage };
+    });
+
+    expect(result.resolved).toBe('done');
+    expect(result.rejectedMessage).toBe('synthesis timed out');
+  });
 });
