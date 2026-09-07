@@ -47,9 +47,8 @@ Adding a tool needs none of this — it all derives from the metadata entry.
 
 ## ML models — read before touching anything that loads model weights
 
-Model weights are mirrored to a Cloudflare R2 bucket. Setup state, the sync runbook and
-the reasoning behind every model choice live in
-[documentation/self-hosted-ml-models.md](documentation/self-hosted-ml-models.md).
+Model weights are mirrored to a Cloudflare R2 bucket. The sync runbook and the traps
+live in [documentation/self-hosted-ml-models.md](documentation/self-hosted-ml-models.md).
 
 - `src/common/ml-models.js` is the **only** source of model ids, pinned revisions, dtypes
   and file lists. Never hardcode a Hugging Face repo id or model URL in a tool module or
@@ -255,6 +254,27 @@ class MyGenerator extends Tool {
 export function initTool() { return new MyGenerator().init(); }
 ```
 
+## UI conventions
+
+Buttons are colour-coded by meaning — match them so tools feel like one site:
+
+| Colour | Meaning | Examples | Classes |
+|---|---|---|---|
+| Blue `bg-blue-600` | Primary action | Select File, Process, Format | `px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium` |
+| Green `bg-green-600` | Get/save output | Download, Export | same, with `green` |
+| Yellow `bg-yellow-600` | Reversible modification | Clear, Reset, Minify | same, with `yellow` |
+| Red `bg-red-600` | Irreversible action | Delete, Remove All | same, with `red` |
+| Slate `bg-slate-200` | Secondary/neutral | Cancel, Copy | `text-slate-800 dark:bg-slate-700 dark:text-slate-100` |
+
+Add the `file-select-btn` class to any button that opens the file picker — `fileUpload.js`
+binds it by delegation.
+
+**Custom footers** are optional. Pass `customFooter: { author, authorUrl, version, links, description, icon }`
+to `super()` in a tool's constructor and `footer-manager.js` swaps the site footer while
+that tool is mounted, restoring it on navigation away. `author` is required. Three tools
+use it (`image/compressor`, `text/json-formatter`, `text/remove-extra-spaces`); most
+tools should just omit it.
+
 ## Architecture (read only if you need context)
 
 ```
@@ -328,3 +348,19 @@ After implementation run `npm run test:video-fast` to verify it processes the ti
 - [ ] `npm run verify:full` passes for cross-cutting changes
 - [ ] No router/registry edits, no server calls in tool logic
 - [ ] Manifests regenerated if metadata changed (`npm run generate:agent-manifest && npm run generate:share-image`)
+
+## Where the docs are
+
+Three files, and that is deliberate — everything else was history and has been deleted
+(it is still in `git log`). Keep it that way: fix the code, then delete the entry, rather
+than writing a new dated document.
+
+| File | What it is | Read it when |
+|---|---|---|
+| `CLAUDE.md` (this file) | The contributor and agent guide. Rules, workflow, templates. | Always. Start here. |
+| `documentation/seo-and-urls.md` | URL/canonical invariants + verification commands. | Before touching anything that emits a URL. |
+| `documentation/self-hosted-ml-models.md` | R2 mirror runbook: sync, rewrite shim, traps. | Before touching model weights or `ml-models.js`. |
+| `documentation/known-issues.md` | Live list of open defects and planned work. | Picking up architectural work; delete entries as you fix them. |
+
+`README.md` is for users and first-time visitors, not contributors — keep contributor
+detail out of it.
