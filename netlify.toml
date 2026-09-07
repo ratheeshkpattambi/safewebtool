@@ -68,6 +68,16 @@
     Content-Type = "text/javascript"
     Cache-Control = "public, max-age=86400"
 
+# Strip trailing slashes before the SPA catch-all so Google never sees two
+# 200 responses for the same page (e.g. /video/resize AND /video/resize/).
+# Without this, the catch-all serves the SPA shell for the trailing-slash form
+# with no canonical tag, and Google overrides the canonical we set on the real page.
+[[redirects]]
+  from = "/*/"
+  to = "/:splat"
+  status = 301
+  force = true
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
