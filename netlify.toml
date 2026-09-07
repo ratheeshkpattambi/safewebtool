@@ -68,15 +68,13 @@
     Content-Type = "text/javascript"
     Cache-Control = "public, max-age=86400"
 
-# Strip trailing slashes before the SPA catch-all so Google never sees two
-# 200 responses for the same page (e.g. /video/resize AND /video/resize/).
-# Without this, the catch-all serves the SPA shell for the trailing-slash form
-# with no canonical tag, and Google overrides the canonical we set on the real page.
-[[redirects]]
-  from = "/*/"
-  to = "/:splat"
-  status = 301
-  force = true
+# NOTE: do NOT add a `from = "/*/"` trailing-slash redirect here.
+# Netlify normalises trailing slashes in redirect `from` patterns, so "/*/" is
+# treated as "/*": it matches EVERY path and redirects it to itself. With
+# force = true that beat the SPA catch-all and took the whole site down with an
+# infinite 301 loop (v2026.9.0, 2026-09-07). Netlify already normalises
+# /path/ -> /path for prerendered files; solve canonical duplication in the
+# prerenderer or with per-path rules, and verify with curl before pushing.
 
 [[redirects]]
   from = "/*"
