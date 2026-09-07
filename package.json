@@ -27,7 +27,8 @@
     "scaffold:tool": "node scripts/scaffold-tool.mjs",
     "sync:models": "node scripts/sync-models-to-r2.mjs",
     "copy-src": "mkdir -p dist/src && cp -r src/* dist/src/",
-    "copy-ffmpeg-files": "node scripts/copy-ffmpeg-files.mjs"
+    "copy-ffmpeg-files": "node scripts/copy-ffmpeg-files.mjs",
+    "verify:deploy": "node scripts/verify-deploy.mjs"
   },
   "dependencies": {
     "@ffmpeg/core": "^0.12.10",

@@ -818,8 +818,18 @@ export function generateMetaTags(path) {
         const tool = getToolMetadata(toolPath);
         
         if (tool) {
+          // Google truncates titles past ~60 characters, which cuts the brand off and
+          // hides the end of longer tool names. Try the most keyword-rich form first
+          // and fall back until one fits, so short names keep "Free Online <X> Tool"
+          // and long ones stay legible instead of being clipped mid-phrase.
           const categoryShortName = (category?.name || categoryId).replace(/ Tools$/i, '');
-          title = `${tool.name} — Free Online ${categoryShortName} Tool | ${siteInfo.name}`;
+          const titleCandidates = [
+            `${tool.name} — Free Online ${categoryShortName} Tool | ${siteInfo.name}`,
+            `${tool.name} — Free Online Tool | ${siteInfo.name}`,
+            `${tool.name} — Free | ${siteInfo.name}`,
+            `${tool.name} | ${siteInfo.name}`
+          ];
+          title = titleCandidates.find(candidate => candidate.length <= 60) || titleCandidates[titleCandidates.length - 1];
           const combined = tool.useCase ? `${tool.description} ${tool.useCase}` : tool.description;
           description = combined.length <= 155 ? combined : (tool.description.length <= 155 ? tool.description : `${tool.description.substring(0, 152)}...`);
           keywords = tool.keywords;

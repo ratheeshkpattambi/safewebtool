@@ -30,6 +30,24 @@ That's it. Do not edit the router or registry — tools are discovered automatic
 4. **Reuse `src/common/*`.** No copy-paste, no heavy libraries.
 5. **Must work on mobile** (small screens).
 6. **Every canonical URL must return 200, never a redirect.** See [URLs & SEO](#urls--seo-read-before-touching-anything-that-emits-a-url).
+7. **Never ship a `netlify.toml`, prerenderer or build-config change without `npm run verify:deploy`.** Playwright runs against Vite on localhost and cannot see `netlify.toml` at all — 315 passing tests did not stop a redirect rule from taking the whole site down.
+
+## Deploy verification — the tests cannot catch an outage
+
+`npm run verify:deploy [origin]` fetches every URL in the sitemap from a **deployed**
+origin and asserts each returns 200 with no redirect, carries a canonical matching the
+requested path, and is not the SPA shell in disguise. It also checks trailing-slash forms
+301 to the canonical rather than 200-ing or looping.
+
+**Run it against a Netlify deploy preview before merging, and against production after
+deploying**, for any change to `netlify.toml`, `scripts/prerender.mjs`, `vite.config.js`,
+redirects or headers.
+
+On 2026-09-07 a trailing-slash redirect took every URL on the site into an infinite 301
+loop, homepage included. The full suite passed — Playwright drives Vite on
+`localhost:5173`, which never reads `netlify.toml`. **A green test run is not evidence
+that the deployed site serves anything.** Netlify already normalises `/path/` to `/path`
+for prerendered files; do not add a redirect for it.
 
 ## URLs & SEO — read before touching anything that emits a URL
 
@@ -42,6 +60,12 @@ commands: [documentation/seo-and-urls.md](documentation/seo-and-urls.md).
 - The prerenderer writes flat `dist/<route>.html`. Netlify serves those at the bare path with a 200; `<route>/index.html` would only serve at `/route/` and make `/route` a 301.
 - The sitemap lists canonical URLs **only, once each** — never both an alias and the tool path it aliases.
 - A missing prerendered file does **not** 404. The SPA rewrite silently serves the homepage shell, so assert on canonical/title, not just on a 200.
+
+- The prerendered `<main>` body is **the entire link graph a non-JS crawler sees**. It
+  must link every tool from the homepage and from its category page. When it did not,
+  the only crawlable links were the five nav entries, and Google left 25 tool pages in
+  "Discovered - currently not indexed": they were reachable only from `sitemap.xml`, and
+  a sitemap-only URL on a low-authority domain simply never gets fetched.
 
 Adding a tool needs none of this — it all derives from the metadata entry.
 
@@ -313,6 +337,7 @@ npm run verify:full                                # before PR / cross-cutting c
 | `ffmpeg-utils.js`, CDN URLs, WASM version | `test:contract` then `test:ffmpeg` then `test:video-fast` |
 | `ml-loader.js`, a tool's own inline worker, or any CDN import inside a Worker | `test:contract` then `test:webkit-ios` — **`chromium-mobile` cannot catch this.** It only emulates viewport/UA/touch on desktop Chromium/V8; it does not run WebKit and will not reproduce a WebKit-only bug. iOS requires every browser (including mobile Chrome) to embed WebKit, so `webkit-iphone` is the only project that actually exercises iOS behavior. |
 | `base.js`, `fileUpload.js`, routing, or 3+ tools | `verify:full` |
+| `netlify.toml`, `prerender.mjs`, `vite.config.js`, redirects, headers | `verify:full` **and `verify:deploy` against a deploy preview** — Playwright cannot see Netlify config |
 | Before any PR | `verify:full` |
 
 ### Test fixtures
@@ -346,6 +371,7 @@ After implementation run `npm run test:video-fast` to verify it processes the ti
 - [ ] `npm run test:contract` passes
 - [ ] `npm run test:tool -- <category>/<toolId>` passes for changed tools
 - [ ] `npm run verify:full` passes for cross-cutting changes
+- [ ] `npm run verify:deploy` passes against the deploy preview if Netlify/build config changed
 - [ ] No router/registry edits, no server calls in tool logic
 - [ ] Manifests regenerated if metadata changed (`npm run generate:agent-manifest && npm run generate:share-image`)
 

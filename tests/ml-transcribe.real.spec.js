@@ -12,7 +12,12 @@ import { test, expect } from '@playwright/test';
  * test asserting on real output; a passing page with no verified inference is exactly
  * the trap that has shipped dead ML tools here twice before.
  */
-test.describe.configure({ timeout: 300000 });
+// Serial, not parallel. Each of these tests initialises a multi-hundred-MB model; run
+// in parallel, three workers fight over memory and bandwidth and every one of them
+// times out at 280s with "model never produced output" — a pure resource artefact that
+// looks exactly like a broken tool. Serially the same three finish in ~45s, because the
+// ML worker caches the loaded model and the second and third tests reuse it.
+test.describe.configure({ timeout: 300000, mode: 'serial' });
 
 test.describe('Audio/Video Transcription — real inference', () => {
   test('transcribes the default sample into recognizable text', async ({ page }) => {

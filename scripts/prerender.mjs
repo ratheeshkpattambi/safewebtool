@@ -22,6 +22,7 @@ import {
   routeAliases,
   getToolMetadata,
   getCategoryMetadata,
+  getToolEntries,
   generateMetaTags,
   generateStructuredData
 } from '../src/common/metadata.js';
@@ -59,20 +60,95 @@ function headFor(url) {
   return meta + generateStructuredData(url);
 }
 
-// Minimal crawlable body so the page isn't a thin/empty shell pre-JS.
+// Crawlable body for a route.
+//
+// This is the site's ENTIRE link graph as far as a non-JS crawler is concerned. The
+// client router replaces <main> on first render, so none of this is visible to real
+// users — but Googlebot's initial fetch sees only this.
+//
+// It has to carry real <a> links. When it did not, the homepage exposed just the five
+// category links from the nav and every one of the 34 tool pages was reachable only
+// from sitemap.xml. Google's response to a sitemap-only URL on a low-authority domain
+// is to queue it and never fetch it: Search Console showed 25 pages stuck in
+// "Discovered - currently not indexed" while the site looked perfectly healthy.
+// Keep every tool linked from at least the homepage and its category page.
+const allEntries = getToolEntries();
+
+const linkList = (items) =>
+  `<ul>${items
+    .map(({ href, label, description }) =>
+      `<li><a href="${href}">${escapeHtml(label)}</a>${description ? ` — ${escapeHtml(description)}` : ''}</li>`)
+    .join('')}</ul>`;
+
+const toolLink = ({ canonicalPath, tool }) => ({
+  href: canonicalPath,
+  label: tool.name,
+  description: tool.description
+});
+
 function bodyFor(url) {
   const parts = url.split('/').filter(Boolean);
+
+  // Home — link every tool, grouped by category, plus the category pages themselves.
   if (parts.length === 0) {
-    return `<h1>${escapeHtml(siteInfo.name)}</h1><p>${escapeHtml(siteInfo.description)}</p>`;
+    const sections = Object.entries(categories).map(([id, category]) => {
+      const inCategory = allEntries.filter(({ tool }) => tool.category === id);
+      if (!inCategory.length) return '';
+      return `<h2><a href="/${id}">${escapeHtml(category.name)}</a></h2>`
+        + `<p>${escapeHtml(category.description)}</p>`
+        + linkList(inCategory.map(toolLink));
+    }).join('');
+    return `<h1>${escapeHtml(siteInfo.name)}</h1><p>${escapeHtml(siteInfo.description)}</p>${sections}`;
   }
+
+  // Category — link every tool it contains, and back to home.
   if (parts.length === 1) {
     const category = getCategoryMetadata(parts[0]);
-    return category ? `<h1>${escapeHtml(category.name)}</h1><p>${escapeHtml(category.description)}</p>` : '';
+    if (!category) return '';
+    const inCategory = allEntries.filter(({ tool }) => tool.category === parts[0]);
+    return `<nav><a href="/">${escapeHtml(siteInfo.name)}</a></nav>`
+      + `<h1>${escapeHtml(category.name)}</h1><p>${escapeHtml(category.description)}</p>`
+      + linkList(inCategory.map(toolLink));
   }
-  const tool = getToolMetadata(routeAliases[url] || parts.join('/'));
+
+  // Tool — breadcrumb up to home and its category, how-to steps, and related tools.
+  const toolPath = routeAliases[url] || parts.join('/');
+  const tool = getToolMetadata(toolPath);
   if (!tool) return '';
+
+  const category = getCategoryMetadata(tool.category);
+  const crumb = `<nav><a href="/">${escapeHtml(siteInfo.name)}</a>`
+    + (category ? ` <a href="/${tool.category}">${escapeHtml(category.name)}</a>` : '')
+    + `</nav>`;
+
   const useCase = tool.useCase ? `<p>${escapeHtml(tool.useCase)}</p>` : '';
-  return `<h1>${escapeHtml(tool.name)}</h1><p>${escapeHtml(tool.description)}</p>${useCase}`;
+  const howTo = Array.isArray(tool.howToUse) && tool.howToUse.length
+    ? `<h2>How to use ${escapeHtml(tool.name)}</h2><ol>${
+        tool.howToUse.map((step) => `<li>${escapeHtml(step)}</li>`).join('')}</ol>`
+    : '';
+
+  const relatedEntries = (tool.related || [])
+    .map((path) => allEntries.find((entry) => entry.path === path))
+    .filter(Boolean);
+  const related = relatedEntries.length
+    ? `<h2>Related tools</h2>${linkList(relatedEntries.map(({ canonicalPath, tool: t }) => ({
+        href: canonicalPath, label: t.name
+      })))}`
+    : '';
+
+  // Every tool page also links back into its category's siblings, so no tool is more
+  // than two hops from the homepage even if `related` is sparse.
+  const siblings = allEntries.filter(
+    ({ tool: t, path }) => t.category === tool.category && path !== toolPath
+  );
+  const more = siblings.length && category
+    ? `<h2>More ${escapeHtml(category.name)}</h2>${linkList(siblings.map(({ canonicalPath, tool: t }) => ({
+        href: canonicalPath, label: t.name
+      })))}`
+    : '';
+
+  return `${crumb}<h1>${escapeHtml(tool.name)}</h1><p>${escapeHtml(tool.description)}</p>`
+    + `${useCase}${howTo}${related}${more}`;
 }
 
 const raw = await readFile(path.join(distDir, 'index.html'), 'utf8');
