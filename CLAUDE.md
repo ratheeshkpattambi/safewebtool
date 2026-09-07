@@ -32,6 +32,29 @@ That's it. Do not edit the router or registry — tools are discovered automatic
 6. **Every canonical URL must return 200, never a redirect.** See [URLs & SEO](#urls--seo-read-before-touching-anything-that-emits-a-url).
 7. **Never ship a `netlify.toml`, prerenderer or build-config change without `npm run verify:deploy`.** Playwright runs against Vite on localhost and cannot see `netlify.toml` at all — 315 passing tests did not stop a redirect rule from taking the whole site down.
 
+## Tool page content — the rules that keep it safe
+
+Long-form per-tool prose and FAQ live in `src/common/tool-articles.js`, rendered by
+`renderToolArticle()`.
+
+- **The same function renders the live page and the prerendered crawler body.** Content
+  that appears only in the prerendered HTML is served to Googlebot and never to a human,
+  which is cloaking and a manual-action risk. Never add prose to `bodyFor()` in
+  `prerender.mjs` that the tool page does not also show.
+- **Every claim must be true of the implementation.** The existing entries cite real
+  quality defaults, real format lists and real encoder behaviour, read from the source.
+  Wrong specifics are worse than no content.
+- **Do not template it.** Generated prose with the tool name swapped in is "scaled
+  content abuse" under Google's spam policy. Write per tool or leave the entry out —
+  `renderToolArticle()` renders nothing for a tool with no entry.
+- **Do not add FAQPage or HowTo structured data.** Google restricted FAQ rich results to
+  government/health sites in 2023 and deprecated them entirely on 2026-05-07; HowTo died
+  in 2023. `metadata.js` still has FAQPage machinery — leave it, but do not invest in it.
+  The visible text earns its place for query matching and AI answer engines; the markup
+  does not.
+- It is in its own module, not `metadata.js`, because that file already ships ~52KB to
+  every page in the eager `common` chunk. See `documentation/known-issues.md`.
+
 ## Deploy verification — the tests cannot catch an outage
 
 `npm run verify:deploy [origin]` fetches every URL in the sitemap from a **deployed**

@@ -1,4 +1,5 @@
 import { categories, getCanonicalPathForToolPath, getToolEntries, getToolMetadata, siteInfo } from './metadata.js';
+import { renderToolArticle } from './tool-articles.js';
 import { listToolsForCategory } from './tool-registry.js';
 
 function renderToolCard(path, tool, index = 0) {
@@ -84,6 +85,7 @@ export function renderToolPageShell(toolInfo) {
             </div>
           </div>
         </div>
+        ${renderToolArticle(toolInfo)}
         ${renderRelatedTools(toolInfo)}
       </div>
     </div>

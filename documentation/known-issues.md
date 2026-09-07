@@ -177,6 +177,19 @@ Ranked by risk × absence, the gaps that matter:
 
 ---
 
+## Open content work
+
+`src/common/tool-articles.js` covers **8 of 34 tools** (image/compressor, image/convert,
+image/resize, video/gif, video/reverse, video/mp4, text/json-formatter, ml/transcribe).
+Those pages went from 132 to 350-500 crawler-visible words. The remaining 26 still render
+the short body and are the next unit of work — see the rules in CLAUDE.md before adding
+any, particularly the cloaking and scaled-content constraints.
+
+Not yet started: format-pair conversion landing pages (`heic-to-jpg`, `mov-to-mp4`), which
+are the largest query-volume opportunity and also the highest spam risk if templated.
+
+---
+
 ## Theme 6 — The one thing on the critical path that grows without bound
 
 `metadata.js` is 52.8 KB of source across 1,061 lines, and it is **statically imported by
@@ -190,6 +203,10 @@ Nothing else in the architecture has this property: tool modules are lazily glob
 FFmpeg loads inside `processFile()`, models stream from R2 on demand. Metadata is the
 sole component whose cost to a first-time visitor scales linearly with the size of the
 catalog — and the roadmap is "add more tools".
+
+`src/common/tool-articles.js` is deliberately separate for this reason, but it is still
+imported eagerly by `page-renderers.js` — both files' page-specific halves should move
+behind the same lazy import.
 
 **Fix — split by consumer, not by size budget.** The runtime needs only
 `{id, name, icon, category, canonicalPath}` for routing, cards and search. The SEO

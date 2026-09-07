@@ -304,8 +304,27 @@ function setTheme(theme) {
   }
 }
 
+/**
+ * Skip obviously automated sessions.
+ *
+ * This REDUCES what is recorded; it does not add tracking. GA4 was reporting 55 of 65
+ * weekly "users" from a handful of datacenter cities hitting only the homepage — 679 of
+ * 703 views — which drowned the ~7-10 real visitors and made it impossible to tell
+ * whether any change moved the needle.
+ *
+ * These checks catch headless automation, which is what most scrapers use. They will
+ * not catch a bot that spoofs its user agent and patches navigator.webdriver, so treat
+ * this as noise reduction, not a clean signal. Playwright sets webdriver, but the tests
+ * run against localhost and were already excluded on the line below.
+ */
+function isAutomatedClient() {
+  if (navigator.webdriver) return true;
+  return /headless|bot|spider|crawler|scrapy|phantomjs|puppeteer/i.test(navigator.userAgent || '');
+}
+
 function loadAnalytics() {
   if (isLocalHost(window.location.hostname) || typeof window.gtag !== 'function') return;
+  if (isAutomatedClient()) return;
   window.gtag('event', 'page_view', {
     page_title: document.title,
     page_location: window.location.href

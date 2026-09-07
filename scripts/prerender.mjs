@@ -27,6 +27,7 @@ import {
   generateStructuredData
 } from '../src/common/metadata.js';
 import { generateSitemap } from '../src/common/sitemap.js';
+import { renderToolArticle } from '../src/common/tool-articles.js';
 
 const distDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../dist');
 
@@ -122,10 +123,11 @@ function bodyFor(url) {
     + `</nav>`;
 
   const useCase = tool.useCase ? `<p>${escapeHtml(tool.useCase)}</p>` : '';
-  const howTo = Array.isArray(tool.howToUse) && tool.howToUse.length
-    ? `<h2>How to use ${escapeHtml(tool.name)}</h2><ol>${
-        tool.howToUse.map((step) => `<li>${escapeHtml(step)}</li>`).join('')}</ol>`
-    : '';
+
+  // The SAME renderer the live page uses, so a crawler and a human get identical
+  // content. Emitting richer prose here than the tool page actually shows would be
+  // cloaking — see renderToolArticle in common/tool-articles.js.
+  const article = renderToolArticle(tool);
 
   const relatedEntries = (tool.related || [])
     .map((path) => allEntries.find((entry) => entry.path === path))
@@ -148,7 +150,7 @@ function bodyFor(url) {
     : '';
 
   return `${crumb}<h1>${escapeHtml(tool.name)}</h1><p>${escapeHtml(tool.description)}</p>`
-    + `${useCase}${howTo}${related}${more}`;
+    + `${useCase}${article}${related}${more}`;
 }
 
 const raw = await readFile(path.join(distDir, 'index.html'), 'utf8');
